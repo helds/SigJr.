@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Layout — SIG Jr.</title>
+<title>Layout — GisJr</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -17,6 +17,16 @@
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 html[data-tema="escuro"]{color-scheme:dark;--agua:#3da271;--agua-claro:#26362d;--mar:#26302b;--papel:#14181a;--card:#1e2423;--tinta:#e7ece8;--tinta-2:#a3aca5;--linha:#38413c;--campo:#2a312e}
+html[data-tema="oceano"]{color-scheme:dark;--agua:#3aa9ff;--agua-claro:#173556;--mar:#10304f;--papel:#0d1722;--card:#13243a;--tinta:#e4eef9;--tinta-2:#93a9c2;--linha:#25405f;--campo:#1a2f4a}
+html[data-tema="ameixa"]{color-scheme:dark;--agua:#b987ff;--agua-claro:#35264d;--mar:#2a1f3f;--papel:#17121f;--card:#221a2e;--tinta:#f0e9f8;--tinta-2:#b2a4c6;--linha:#40305a;--campo:#2d2340}
+html[data-tema="brasa"]{color-scheme:dark;--agua:#ff9a3c;--agua-claro:#3d2a1a;--mar:#33241a;--papel:#1a130e;--card:#261c15;--tinta:#f7ebe0;--tinta-2:#c2ab98;--linha:#4a3626;--campo:#34261b}
+/* olho (aberto = visível, fechado = oculto) na lista de itens */
+#lista-itens li .c-olho input[type=checkbox]{-webkit-appearance:none;appearance:none;width:18px;height:18px;margin:0;border:0;padding:0;cursor:pointer;background:var(--agua);
+ -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z'/%3E%3Ccircle cx='12' cy='12' r='3.2' fill='%23000'/%3E%3C/svg%3E") center/18px no-repeat;
+ mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z'/%3E%3Ccircle cx='12' cy='12' r='3.2' fill='%23000'/%3E%3C/svg%3E") center/18px no-repeat}
+#lista-itens li .c-olho input[type=checkbox]:not(:checked){background:var(--tinta-2);opacity:.7;
+ -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 9.5c3.2 3.6 6.2 5.5 10 5.5s6.8-1.9 10-5.5'/%3E%3Cpath d='M5 13.8 3 17M9.5 15.8 8.5 19.2M14.5 15.8l1 3.4M19 13.8l2 3.2'/%3E%3C/svg%3E");
+ mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 9.5c3.2 3.6 6.2 5.5 10 5.5s6.8-1.9 10-5.5'/%3E%3Cpath d='M5 13.8 3 17M9.5 15.8 8.5 19.2M14.5 15.8l1 3.4M19 13.8l2 3.2'/%3E%3C/svg%3E")}
 html{color-scheme:light;height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;height:100%;display:flex;flex-direction:column;background:var(--papel);color:var(--tinta);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;font-size:17px;line-height:1.4}
@@ -385,12 +395,26 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
 #lista-itens .c-ic svg{width:18px;height:18px;fill:none;stroke:var(--agua);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
 .it.travado{cursor:default}
 @media (max-width:900px){.dir{border-left:0;border-top:2px solid var(--linha)}.dir aside.prop{border-top:0}}
+
+/* exportação: mantém cores de fundo (símbolos da legenda, barra de escala) */
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+/* travar: o .cont tinha pointer-events:auto e furava o bloqueio */
+.it.travado,.it.travado *{pointer-events:none!important}
+.it.travado .al{display:none!important}
+.nst{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.nst button{height:64px;padding:4px;border:2px solid var(--linha);border-radius:8px;background:#fff}
+.nst button.on{border-color:var(--agua);box-shadow:0 0 0 2px var(--agua)}
+.nst svg,.nst img{width:100%;height:100%;display:block;stroke:none;fill:none;stroke-width:1}
+.imp{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:2px solid var(--linha);border-radius:8px;background:var(--card);font-size:14px;cursor:pointer;margin-top:8px}
+.imp:hover{border-color:var(--agua)}.imp input{display:none}
+.tf select,.tf input[type=number]{width:100%;font:inherit;padding:6px 8px;border:2px solid var(--agua);border-radius:8px;background:var(--campo);color:var(--tinta)}
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-salvar" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/></symbol>
   <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></symbol>
+  <symbol id="i-exportar" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></symbol>
   <symbol id="i-lua" viewBox="0 0 24 24"><path d="M20 14A8 8 0 0110 4a8 8 0 1010 10z"/></symbol>
   <symbol id="i-lixo" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
   <symbol id="i-copia" viewBox="0 0 24 24"><path d="M8 8h12v12H8zM4 16V4h12"/></symbol>
@@ -411,7 +435,7 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
 <div class="barra">
   <div class="grupo">
     <button class="b" id="salvar" type="button" title="Salvar o layout"><svg><use href="#i-salvar"/></svg>Salvar</button>
-    <button class="b dest" id="imprimir" type="button" title="Imprimir ou salvar como PDF"><svg><use href="#i-print"/></svg>Imprimir</button>
+    <button class="b dest" id="imprimir" type="button" title="Exportar o layout (PDF ou imagem pelo navegador)"><svg><use href="#i-exportar"/></svg>Exportar</button>
   </div>
   <div class="grupo">
     <button class="b" data-add="mapa" type="button" title="Colocar o mapa na folha"><svg><use href="#i-mapa"/></svg>Mapa</button>
@@ -452,6 +476,7 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
       <button id="grid-dialog-done">Fechar</button>
     </div>
   </div>
+</div>
 <div id="color-picker-overlay">
   <div id="color-picker-popover">
     <div class="cp-header">
@@ -1083,7 +1108,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
   // Reconstrói as camadas Leaflet visíveis de um item de mapa a partir do
   // snapshot mais recente recebido do mapa principal. Chamado sempre que um
   // novo snapshot chega, e também na criação do item.
-  // Mapa de fundo escolhido no SIG Jr. (OpenStreetMap, satélite etc.): o snapshot traz a descrição
+  // Mapa de fundo escolhido no GisJr (OpenStreetMap, satélite etc.): o snapshot traz a descrição
   // pronta (fundo.d = {u,a,m,s,o}). Fica no tilePane, abaixo de todas as camadas. "Bloquear camadas" congela também o fundo.
   function aplicarFundoNoItem(item) {
     const map = item.leaflet;
@@ -1729,8 +1754,13 @@ function padroesEscala(it){
   if(it.scalebarFont===undefined)it.scalebarFont=defaultTextFormat();
 }
 
-/* ---------- tema (segue a escolha feita no SIG Jr.) ---------- */
-try{var tv=localStorage.getItem("mapinha:tema"),esc_=tv?tv==="escuro":!!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);if(esc_)document.documentElement.setAttribute("data-tema","escuro")}catch(x){}
+/* ---------- tema (segue a escolha feita no GisJr) ---------- */
+try{
+  var TEMAS=["escuro","oceano","ameixa","brasa"];
+  function aplicaTema(){var tv=localStorage.getItem("mapinha:tema");if(!tv&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)tv="escuro";
+    if(tv&&TEMAS.indexOf(tv)>=0)document.documentElement.setAttribute("data-tema",tv);else document.documentElement.removeAttribute("data-tema")}
+  aplicaTema();window.addEventListener("storage",function(e){if(e.key==="mapinha:tema")aplicaTema()});
+}catch(x){}
 
 /* ---------- ligação com o mapa (index-5.html) ---------- */
 function falta(){if(!ligado&&!salvo)aviso("Não achei o mapa. Volte à aba do mapa e abra o layout pelo botão Layout.",5000)}
@@ -1803,6 +1833,7 @@ function montar(it){
 function pos(it){var s=it._el.style;s.left=it.x+"px";s.top=it.y+"px";s.width=it.w+"px";s.height=it.h+"px"}
 function marcar(){itens.forEach(function(i){if(i._el)i._el.classList.toggle("sel",i.id===sel)})}
 function pegar(e,it,modo){
+  if(it.locked)return;
   sel=it.id;marcar();props();
   if(modo==="m"&&it.t==="mapa"&&it.mexer)return; // mexendo dentro do mapa: o Leaflet cuida do arrasto
   e.preventDefault();e.stopPropagation();
@@ -1863,11 +1894,11 @@ function desenhaConteudo(it){
   if(it.t==="mapa"){estilo(it);return}
   var cor=it.cor||"#25302a";
   if(it.t==="titulo"||it.t==="texto"){
-    var al=it.alin||(it.t==="titulo"?"center":"left"),jc=al==="left"?"flex-start":al==="right"?"flex-end":"center",neg=it.neg===undefined?it.t==="titulo":it.neg;
-    c.style.cssText="display:flex;align-items:center;justify-content:"+jc+";text-align:"+al+";padding:4px 8px;white-space:pre-wrap;line-height:1.15;font-size:"+it.tam+"px;color:"+cor+";font-weight:"+(neg?700:400);
+    var ft=fmtTxt(it),jc=ft.align==="left"||ft.align==="justify"?"flex-start":ft.align==="right"?"flex-end":"center";
+    c.style.cssText="display:flex;align-items:center;justify-content:"+jc+";padding:4px 8px;white-space:pre-wrap;"+textFormatToCss(ft);
     c.textContent=it.txt;
   }else if(it.t==="fig"){c.style.cssText="display:flex;align-items:center;justify-content:center;font-size:"+Math.min(it.w,it.h)*.8+"px;line-height:1";c.textContent=it.txt}
-  else if(it.t==="norte"){c.innerHTML='<svg viewBox="0 0 70 90" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"><path d="M35 6L56 70 35 58 14 70z" fill="'+cor+'"/><path d="M35 6L35 58 14 70z" fill="#fff" stroke="'+cor+'" stroke-width="2"/><text x="35" y="86" text-anchor="middle" font-size="18" font-weight="700" font-family="Atkinson Hyperlegible,sans-serif" fill="'+cor+'">N</text></svg>'}
+  else if(it.t==="norte"){var cn=it.cor||"#25302a",e0=it.estiloN||"n0";c.innerHTML=norteSvg(e0,cn,it.cor2||(NORTES[e0]?"#ffffff":cn))}
   else if(it.t==="legenda"){
     var oc=it.lgOcultas||[],l=snap.camadas.filter(function(x){return x.visible&&oc.indexOf(x.id)<0});
     c.innerHTML='<div class="lg" style="font-size:'+(it.lgTam||15)+'px"><b>'+esc(it.tit||"Legenda")+'</b>'+(l.length?l.map(function(x){var ov=(it.lgOv||{})[x.id]||{},sy=lgSym(x,ov),lb=ov.label!==undefined&&ov.label!==""?ov.label:x.name;return'<div style="white-space:pre-line"><i style="width:'+(ov.w>0?ov.w*3.78:16)+'px;height:'+(ov.h>0?ov.h*3.78:16)+'px;background:'+lgFill(sy)+';border:'+lgBord(sy)+'"></i>'+esc(lb)+'</div>'}).join(""):'<div>Nenhuma camada ainda</div>')+'</div>';
@@ -1890,6 +1921,82 @@ function atualizaEscalas(){
   });
 }
 
+
+var NORTES={
+n0:["0 0 70 90",'<path d="M35 6L56 70 35 58 14 70z" fill="@F@"/><path d="M35 6L35 58 14 70z" fill="@S@" stroke="@F@" stroke-width="2"/><text x="35" y="86" text-anchor="middle" font-size="18" font-weight="700" font-family="sans-serif" fill="@F@">N</text>'],
+n1:["0 0 60 100",'<text x="30" y="18" text-anchor="middle" font-size="18" font-weight="700" font-family="sans-serif" fill="@F@">N</text><path d="M30 24L52 70H34V96H26V70H8z" fill="@F@"/>'],
+n2:["0 -16 100 116",'<text x="50" y="-2" text-anchor="middle" font-size="18" font-weight="700" font-family="sans-serif" fill="@F@">N</text><path d="M50 4L61 39 96 50 61 61 50 96 39 61 4 50 39 39z" fill="@S@" stroke="@F@" stroke-width="3"/><path d="M50 4L61 39 50 50zM50 96L39 61 50 50zM96 50L61 61 50 50zM4 50L39 39 50 50z" fill="@F@"/>'],
+n3:["0 0 100 100",'<circle cx="50" cy="50" r="45" fill="none" stroke="@F@" stroke-width="4"/><path d="M50 14L68 72 50 62 32 72z" fill="@F@"/><path d="M50 14V62L32 72z" fill="@S@" stroke="@F@" stroke-width="2"/>'],
+n4:["0 -16 100 116",'<text x="50" y="-2" text-anchor="middle" font-size="18" font-weight="700" font-family="sans-serif" fill="@F@">N</text><g transform="rotate(45 50 50)"><path d="M50 18L56 44 82 50 56 56 50 82 44 56 18 50 44 44z" fill="@S@" stroke="@F@" stroke-width="2"/></g><path d="M50 4L58 42 96 50 58 58 50 96 42 58 4 50 42 42z" fill="@F@"/>'],
+n5:["0 0 100 100",'<path d="M50 6L88 92 50 72 12 92z" fill="@F@"/><path d="M50 6V72L12 92z" fill="@S@" stroke="@F@" stroke-width="2"/>'],
+n6:["0 0 100 100",'<circle cx="50" cy="50" r="46" fill="@S@" stroke="@F@" stroke-width="3"/><path d="M50 10L62 50H38z" fill="@F@"/><path d="M50 90L38 50H62z" fill="@S@" stroke="@F@" stroke-width="2"/><circle cx="50" cy="50" r="4" fill="@S@" stroke="@F@" stroke-width="2"/>']
+};
+function libN(){try{return JSON.parse(localStorage.getItem("mapinha:norteLib")||"[]")}catch(x){return[]}}
+function salvaLibN(l){try{localStorage.setItem("mapinha:norteLib",JSON.stringify(l))}catch(x){aviso("Sem espaço para guardar as setas importadas.")}}
+function norteSvg(id,cor,cor2){
+  var a=NORTES[id];
+  if(a)return'<svg viewBox="'+a[0]+'" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">'+a[1].replace(/@F@/g,cor).replace(/@S@/g,cor2||"#ffffff")+'</svg>';
+  var u=libN().filter(function(x){return x.id===id})[0];
+  if(!u)return norteSvg("n0",cor,cor2);
+  var t=u.svg.replace(/param\(fill\)\s*(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)?/g,cor).replace(/param\(outline\)\s*(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)?/g,cor2||cor);
+  return'<img alt="" src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(t)+'" style="width:100%;height:100%;object-fit:contain">';
+}
+function painelNorte(it){
+  var cor=it.cor||"#25302a",est=it.estiloN||"n0",lib=libN(),ids=Object.keys(NORTES).concat(lib.map(function(x){return x.id}));
+  var h='<div class="pl"><label>Estilo da seta</label><div class="nst">'+ids.map(function(i){var c2=it.cor2||(NORTES[i]?"#ffffff":cor);return'<button type="button" data-nst="'+i+'" class="'+(i===est?"on":"")+'" aria-label="Seta '+i+'">'+norteSvg(i,cor,c2)+'</button>'}).join("")+'</div>';
+  h+='<label class="imp">'+ic("mais")+'Importar SVG do QGIS<input type="file" id="n-imp" accept=".svg,image/svg+xml" multiple></label>';
+  if(lib.length)h+=' <button type="button" class="mini perigo" data-nrm="1" style="margin-top:8px">Apagar importadas</button>';
+  h+='</div><div class="lin"><label for="p-cor">Cor</label><input type="color" id="p-cor" value="'+cor+'"></div><div class="lin"><label for="p-cor2">Cor secundária / contorno</label><input type="color" id="p-cor2" value="'+(it.cor2||(NORTES[est]?"#ffffff":cor))+'"></div>';
+  return h;
+}
+$("prop").addEventListener("input",function(e){var it=getIt(sel);if(it&&it.t==="norte"&&e.target.id==="p-cor2"){it.cor2=e.target.value;desenhaConteudo(it);agendar()}});
+$("prop").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;var it=getIt(sel);if(!it||it.t!=="norte")return;
+  if(b.dataset.nst){it.estiloN=b.dataset.nst;desenhaConteudo(it);props();agendar()}
+  else if(b.dataset.nrm){salvaLibN([]);if(!NORTES[it.estiloN||"n0"])it.estiloN="n0";desenhaConteudo(it);props();agendar()}
+});
+$("prop").addEventListener("change",function(e){
+  if(e.target.id!=="n-imp")return;var it=getIt(sel);if(!it||it.t!=="norte")return;
+  var fs=[].slice.call(e.target.files),lib=libN(),n=0,ult=null;
+  Promise.all(fs.map(function(f){return new Promise(function(ok){var r=new FileReader();r.onload=function(){var t=String(r.result);
+    if(/<svg/i.test(t)){t=t.replace(/<script[\s\S]*?<\/script>/gi,"");var id="u"+Date.now()+"_"+(n++);lib.push({id:id,nome:f.name,svg:t});ult=id}ok()};r.onerror=ok;r.readAsText(f)})})).then(function(){
+    if(!ult){aviso("Não encontrei SVG válido nos arquivos.");return}
+    salvaLibN(lib);it.estiloN=ult;desenhaConteudo(it);props();agendar();aviso("Seta importada.")});
+});
+
+var FONTES=["Atkinson Hyperlegible","Arial","Verdana","Tahoma","Trebuchet MS","Times New Roman","Georgia","Courier New","Comic Sans MS","Impact"];
+function fmtTxt(it){
+  if(!it.fmt){var f=defaultTextFormat();f.family="Atkinson Hyperlegible";f.size=Math.round((it.tam||20)*75)/100;f.color=it.cor||"#25302a";f.bold=it.neg===undefined?it.t==="titulo":it.neg;f.align=it.alin||(it.t==="titulo"?"center":"left");f.lineHeight=115;it.fmt=f}
+  return it.fmt;
+}
+function tfN(l,k,v,st,mn){return'<div class="pl tf"><label>'+l+'</label><input type="number" data-tf="'+k+'" data-ty="n" step="'+st+'" value="'+v+'"'+(mn!==undefined?' min="'+mn+'"':"")+'></div>'}
+function tfS(l,k,v,pr){return'<div class="pl tf"><label>'+l+'</label><select data-tf="'+k+'" data-ty="s">'+pr.map(function(x){return opt(x[0],x[1],v)}).join("")+'</select></div>'}
+function tfC(l,k,v){return'<div class="lin"><label>'+l+'</label><input type="color" data-tf="'+k+'" data-ty="s" value="'+lgHex(v)+'"></div>'}
+function tfK(l,k,v){return'<label class="ck"><input type="checkbox" data-tf="'+k+'" data-ty="b"'+(v?" checked":"")+'> '+l+'</label>'}
+function tfR(l,k,v){return'<div class="pl"><label>'+l+': '+v+'%</label><input type="range" data-tf="'+k+'" data-ty="n" min="0" max="100" value="'+v+'"></div>'}
+function painelTexto(it){
+  var f=fmtTxt(it),es=f.bold&&f.italic?"Negrito Itálico":f.bold?"Negrito":f.italic?"Itálico":(f.style||"Normal");
+  var h='<div class="pl"><label for="p-txt">Texto</label><textarea id="p-txt" rows="3">'+esc(it.txt)+'</textarea></div>';
+  h+='<h3>Fonte</h3>'+tfS("Família","family",f.family,FONTES.map(function(x){return[x,x]}));
+  h+=tfS("Estilo","style",es,[["Normal","Normal"],["Negrito","Negrito"],["Itálico","Itálico"],["Negrito Itálico","Negrito Itálico"]]);
+  h+='<div class="par">'+tfN("Tamanho","size",f.size,0.5,1)+tfS("Unidade","sizeUnit",f.sizeUnit,[["pt","Pontos"],["mm","Milímetros"],["px","Pixels"]])+'</div>';
+  h+=tfC("Cor","color",f.color)+tfR("Opacidade","opacity",f.opacity)+tfK("Sublinhado","underline",f.underline)+tfK("Tachado","strikeout",f.strikeout);
+  h+='<h3>Formatação</h3>'+tfS("Caixa","textCase",f.textCase,[["none","Normal"],["upper","MAIÚSCULAS"],["lower","minúsculas"],["capitalize","Capitalizar"]]);
+  h+='<div class="par">'+tfN("Letras (mm)","letterSpacing",f.letterSpacing,0.1)+tfN("Palavras (mm)","wordSpacing",f.wordSpacing,0.1)+'</div>'+tfN("Altura da linha (%)","lineHeight",f.lineHeight,5,50);
+  h+='<div class="acoes" style="margin-bottom:6px">'+[["left","Esquerda"],["center","Centro"],["right","Direita"],["justify","Justif."]].map(function(x){return'<button class="mini'+(f.align===x[0]?" on":"")+'" data-tfal="'+x[0]+'" type="button">'+x[1]+'</button>'}).join("")+'</div>';
+  h+='<h3>Contorno (buffer)</h3>'+tfK("Desenhar contorno","bufferEnabled",f.bufferEnabled)+'<div class="par">'+tfN("Tamanho (mm)","bufferSize",f.bufferSize,0.1,0)+tfC("Cor","bufferColor",f.bufferColor)+'</div>';
+  h+='<h3>Sombra</h3>'+tfK("Desenhar sombra","shadowEnabled",f.shadowEnabled)+'<div class="par">'+tfN("Ângulo","shadowAngle",f.shadowAngle,5)+tfN("Distância (mm)","shadowDistance",f.shadowDistance,0.1,0)+'</div><div class="par">'+tfN("Desfoque (mm)","shadowBlur",f.shadowBlur,0.1,0)+tfC("Cor","shadowColor",f.shadowColor)+'</div>';
+  return h;
+}
+function aplicaTF(e){
+  var t=e.target,k=t.dataset&&t.dataset.tf;if(!k)return;var it=getIt(sel);if(!it||(it.t!=="texto"&&it.t!=="titulo"))return;
+  var f=fmtTxt(it),ty=t.dataset.ty;f[k]=ty==="b"?t.checked:ty==="n"?(t.value===""?0:+t.value):t.value;
+  if(k==="style"){f.bold=false;f.italic=false}
+  if(k==="opacity"&&t.previousElementSibling)t.previousElementSibling.textContent="Opacidade: "+f.opacity+"%";
+  desenhaConteudo(it);agendar();
+}
+$("prop").addEventListener("input",aplicaTF);$("prop").addEventListener("change",aplicaTF);
+$("prop").addEventListener("click",function(e){var b=e.target.closest("button");if(!b||!b.dataset.tfal)return;var it=getIt(sel);if(!it)return;fmtTxt(it).align=b.dataset.tfal;desenhaConteudo(it);props();agendar()});
 /* ---------- painel da direita ---------- */
 function ic(n){return'<svg><use href="#i-'+n+'"/></svg>'}
 function opt(v,t,cur){return'<option value="'+v+'"'+(cur===v?" selected":"")+'>'+t+'</option>'}
@@ -1917,15 +2024,12 @@ function props(){
   if(!it){p.innerHTML='<h2>Escolha um item</h2><p class="vazio">Clique em um item da folha para mudar as cores, o texto e o tamanho.</p><p class="vazio" style="margin-top:10px">Arraste para mover. Puxe a bolinha laranja para mudar o tamanho.</p>';return}
   if(it.t==="legenda"&&it._lgEdit!=null){var lc=snap.camadas.filter(function(x){return x.id===it._lgEdit})[0];if(lc){p.innerHTML=painelLegItem(it,lc);decorateColorInputs(p);return}it._lgEdit=null}
   var nomes={mapa:"Mapa",titulo:"Título",legenda:"Legenda",escala:"Escala",norte:"Seta do Norte",texto:"Texto",fig:"Imagem"},h="<h2>"+nomes[it.t]+"</h2>";
-  if(it.t==="titulo"||it.t==="texto"){
-    var al=it.alin||(it.t==="titulo"?"center":"left"),neg=it.neg===undefined?it.t==="titulo":it.neg;
-    h+='<div class="pl"><label for="p-txt">Texto</label><textarea id="p-txt" rows="3">'+esc(it.txt)+'</textarea></div><div class="pl"><label for="p-tam">Tamanho da letra</label><input type="range" id="p-tam" min="10" max="120" value="'+it.tam+'"></div><div class="lin"><label for="p-cor">Cor da letra</label><input type="color" id="p-cor" value="'+it.cor+'"></div><div class="lin"><label><input type="checkbox" id="p-neg"'+(neg?" checked":"")+'> Negrito</label></div><div class="acoes" style="margin-bottom:6px">'+[["left","Esquerda"],["center","Centro"],["right","Direita"]].map(function(x){return'<button class="mini'+(al===x[0]?" on":"")+'" data-al="'+x[0]+'" type="button">'+x[1]+'</button>'}).join("")+'</div>';
-  }
+  if(it.t==="titulo"||it.t==="texto")h+=painelTexto(it);
   if(it.t==="legenda"){
     var oc=it.lgOcultas||[],vis=snap.camadas.filter(function(x){return x.visible});
     h+='<div class="pl"><label for="p-tit">Título da legenda</label><input type="text" id="p-tit" value="'+esc(it.tit||"")+'"></div><div class="pl"><label for="p-lgtam">Tamanho da letra</label><input type="range" id="p-lgtam" min="10" max="40" value="'+(it.lgTam||15)+'"></div><div class="pl"><label>Camadas na legenda</label>'+(vis.length?vis.map(function(x){return'<div class="lin"><label class="ck"><input type="checkbox" data-lg="'+x.id+'"'+(oc.indexOf(x.id)<0?" checked":"")+'> '+esc(x.name)+'</label><button type="button" class="mini" data-lged="'+x.id+'">Editar</button></div>'}).join(""):'<p class="vazio">Nenhuma camada visível ainda.</p>')+'</div>';
   }
-  if(it.t==="norte")h+='<div class="lin"><label for="p-cor">Cor</label><input type="color" id="p-cor" value="'+(it.cor||"#25302a")+'"></div>';
+  if(it.t==="norte")h+=painelNorte(it);
   if(it.t==="escala")h+=painelEscala(it);
   if(it.t==="fig")h+='<div class="pl"><label>Escolha a imagem</label><div class="figs">'+FIG.map(function(f){return'<button type="button" data-fig="'+f+'" aria-label="Imagem '+f+'">'+f+'</button>'}).join("")+'</div></div>';
   if(it.t==="mapa")h+=painelMexer(it)+painelCamadas(it)+'<h3>Escala</h3><div class="pl"><label for="p-esc">Escala do mapa</label><input type="text" id="p-esc" value="'+scaleTextForZoom(it.zoom)+'"></div>';
@@ -1963,7 +2067,7 @@ $("prop").addEventListener("click",function(e){
   if(b.dataset.mex){it.mexer=!it.mexer;mexer(it);props();agendar();return}
   var a=b.dataset.a,ix=itens.indexOf(it);
   if(a==="del"){if(it._m)it._m.remove();it._el.remove();itens.splice(ix,1);sel=null;marcar();props()}
-  else if(a==="dup"){var c=Object.assign({},it);c.lgOcultas=(it.lgOcultas||[]).slice();c.id="i"+prox++;c.x=Math.min(W-it.w,it.x+24);c.y=Math.min(H-it.h,it.y+24);Object.keys(c).forEach(function(p){if(p[0]==="_")delete c[p]});["scalebarFont","segmentWidthAdjust","center","grids","lgOv"].forEach(function(p){if(c[p])c[p]=JSON.parse(JSON.stringify(c[p]))});itens.push(c);montar(c);sel=c.id;marcar();props()}
+  else if(a==="dup"){var c=Object.assign({},it);c.lgOcultas=(it.lgOcultas||[]).slice();c.id="i"+prox++;c.x=Math.min(W-it.w,it.x+24);c.y=Math.min(H-it.h,it.y+24);Object.keys(c).forEach(function(p){if(p[0]==="_")delete c[p]});["scalebarFont","segmentWidthAdjust","center","grids","lgOv","fmt"].forEach(function(p){if(c[p])c[p]=JSON.parse(JSON.stringify(c[p]))});itens.push(c);montar(c);sel=c.id;marcar();props()}
   else if(a==="cima"&&ix<itens.length-1){itens.splice(ix,1);itens.push(it);$("pagina").appendChild(it._el)}
   else if(a==="baixo"&&ix>0){itens.splice(ix,1);itens.unshift(it);$("pagina").insertBefore(it._el,$("pagina").firstChild)}
   atualizaEscalas();listaItens();agendar();
@@ -3652,7 +3756,7 @@ function mapaProps(e){
 
 /* ---------- barra de cima ---------- */
 $("salvar").onclick=function(){aviso(gravar()?"Layout \""+nomeLay+"\" salvo.":"Não deu para salvar (espaço do navegador cheio?).")};
-$("imprimir").onclick=function(){sel=null;marcar();props();setTimeout(function(){window.print()},50)};
+$("imprimir").onclick=function(){sel=null;marcar();props();atualizaEscalas();itens.forEach(function(i){if(i._m)i._m.invalidateSize()});aviso("Na janela que abrir, escolha \"Salvar como PDF\".",3500);setTimeout(function(){window.print()},300)};
 
 /* ---------- ajuste de tamanho da folha ---------- */
 function ajustar(){
