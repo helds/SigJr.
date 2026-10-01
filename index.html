@@ -4873,7 +4873,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
 
   /* ---------- Modal "Adicionar camada": malhas do IBGE (zips hospedados no repositório) ou arquivo do computador ----------
      Estrutura esperada (relativa ao index.html):
-       zips/Brasil_sem_estados.zip | Brasil_com_estados.zip | Regioes.zip | estados/SP.zip | municipios/SP.zip (por UF, sigla em maiúsculas) */
+       zips/BR_Pais_2025.zip | BR_UF_2025 (1).zip | BR_Regioes_2025.zip | estados/SP_UF_2025.zip | municipios/SP_Municipios_2025.zip */
   var ZIPS_BASE="zips/";
   var UFS={AC:"Acre",AL:"Alagoas",AP:"Amapá",AM:"Amazonas",BA:"Bahia",CE:"Ceará",DF:"Distrito Federal",ES:"Espírito Santo",GO:"Goiás",MA:"Maranhão",MT:"Mato Grosso",MS:"Mato Grosso do Sul",MG:"Minas Gerais",PA:"Pará",PB:"Paraíba",PR:"Paraná",PE:"Pernambuco",PI:"Piauí",RJ:"Rio de Janeiro",RN:"Rio Grande do Norte",RS:"Rio Grande do Sul",RO:"Rondônia",RR:"Roraima",SC:"Santa Catarina",SP:"São Paulo",SE:"Sergipe",TO:"Tocantins"};
   var OPCOES={
@@ -4977,10 +4977,10 @@ const POINT_ANCHOR_TO_DIRECTION = {
       var n=sel.value,t=subSel(),u=uf.value,arq,nome;
       if(n==="arquivo"){fechar();byId("arq").click();return}
       if(OPCOES[n].fundo){fechar();definirFundo(vs.value);return}
-      if(n==="brasil"){arq=t==="sem"?"Brasil_sem_estados":"Brasil_com_estados";nome=t==="sem"?"Brasil":"Brasil_Estados"}
-      else if(n==="regioes"){arq="Regioes";nome="Grandes_Regioes"}
-      else if(t==="sem"){arq="estados/"+u;nome=u}
-      else{arq="municipios/"+u;nome=u+"_Municipios"}
+      if(n==="brasil"){arq=t==="sem"?"BR_Pais_2025":"BR_UF_2025 (1)";nome=t==="sem"?"Brasil":"Brasil_Estados"}
+      else if(n==="regioes"){arq="BR_Regioes_2025";nome="Grandes_Regioes"}
+      else if(t==="sem"){arq="estados/"+u+"_UF_2025";nome=u}
+      else{arq="municipios/"+u+"_Municipios_2025";nome=u+"_Municipios"}
       fechar();aviso("Carregando malha...");
       try{
         var r=await fetch(ZIPS_BASE+arq+".zip");
