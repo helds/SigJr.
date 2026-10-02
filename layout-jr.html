@@ -35,6 +35,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 .barra{display:flex;align-items:stretch;gap:0 14px;padding:10px 14px;background:var(--card);border-bottom:2px solid var(--linha)}
 .grupo{display:flex;gap:4px}
 .grupo+.grupo{padding-left:14px;border-left:2px solid var(--linha)}
+.grupo-tema{align-items:center;margin-left:auto}
+.tema-lab{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--tinta-2)}
+.tema-sel{padding:6px 10px;font:inherit;font-size:14px;border:2px solid var(--linha);border-radius:8px;background:var(--card);color:var(--tinta);cursor:pointer}
+.tema-sel:hover{border-color:var(--agua)}
+.tema-sel option{background:var(--card);color:var(--tinta)}
+#lays-ov .tema-hall{position:absolute;right:16px;top:50%;transform:translateY(-50%)}
 .b{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:88px;width:auto;height:68px;padding:6px 10px;border:2px solid transparent;border-radius:8px;background:transparent;font-size:14px;line-height:1.15;white-space:nowrap}
 @media (max-width:1240px){
   .barra{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:4px}
@@ -52,13 +58,31 @@ aside h2{font-size:17px;margin:0 0 10px}
 #palco{overflow:auto;padding:16px;background:var(--mar);display:flex;justify-content:center;align-items:flex-start}
 #caixa{position:relative;flex:none}
 #pagina{position:absolute;left:0;top:0;width:1122px;height:793px;background:#fff;transform-origin:0 0;box-shadow:0 4px 18px rgba(0,0,0,.3)}
-.it{position:absolute;cursor:grab;touch-action:none;color:#25302a}
+.it{position:absolute;cursor:grab;touch-action:none;color:#000000}
 .it .cont{position:absolute;inset:0;overflow:hidden;pointer-events:auto}
 .it .fundo-cred{position:absolute;right:3px;bottom:3px;max-width:92%;z-index:5;font-size:8px;line-height:1.2;padding:1px 4px;background:rgba(255,255,255,.82);color:#333;border-radius:2px;pointer-events:none}
 .it .fundo-cred a{color:inherit;text-decoration:none}
-.it.sel{outline:3px solid var(--sol);outline-offset:2px}
-.it .al{display:none;position:absolute;right:-12px;bottom:-12px;width:24px;height:24px;border-radius:50%;background:var(--sol);border:2px solid #fff;cursor:nwse-resize;z-index:1000;touch-action:none}
+.it.sel{outline:2px solid var(--sol);outline-offset:0}
+.it .al{display:none;position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;box-sizing:border-box;border-radius:3px;background:#fff;border:2px solid var(--sol);box-shadow:0 1px 3px rgba(0,0,0,.35);z-index:1000;touch-action:none}
+.it .al::after{content:"";position:absolute;inset:-9px} /* área de toque maior que o quadradinho */
 .it.sel .al{display:block}
+.it .al:hover{background:var(--sol)}
+.it .al[data-h="nw"]{left:0;top:0;cursor:nwse-resize}
+.it .al[data-h="n"]{left:50%;top:0;cursor:ns-resize}
+.it .al[data-h="ne"]{left:100%;top:0;cursor:nesw-resize}
+.it .al[data-h="e"]{left:100%;top:50%;cursor:ew-resize}
+.it .al[data-h="se"]{left:100%;top:100%;cursor:nwse-resize}
+.it .al[data-h="s"]{left:50%;top:100%;cursor:ns-resize}
+.it .al[data-h="sw"]{left:0;top:100%;cursor:nesw-resize}
+.it .al[data-h="w"]{left:0;top:50%;cursor:ew-resize}
+@media (pointer:coarse){.it .al{width:22px;height:22px;margin:-11px 0 0 -11px}.it .al::after{inset:-6px}}
+/* Guias inteligentes: aparecem só enquanto um item é movido/redimensionado e "grudam" nas bordas e centros dos outros itens e da folha */
+.smart-guide{position:absolute;z-index:900;pointer-events:none;background:#e619c9}
+.smart-guide.horizontal{left:0;width:100%;height:1.5px;margin-top:-.75px}
+.smart-guide.vertical{top:0;height:100%;width:1.5px;margin-left:-.75px}
+.smart-guide-point{position:absolute;z-index:901;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#e619c9;border:1.5px solid #fff;pointer-events:none}
+/* ícones (olho/cadeado) do cabeçalho da aba Camadas */
+.cam-cab svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .it.mapa.mexer{cursor:default;outline-color:var(--agua)}
 .it.mapa .cont{z-index:0}
 .leaflet-container{background:#fff;font:inherit}
@@ -74,9 +98,9 @@ aside h2{font-size:17px;margin:0 0 10px}
 .lg{padding:8px 12px;height:100%;overflow:hidden;font-size:15px}
 .lg b{display:block;margin-bottom:4px}
 .lg div{display:flex;align-items:center;gap:8px;margin:2px 0}
-.lg i{width:16px;height:16px;border:1px solid #25302a;border-radius:3px;flex:none}
-.esc{display:flex;flex-direction:column;justify-content:flex-end;height:100%;font-size:14px;color:#25302a;padding:4px}
-.esc .r{height:10px;border:2px solid #25302a;border-top:0;margin-top:2px}
+.lg i{width:16px;height:16px;border:1px solid #000000;border-radius:3px;flex:none}
+.esc{display:flex;flex-direction:column;justify-content:flex-end;height:100%;font-size:14px;color:#000000;padding:4px}
+.esc .r{height:10px;border:2px solid #000000;border-top:0;margin-top:2px}
 .pl{margin-bottom:12px}
 .pl label{display:block;font-size:14px;color:var(--tinta-2);margin-bottom:4px}
 .pl textarea,.pl input[type=text]{width:100%;font:inherit;padding:6px 8px;border:2px solid var(--agua);border-radius:8px;background:var(--campo);color:var(--tinta)}
@@ -99,7 +123,7 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
 .figs button{font-size:22px;padding:2px;border:2px solid var(--linha);border-radius:8px;background:var(--card)}
 .figs button:hover{border-color:var(--agua)}
 .vazio{margin:0;color:var(--tinta-2)}
-#aviso-t{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tinta);color:var(--papel);padding:10px 16px;border-radius:8px;font-size:15px;max-width:92vw;z-index:5000;opacity:0;pointer-events:none;transition:opacity .2s}
+#aviso-t{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tinta);color:var(--papel);padding:10px 16px;border-radius:8px;font-size:15px;max-width:92vw;z-index:10000;opacity:0;pointer-events:none;transition:opacity .2s}
 #aviso-t.on{opacity:1}
 @media (max-width:900px){.area{grid-template-columns:1fr;grid-template-rows:minmax(320px,1fr) auto}aside.prop{border:0;border-top:2px solid var(--linha);max-height:34vh}}
 @media (prefers-reduced-motion:reduce){#aviso-t{transition:none}}
@@ -111,7 +135,7 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
   #palco{padding:0;background:none;overflow:visible;display:block}
   #caixa{width:1122px!important;height:793px!important}
   #pagina{transform:none!important;box-shadow:none}
-  .it.sel{outline:0}.it .al{display:none!important}
+  .it.sel{outline:0}.it .al,.smart-guide,.smart-guide-point{display:none!important}
 }
   /* ---- Diálogo "Modificar grade…" ---- */
   #grid-dialog-overlay {
@@ -210,140 +234,32 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
 .mexer-btn[aria-pressed="true"]{background:var(--agua);color:var(--papel)}
 .mexer-btn[aria-pressed="true"] svg{stroke:var(--papel)}
 .mexer-btn[aria-pressed="true"] small{color:var(--papel)}
-/* ---------- Popover de cor (roda de cores estilo QGIS, portado do index.html) ----------
-     Aberto como uma janela modal centralizada com fundo escurecido — mesmo
-     padrão visual do diálogo de formatação de texto (#text-format-overlay). */
-  #color-picker-overlay {
-    display:none;
-    position:fixed; inset:0;
-    background:rgba(0,0,0,0.35);
-    z-index:9500;
-    align-items:center;
-    justify-content:center;
-  }
-  #color-picker-overlay.show { display:flex; }
-  #color-picker-popover {
-    background:var(--card);
-    border-radius:6px;
-    box-shadow:0 10px 32px rgba(0,0,0,0.38);
-    padding:0;
-    width:275px;
-    max-width:92vw;
-    max-height:90vh;
-    overflow-y:auto;
-    font-size:12px;
-    color:var(--tinta);
-  }
-  #color-picker-popover .cp-header {
-    padding:11px 16px;
-    font-weight:700;
-    font-size:12.5px;
-    border-bottom:1px solid var(--linha);
-    display:flex; justify-content:space-between; align-items:center;
-    background:var(--card);
-  }
-  #color-picker-popover .cp-close {
-    cursor:pointer; color:var(--tinta-2); font-size:17px; line-height:1;
-  }
-  #color-picker-popover .cp-body { padding:10px 14px 4px; }
-  #color-picker-popover .cp-footer {
-    display:flex; justify-content:flex-end; gap:6px;
-    padding:11px 16px; background:var(--card); border-top:1px solid var(--linha);
-  }
-  #color-picker-popover .cp-ok-btn {
-    padding:6px 16px; font-size:12px; border-radius:3px; cursor:pointer;
-    border:1px solid var(--agua); background:var(--agua);
-    color:#fff; font-weight:600;
-  }
-  #color-picker-popover .cp-transparent-row {
-    display:flex; align-items:center; gap:6px;
-    margin-bottom:8px;
-  }
-  #color-picker-popover .cp-transparent-row input[type=checkbox] { margin:0; }
-  #color-picker-popover .cp-wheel-box {
-    position:relative;
-    width:190px; height:190px;
-    margin:2px auto 8px auto;
-    cursor:crosshair;
-    user-select:none;
-  }
-  #color-picker-popover .cp-wheel-box canvas { position:absolute; top:0; left:0; }
-  #color-picker-popover .cp-wheel-handle {
-    position:absolute;
-    width:9px; height:9px;
-    border:2px solid #000;
-    border-radius:50%;
-    box-shadow:0 0 0 1px #fff;
-    transform:translate(-50%,-50%);
-    pointer-events:none;
-  }
-  #color-picker-popover .cp-alpha-row {
-    position:relative;
-    height:16px;
-    margin-bottom:8px;
-    cursor:pointer;
-    background-image:
-      linear-gradient(45deg,#bbb 25%,transparent 25%),
-      linear-gradient(-45deg,#bbb 25%,transparent 25%),
-      linear-gradient(45deg,transparent 75%,#bbb 75%),
-      linear-gradient(-45deg,transparent 75%,#bbb 75%);
-    background-size:8px 8px;
-    background-position:0 0,0 4px,4px -4px,-4px 0px;
-    border:1px solid #999;
-  }
-  #color-picker-popover .cp-alpha-fill {
-    position:absolute; top:0; left:0; right:0; bottom:0;
-  }
-  #color-picker-popover .cp-alpha-handle {
-    position:absolute; top:-2px;
-    width:4px; height:20px;
-    background:#333; border:1px solid #fff;
-    transform:translateX(-50%);
-    pointer-events:none;
-  }
-  #color-picker-popover .cp-sv-row {
-    position:relative;
-    height:16px;
-    margin-bottom:8px;
-    cursor:crosshair;
-    border:1px solid #999;
-  }
-  #color-picker-popover .cp-sv-fill {
-    position:absolute; top:0; left:0; right:0; bottom:0;
-  }
-  #color-picker-popover .cp-sv-handle {
-    position:absolute; top:-2px;
-    width:4px; height:20px;
-    background:#333; border:1px solid #fff;
-    transform:translateX(-50%);
-    pointer-events:none;
-  }
-  #color-picker-popover .cp-bar-label {
-    font-size:10.5px; color:var(--tinta-2); margin:0 0 2px 1px;
-  }
-  #color-picker-popover .cp-hex-row { display:flex; align-items:center; gap:6px; margin-top:2px; }
-  #color-picker-popover .cp-hex-row input { flex:1; border:1px solid #b0b0b0; border-radius:2px; padding:3px 6px; background:var(--campo); color:var(--tinta); }
-  #color-picker-popover .cp-section-label {
-    background:var(--linha); color:var(--tinta);
-    font-size:10.5px; font-weight:600;
-    padding:2px 6px; margin:8px 0 4px 0;
-  }
-  #color-picker-popover .cp-swatches { display:grid; grid-template-columns: repeat(8, 1fr); gap:3px; }
-  #color-picker-popover .cp-swatch { width:100%; aspect-ratio:1; border:1px solid rgba(0,0,0,0.3); cursor:pointer; border-radius:1px; }
-  #color-picker-popover .cp-menu {
-    margin-top:6px;
-    border-top:1px solid #ccc;
-    padding-top:4px;
-    padding-bottom:2px;
-  }
-  #color-picker-popover .cp-menu-item {
-    padding:4px 4px;
-    cursor:pointer;
-    color:var(--tinta);
-  }
-  #color-picker-popover .cp-menu-item:hover { background: var(--agua-claro); }
-  #color-picker-popover .cp-menu-item.disabled { color:#a0a0a0; cursor:default; }
-  #color-picker-popover .cp-menu-item.disabled:hover { background:transparent; }
+  /* ---------- Seletor de cor: janela modal (Fechar / Aplicar) ---------- */
+  #color-picker-overlay{display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
+  #color-picker-overlay.show{display:flex}
+  #color-picker-popover{display:flex;flex-direction:column;width:300px;max-width:100%;max-height:100%;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);font-size:14px;overflow:hidden}
+  #color-picker-popover .cp-header{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 16px;font-weight:700;font-size:16px;border-bottom:2px solid var(--linha)}
+  #color-picker-popover .cp-close{border:0;background:none;color:var(--tinta-2);font-size:26px;line-height:1;width:36px;height:36px;border-radius:8px;cursor:pointer}
+  #color-picker-popover .cp-close:hover{background:var(--agua-claro)}
+  #color-picker-popover .cp-body{padding:12px 16px;overflow-y:auto;min-height:0}
+  #color-picker-popover .cp-footer{display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:2px solid var(--linha)}
+  #color-picker-popover .cp-btn{padding:8px 16px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--linha);background:var(--card);color:var(--tinta)}
+  #color-picker-popover .cp-btn:hover{border-color:var(--agua)}
+  #color-picker-popover .cp-btn.cp-ok-btn{background:var(--agua);border-color:var(--agua);color:var(--papel)}
+  #color-picker-popover .cp-wheel-box{position:relative;width:190px;height:190px;margin:2px auto 12px auto;cursor:crosshair;touch-action:none}
+  #color-picker-popover .cp-wheel-box canvas{position:absolute;top:0;left:0}
+  #color-picker-popover .cp-wheel-handle{position:absolute;width:12px;height:12px;border:2px solid #000;border-radius:50%;box-shadow:0 0 0 1px #fff;transform:translate(-50%,-50%);pointer-events:none}
+  #color-picker-popover .cp-bar-label{font-size:12px;color:var(--tinta-2);margin:0 0 3px 1px}
+  #color-picker-popover .cp-sv-row{position:relative;height:22px;margin-bottom:12px;cursor:crosshair;touch-action:none;border:1px solid color-mix(in srgb,var(--tinta) 35%,transparent)}
+  #color-picker-popover .cp-sv-fill{position:absolute;top:0;left:0;right:0;bottom:0}
+  #color-picker-popover .cp-sv-handle{position:absolute;top:-3px;width:6px;height:28px;background:#333;border:1px solid #fff;border-radius:2px;transform:translateX(-50%);pointer-events:none}
+  #color-picker-popover .cp-hex-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+  #color-picker-popover .cp-hex-row input{flex:1;min-width:0;border:2px solid var(--linha);border-radius:8px;padding:6px 8px;font:inherit;background:var(--campo);color:var(--tinta);text-transform:uppercase}
+  #color-picker-popover .cp-prev{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--tinta-2)}
+  #color-picker-popover .cp-prev i{display:block;width:34px;height:26px;border:2px solid var(--linha);border-radius:6px}
+  #color-picker-popover .cp-menu{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  #color-picker-popover .cp-menu-item{flex:1 1 0;padding:7px 10px;font:inherit;font-size:13px;border:2px solid var(--linha);border-radius:8px;background:var(--card);color:var(--tinta);cursor:pointer}
+  #color-picker-popover .cp-menu-item:hover{border-color:var(--agua)}
 
   /* Botão que substitui visualmente cada <input type="color"> nativo do
      painel de propriedades (ver decorateColorInputs()) — mesma aparência de
@@ -408,9 +324,97 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
 .imp{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:2px solid var(--linha);border-radius:8px;background:var(--card);font-size:14px;cursor:pointer;margin-top:8px}
 .imp:hover{border-color:var(--agua)}.imp input{display:none}
 .tf select,.tf input[type=number]{width:100%;font:inherit;padding:6px 8px;border:2px solid var(--agua);border-radius:8px;background:var(--campo);color:var(--tinta)}
+
+/* ================= Interface sem seleção de texto ================= */
+/* Nada da interface pode ser selecionado/arrastado como texto; só caixas de texto. */
+html,body,*,*::before,*::after{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,[contenteditable=""],[contenteditable="true"],[contenteditable=""] *,[contenteditable="true"] *{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+/* botões de rádio, caixas de marcar, cores e sliders não têm texto a selecionar */
+input[type=checkbox],input[type=radio],input[type=range],input[type=color],input[type=button],input[type=submit],input[type=file]{-webkit-user-select:none;user-select:none}
+
+/* ================= Barra de rolagem personalizada da barra de ferramentas ================= */
+.barra .grupo{flex-shrink:0}
+.barra{flex:none;max-width:100%}
+.barra{overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:auto;-ms-overflow-style:auto}
+.barra::-webkit-scrollbar{display:block;width:12px;height:12px;background:transparent}
+.barra::-webkit-scrollbar-track{margin:0 10px;background:transparent}
+.barra::-webkit-scrollbar-thumb{min-width:48px;border:4px solid transparent;border-radius:999px;background:color-mix(in srgb,var(--agua) 45%,transparent);background-clip:padding-box;transition:background-color .15s}
+.barra::-webkit-scrollbar-thumb:hover{background:var(--agua);background-clip:padding-box}
+.barra::-webkit-scrollbar-thumb:active{background:var(--sol);background-clip:padding-box}
+.barra::-webkit-scrollbar-corner{background:transparent}
+/* Firefox: não aceita ::-webkit-scrollbar, usa as propriedades padrão */
+@supports (-moz-appearance:none){
+  .barra{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--agua) 55%,transparent) transparent}
+}
+
+/* ---------- Diálogo Exportar (PNG ou PDF) ---------- */
+#export-overlay{display:none;position:fixed;inset:0;z-index:9400;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
+#export-overlay.show{display:flex}
+#export-dialog{display:flex;flex-direction:column;width:340px;max-width:100%;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);overflow:hidden}
+#export-dialog .ex-header{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 16px;font-weight:700;font-size:16px;border-bottom:2px solid var(--linha)}
+#export-dialog .ex-close{border:0;background:none;color:var(--tinta-2);font-size:26px;line-height:1;width:36px;height:36px;border-radius:8px;cursor:pointer}
+#export-dialog .ex-close:hover{background:var(--agua-claro)}
+#export-dialog .ex-body{display:flex;flex-direction:column;gap:10px;padding:14px 16px}
+#export-dialog .ex-op{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:12px 14px;font:inherit;border:2px solid var(--linha);border-radius:10px;background:var(--card);color:var(--tinta);cursor:pointer}
+#export-dialog .ex-op:hover,#export-dialog .ex-op:focus-visible{border-color:var(--agua)}
+#export-dialog .ex-op b{font-size:17px}
+#export-dialog .ex-op span{font-size:13px;color:var(--tinta-2)}
+#export-dialog .ex-footer{display:flex;justify-content:flex-end;padding:10px 16px;border-top:2px solid var(--linha)}
+#export-dialog .ex-btn{padding:8px 16px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--linha);background:var(--card);color:var(--tinta)}
+#export-dialog .ex-btn:hover{border-color:var(--agua)}
+
+/* ---------- Tela Layouts (mesmo visual da tela inicial do GisJr) ---------- */
+#lays-ov{display:none;flex:1;min-height:0;flex-direction:column;background:var(--papel);color:var(--tinta);overflow:auto}
+html.hall #lays-ov{display:flex}
+html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-picker-overlay{display:none!important}
+#lays-ov *{box-sizing:border-box}
+#lays-ov .ly-topo{position:relative;flex:none;display:flex;align-items:center;justify-content:center;padding:14px 20px;background:var(--card);border-bottom:2px solid var(--linha)}
+#lays-ov .ly-logo{font-size:26px;font-weight:700;color:var(--agua);letter-spacing:.5px}
+#lays-ov .ly-logo span{color:var(--sol)}
+#lays-ov .ly-main{width:100%;padding:20px;max-width:1100px;margin:0 auto}
+#lays-ov h1{font-size:24px;margin:0 0 14px}
+#lays-ov .ly-bloco{margin:0 0 28px;padding:18px 20px;border:2px solid var(--linha);border-radius:14px;background:var(--card)}
+#lays-ov .ly-bloco.criar{border-color:var(--agua)}
+#lays-ov .ly-sub{margin:-8px 0 14px;color:var(--tinta-2);font-size:15px}
+#lays-ov .ly-novo{display:flex;align-items:center;gap:16px;width:100%;max-width:520px;padding:16px 20px;border:2px dashed var(--agua);border-radius:12px;background:var(--card);text-align:left}
+#lays-ov .ly-novo i{font-style:normal;font-size:44px;line-height:1;color:var(--agua)}
+#lays-ov .ly-novo b{display:block;font-size:20px;color:var(--agua)}
+#lays-ov .ly-novo small{color:var(--tinta-2);font-size:15px}
+#lays-ov .ly-novo:hover{background:var(--papel)}
+#lays-ov .ly-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+#lays-ov .ly-cards>.vazio{grid-column:1/-1}
+#lays-ov .ly-card{display:flex;flex-direction:column;background:var(--papel);border:2px solid var(--linha);border-radius:10px;overflow:hidden}
+#lays-ov .ly-card.atual{border-color:var(--agua)}
+#lays-ov .ly-abrir{border:0;background:none;padding:0;text-align:left;width:100%}
+#lays-ov .ly-abrir:hover b{color:var(--agua)}
+#lays-ov .ly-info{padding:12px 12px 6px}
+#lays-ov .ly-info b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lays-ov .ly-info small{color:var(--tinta-2)}
+#lays-ov .ly-acoes{display:flex;gap:6px;padding:6px 10px 10px;flex-wrap:wrap}
+#lays-ov .ly-edita{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px 10px;width:100%}
+#lays-ov .ly-edita input{flex:1 1 100%;font:inherit;padding:6px 8px;border:2px solid var(--agua);border-radius:8px;background:var(--card);color:var(--tinta)}
+#lays-ov .ly-aviso{padding:8px 10px 10px;font-size:14px;width:100%}
+#lays-ov .ly-aviso p{margin:0 0 6px}
+#lays-ov .vazio{margin:0;color:var(--tinta-2)}
+#lays-ov .mini.ok{background:var(--agua);color:var(--papel);border-color:var(--agua)}
+#lays-ov .mini.ok svg{stroke:var(--papel)}
+#lays-ov .mini.sim{background:#c0392b;border-color:#c0392b;color:#fff}
+#lays-ov .mini.sim svg{stroke:#fff}
+@media print{#lays-ov,#sair-overlay{display:none!important}}
+/* ---------- Diálogo "Sair do layout?" ---------- */
+#sair-overlay{display:none;position:fixed;inset:0;z-index:9450;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
+#sair-overlay.show{display:flex}
+#sair-dialog{display:flex;flex-direction:column;width:420px;max-width:100%;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);overflow:hidden}
+#sair-dialog .sd-titulo{padding:12px 16px;font-weight:700;font-size:18px;border-bottom:2px solid var(--linha)}
+#sair-dialog .sd-msg{margin:0;padding:14px 16px;font-size:15px;color:var(--tinta-2)}
+#sair-dialog .sd-rodape{display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:2px solid var(--linha)}
+#sair-dialog .sd-btn{padding:8px 16px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--linha);background:var(--card);color:var(--tinta)}
+#sair-dialog .sd-btn:hover{border-color:var(--agua)}
+#sair-dialog .sd-btn.perigo{background:#c0392b;border-color:#c0392b;color:#fff}
 </style>
 </head>
 <body>
+<script>try{if(!new URLSearchParams(location.search).get("layout"))document.documentElement.classList.add("hall")}catch(e){}</script>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-salvar" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/></symbol>
   <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></symbol>
@@ -426,16 +430,21 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
   <symbol id="i-legenda" viewBox="0 0 24 24"><path d="M4 6h3M10 6h10M4 12h3M10 12h10M4 18h3M10 18h10"/></symbol>
   <symbol id="i-escala" viewBox="0 0 24 24"><path d="M2 8h20v8H2zM6 8v3M10 8v4M14 8v3M18 8v4"/></symbol>
   <symbol id="i-norte" viewBox="0 0 24 24"><path d="M12 2l6 18-6-4-6 4zM12 2v14"/></symbol>
+  <symbol id="i-olho" viewBox="0 0 24 24"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3.2"/></symbol>
+  <symbol id="i-trava" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
   <symbol id="i-texto" viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></symbol>
   <symbol id="i-imagem" viewBox="0 0 24 24"><path d="M3 5h18v14H3zM3 17l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9.5" r="1.6"/></symbol>
   <symbol id="i-mexer" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></symbol>
+  <symbol id="i-lapis" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/></symbol>
+  <symbol id="i-layouts" viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></symbol>
   <symbol id="i-foco" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
 </svg>
 
 <div class="barra">
   <div class="grupo">
+    <button class="b" id="b-lays" type="button" title="Layouts deste mapa: criar um novo ou abrir outro"><svg><use href="#i-layouts"/></svg>Layouts</button>
     <button class="b" id="salvar" type="button" title="Salvar o layout"><svg><use href="#i-salvar"/></svg>Salvar</button>
-    <button class="b dest" id="imprimir" type="button" title="Exportar o layout (PDF ou imagem pelo navegador)"><svg><use href="#i-exportar"/></svg>Exportar</button>
+    <button class="b dest" id="imprimir" type="button" title="Exportar o layout (PNG ou PDF)"><svg><use href="#i-exportar"/></svg>Exportar</button>
   </div>
   <div class="grupo">
     <button class="b" data-add="mapa" type="button" title="Colocar o mapa na folha"><svg><use href="#i-mapa"/></svg>Mapa</button>
@@ -443,7 +452,11 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
     <button class="b" data-add="escala" type="button" title="Colocar a escala: quanto mede o mapa"><svg><use href="#i-escala"/></svg>Escala</button>
     <button class="b" data-add="norte" type="button" title="Colocar a seta do Norte"><svg><use href="#i-norte"/></svg>Seta do Norte</button>
     <button class="b" data-add="texto" type="button" title="Escrever um texto"><svg><use href="#i-texto"/></svg>Texto</button>
+    <input type="file" id="f-img" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" hidden>
     <button class="b" data-add="fig" type="button" title="Colocar uma imagem"><svg><use href="#i-imagem"/></svg>Imagem</button>
+  </div>
+  <div class="grupo grupo-tema">
+    <label class="tema-lab">Tema<select class="tema-sel" aria-label="Tema de cores"><option value="claro">Claro</option><option value="escuro">Escuro</option><option value="oceano">Oceano</option><option value="ameixa">Ameixa</option><option value="brasa">Brasa</option></select></label>
   </div>
 </div>
 
@@ -454,7 +467,7 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
     <aside class="prop" id="prop"></aside>
     <aside class="prop" id="camadas" hidden>
       <div class="cam-topo"><h2>Camadas da folha</h2><button class="mini" id="cam-todos" type="button" title="Mostrar ou esconder todos os itens">Todos</button></div>
-      <div class="cam-cab"><span class="c-olho" title="Mostrar/esconder">&#128065;</span><span class="c-trava" title="Travar">&#128274;</span><span class="c-nome">Item</span></div>
+      <div class="cam-cab"><span class="c-olho" title="Mostrar/esconder"><svg aria-hidden="true"><use href="#i-olho"/></svg></span><span class="c-trava" title="Travar"><svg aria-hidden="true"><use href="#i-trava"/></svg></span><span class="c-nome">Item</span></div>
       <div id="lista-itens-caixa"><ul id="lista-itens"></ul></div>
       <p class="vazio" style="font-size:14px;margin-top:8px">Arraste para mudar a ordem: o que está em cima da lista fica na frente na folha. Olho esconde o item; cadeado impede de mexer nele.</p>
     </aside>
@@ -477,25 +490,53 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
     </div>
   </div>
 </div>
+<div id="lays-ov">
+  <header class="ly-topo">
+    <div class="ly-logo">Gis<span>Jr</span></div>
+    <select class="tema-sel tema-hall" aria-label="Tema de cores"><option value="claro">Claro</option><option value="escuro">Escuro</option><option value="oceano">Oceano</option><option value="ameixa">Ameixa</option><option value="brasa">Brasa</option></select>
+  </header>
+  <main class="ly-main" role="dialog" aria-modal="true" aria-label="Layouts do mapa">
+    <section class="ly-bloco criar" aria-labelledby="ly-t-criar">
+      <h1 id="ly-t-criar">Criar layout</h1>
+      <button type="button" class="ly-novo" data-a="criar"><i>+</i><span><b>Novo layout vazio</b><small>Comece do zero numa folha A4 em branco. Ele só é guardado quando você salvar com pelo menos um item.</small></span></button>
+    </section>
+    <section class="ly-bloco" aria-labelledby="lays-tit">
+      <h1 id="lays-tit">Layouts já criados</h1>
+      <p class="ly-sub" id="lays-sub"></p>
+      <div class="ly-cards" id="lays-grade"></div>
+    </section>
+  </main>
+</div>
+<div id="sair-overlay">
+  <div id="sair-dialog" role="dialog" aria-modal="true" aria-labelledby="sd-titulo">
+    <div class="sd-titulo" id="sd-titulo">Sair do layout?</div>
+    <p class="sd-msg">Este layout tem alterações que ainda não foram salvas. Elas podem ser perdidas. Use o botão Salvar para guardar o layout antes de sair.</p>
+    <div class="sd-rodape"><button type="button" class="sd-btn" id="sd-cancela">Cancelar</button><button type="button" class="sd-btn perigo" id="sd-sai">Sair mesmo assim</button></div>
+  </div>
+</div>
+<div id="export-overlay">
+  <div id="export-dialog" role="dialog" aria-modal="true" aria-labelledby="ex-titulo">
+    <div class="ex-header">
+      <span id="ex-titulo">Exportar layout</span>
+      <button type="button" class="ex-close" id="ex-close-btn" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="ex-body">
+      <button type="button" class="ex-op" id="ex-png"><b>PNG</b><span>Imagem da página inteira, em alta resolução.</span></button>
+      <button type="button" class="ex-op" id="ex-pdf"><b>PDF</b><span>Abre a janela de impressão; escolha “Salvar como PDF”.</span></button>
+    </div>
+    <div class="ex-footer"><button type="button" class="ex-btn" id="ex-cancel-btn">Fechar</button></div>
+  </div>
+</div>
 <div id="color-picker-overlay">
-  <div id="color-picker-popover">
+  <div id="color-picker-popover" role="dialog" aria-modal="true" aria-labelledby="cp-titulo">
     <div class="cp-header">
-      <span>Selecionar Cor</span>
-      <span class="cp-close" id="cp-close-btn">&times;</span>
+      <span id="cp-titulo">Selecionar cor</span>
+      <button type="button" class="cp-close" id="cp-close-btn" aria-label="Fechar">&times;</button>
     </div>
     <div class="cp-body">
-      <div class="cp-transparent-row">
-        <input type="checkbox" id="cp-transparent-checkbox">
-        <label for="cp-transparent-checkbox">Preenchimento Transparente</label>
-      </div>
       <div class="cp-wheel-box" id="cp-wheel-box">
         <canvas id="cp-wheel-canvas" width="190" height="190"></canvas>
         <div class="cp-wheel-handle" id="cp-wheel-handle"></div>
-      </div>
-      <div class="cp-bar-label">Transparência</div>
-      <div class="cp-alpha-row" id="cp-alpha-row">
-        <div class="cp-alpha-fill" id="cp-alpha-fill"></div>
-        <div class="cp-alpha-handle" id="cp-alpha-handle"></div>
       </div>
       <div class="cp-bar-label">Brilho</div>
       <div class="cp-sv-row" id="cp-val-row">
@@ -509,35 +550,38 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
       </div>
       <div class="cp-hex-row">
         <span>#</span>
-        <input type="text" id="cp-hex-input" maxlength="6">
+        <input type="text" id="cp-hex-input" maxlength="6" autocomplete="off" spellcheck="false">
+        <span class="cp-prev"><i id="cp-prev-old"></i>Atual</span>
+        <span class="cp-prev"><i id="cp-prev-new"></i>Nova</span>
       </div>
-      <div class="cp-section-label">Cores recentes</div>
-      <div class="cp-swatches" id="cp-recent-swatches"></div>
-      <div class="cp-section-label">Cores Padrão</div>
-      <div class="cp-swatches" id="cp-standard-swatches"></div>
       <div class="cp-menu">
-        <div class="cp-menu-item" id="cp-menu-copy">Copiar Cor</div>
-        <div class="cp-menu-item" id="cp-menu-paste">Colar Cor</div>
-        <div class="cp-menu-item" id="cp-menu-pick">Capturar Cor</div>
-        <div class="cp-menu-item" id="cp-menu-choose">Escolher Cor...</div>
+        <button type="button" class="cp-menu-item" id="cp-menu-copy">Copiar</button>
+        <button type="button" class="cp-menu-item" id="cp-menu-paste">Colar</button>
+        <button type="button" class="cp-menu-item" id="cp-menu-choose">Escolher…</button>
       </div>
     </div>
     <div class="cp-footer">
-      <button class="cp-ok-btn" id="cp-ok-btn">OK</button>
+      <button type="button" class="cp-btn" id="cp-cancel-btn">Fechar</button>
+      <button type="button" class="cp-btn cp-ok-btn" id="cp-ok-btn">Aplicar</button>
     </div>
   </div>
 </div>
-<input type="color" id="cp-native-color" style="position:fixed; top:-100px; left:-100px; width:1px; height:1px; opacity:0; pointer-events:none;">
+<input type="color" id="cp-native-color" data-cp-decorated="1" style="position:fixed; top:-100px; left:-100px; width:1px; height:1px; opacity:0; pointer-events:none;">
 <div id="aviso-t" role="status"></div>
 
 <script>
 (function(){
 var W=1122,H=793;
 function $(i){return document.getElementById(i)}
-var qs=new URLSearchParams(location.search),mapaId=qs.get("mapa")||"",CH="mapinha:layout:"+(mapaId||"solto");
+var qs=new URLSearchParams(location.search),mapaId=qs.get("mapa")||"",lid=qs.get("layout")||"",GRUPO=mapaId||"solto";
+// layout da URL que não existe (apagado, link velho): cai no hall
+var rascunho=false; // layout novo, ainda não salvo: só entra na lista quando for salvo com pelo menos 1 item
+if(lid){try{if(!JSON.parse(localStorage.getItem("mapinha:layouts:"+GRUPO)||"[]").some(function(x){return x.id===lid})){if(qs.get("novo")==="1")rascunho=true;else lid=""}}catch(e){lid=""}}
+var hall=!lid,CH="mapinha:layout:"+GRUPO+":"+lid;
+document.documentElement.classList.toggle("hall",hall);
 var snap={camadas:[]},ligado=false,salvo=false,itens=[],sel=null,prox=1,k=1,T=null,nomeLay="Meu layout";
 var FIG=["🌳","🌊","🏠","🏫","⭐","🐟","🦜","☀️","🌧️","🚲","⛰️","❤️"];
-var PAD={titulo:{w:560,h:70,txt:"Meu mapa",tam:44,cor:"#1e7a4c"},texto:{w:300,h:90,txt:"Escreva aqui…",tam:20,cor:"#25302a"},mapa:{w:640,h:480},legenda:{w:210,h:170,tit:"Legenda"},escala:{w:400,h:70},norte:{w:70,h:90},fig:{w:90,h:90,txt:"🌳"}};
+var PAD={titulo:{w:560,h:70,txt:"Meu mapa",tam:44,cor:"#1e7a4c"},texto:{w:300,h:90,txt:"Escreva aqui…",tam:20,cor:"#000000"},mapa:{w:640,h:480},legenda:{w:210,h:170,tit:"Legenda"},escala:{w:400,h:70},norte:{w:70,h:90},fig:{w:90,h:90,txt:"🌳"}};
 
 function aviso(m,ms){var e=$("aviso-t");e.textContent=m;e.classList.add("on");clearTimeout(aviso.t);aviso.t=setTimeout(function(){e.classList.remove("on")},ms||2600)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -585,12 +629,19 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
     return { minLat, minLng, maxLat, maxLng };
   }
 
+  // Enquadramento inicial do item de mapa: a MAIOR camada vetorial visível (maior área da extensão,
+  // com a largura corrigida pela latitude). Não depende de qual camada está ativa nem da ordem da lista.
   function findLargestVisibleLayerBounds() {
-    const visibleWithGeom = mapProjectState.layers.filter(l => l.visible && !l.isBasemap && l.geojson);
-    if (!visibleWithGeom.length) return null;
-    const active = visibleWithGeom.find(l => l.id === mapProjectState.selectedLayerId);
-    const target = active || visibleWithGeom[visibleWithGeom.length - 1];
-    return geojsonBounds(target.geojson);
+    let best = null, bestArea = -1;
+    mapProjectState.layers.forEach(l => {
+      if (!l.visible || l.isBasemap || !l.geojson) return;
+      const b = geojsonBounds(l.geojson);
+      if (!b) return;
+      const midLat = (b.minLat + b.maxLat) / 2;
+      const area = (b.maxLng - b.minLng) * Math.cos(midLat * Math.PI / 180) * (b.maxLat - b.minLat);
+      if (area > bestArea) { bestArea = area; best = b; }
+    });
+    return best;
   }
 
   function updatePlaceholderMessage(el) {
@@ -1261,9 +1312,12 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
 
       const paneName = ensureItemLayerPane(item, layer.id);
       if (!leafletLayer) {
+        // smoothFactor:0 desliga a simplificação (Douglas-Peucker) que o Leaflet faz nas
+        // linhas e polígonos conforme o zoom diminui: o layout mostra e exporta a geometria completa.
         leafletLayer = L.geoJSON(layer.geojson, {
           pane: paneName,
-          style: styleFn,
+          smoothFactor: 0,
+          style: (f) => Object.assign({}, styleFn(f), { smoothFactor: 0 }),
           pointToLayer: (feature, latlng) => L.circleMarker(latlng, { radius: 5, pane: paneName, ...styleFn(feature) }),
         });
         item._layerGroups.set(layer.id, leafletLayer);
@@ -1272,7 +1326,8 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
         // e evita "piscar" o item de mapa a cada snapshot).
         leafletLayer.clearLayers();
         leafletLayer.addData(layer.geojson);
-        leafletLayer.setStyle(styleFn); // função por feição (Categorizado/Graduado)
+        leafletLayer.setStyle((f) => Object.assign({}, styleFn(f), { smoothFactor: 0 })); // função por feição (Categorizado/Graduado)
+        leafletLayer.options.smoothFactor = 0;
       }
       if (!map.hasLayer(leafletLayer)) leafletLayer.addTo(map);
 
@@ -1757,8 +1812,13 @@ function padroesEscala(it){
 /* ---------- tema (segue a escolha feita no GisJr) ---------- */
 try{
   var TEMAS=["escuro","oceano","ameixa","brasa"];
-  function aplicaTema(){var tv=localStorage.getItem("mapinha:tema");if(!tv&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)tv="escuro";
-    if(tv&&TEMAS.indexOf(tv)>=0)document.documentElement.setAttribute("data-tema",tv);else document.documentElement.removeAttribute("data-tema")}
+  var temaSels=[].slice.call(document.querySelectorAll(".tema-sel"));
+  function aplicaTema(){var tv=null;try{tv=localStorage.getItem("mapinha:tema")}catch(x){}
+    if(!tv&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)tv="escuro";
+    if(TEMAS.indexOf(tv)<0)tv="claro";
+    if(tv==="claro")document.documentElement.removeAttribute("data-tema");else document.documentElement.setAttribute("data-tema",tv);
+    temaSels.forEach(function(s){s.value=tv})}
+  temaSels.forEach(function(s){s.addEventListener("change",function(){try{localStorage.setItem("mapinha:tema",s.value)}catch(x){}aplicaTema()})});
   aplicaTema();window.addEventListener("storage",function(e){if(e.key==="mapinha:tema")aplicaTema()});
 }catch(x){}
 
@@ -1783,23 +1843,89 @@ function lerSalvo(){
     g.onsuccess=function(){if(g.result&&g.result.data){salvo=true;recebeu(g.result.data);aviso("Usando o mapa que você salvou.")}else falta()};g.onerror=falta}catch(e){falta()}};
   r.onerror=falta;
 }
-if("BroadcastChannel" in window){
+if(hall){/* hall: não há layout aberto, então não há o que ligar ao mapa */}
+else if("BroadcastChannel" in window){
   var ch=new BroadcastChannel("sigjr-layout-sync");
   ch.onmessage=function(e){var m=e.data;if(m&&m.type==="snapshot"){var prim=!ligado;ligado=true;recebeu(m.snapshot);if(prim)aviso("Ligado ao mapa. Se você mudar o mapa, o layout muda junto.")}};
   ch.postMessage({type:"pedido"});
   var n=0,tm=setInterval(function(){if(ligado||++n>4){clearInterval(tm);if(!ligado)lerSalvo();return}ch.postMessage({type:"pedido"})},700);
-  window.addEventListener("beforeunload",function(){ch.close()});
+  window.addEventListener("beforeunload",function(){clearInterval(tm);ch.close()});
 }else lerSalvo();
 
-/* ---------- salvar ---------- */
-function gravar(){
-  try{localStorage.setItem(CH,JSON.stringify({nome:nomeLay,prox:prox,itens:itens.map(function(i){var o={};for(var p in i)if(p[0]!=="_")o[p]=i[p];return o})}));return true}
-  catch(e){return false}
+/* ---------- layouts do mapa: cada mapa tem a sua lista e cada layout é guardado à parte ---------- */
+var CHL="mapinha:layouts:"+GRUPO;
+function chaveLay(id){return"mapinha:layout:"+GRUPO+":"+id}
+function lerLays(){try{var l=JSON.parse(localStorage.getItem(CHL)||"[]");return Array.isArray(l)?l:[]}catch(e){return[]}}
+function gravaLays(l){try{localStorage.setItem(CHL,JSON.stringify(l));return true}catch(e){return false}}
+function achaLay(id){return lerLays().filter(function(x){return x.id===id})[0]||null}
+function novoLid(){return"l"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
+// o layout único da versão anterior (chave sem id) vira o primeiro layout da lista
+function migrarAntigo(){
+  var velho="mapinha:layout:"+GRUPO,raw;
+  try{raw=localStorage.getItem(velho)}catch(e){return}
+  if(raw==null)return;
+  try{
+    var d=JSON.parse(raw),its=(d&&d.itens)||[];
+    if(its.length){
+      var id=novoLid(),l=lerLays();
+      localStorage.setItem(chaveLay(id),raw);
+      l.unshift({id:id,nome:(d&&d.nome)||"Meu layout",d:Date.now(),n:its.length});
+      if(!gravaLays(l)){localStorage.removeItem(chaveLay(id));return}
+    }
+    localStorage.removeItem(velho);
+  }catch(e){}
 }
-function agendar(){clearTimeout(T);T=setTimeout(gravar,600)}
-function carregar(){
-  try{var d=JSON.parse(localStorage.getItem(CH)||"null");if(d){nomeLay=d.nome||nomeLay;prox=d.prox||1;itens=d.itens||[];itens.forEach(function(i){if(i.t==="mapa"&&i.c&&!i.center){i.center=i.c;i.zoom=i.z;delete i.c;delete i.z}})}}catch(e){}
+// Alterações: compara o layout atual com o estado de antes da primeira ação do usuário (ou do último Salvar).
+// Salvar só acontece pelo botão Salvar; não há gravação automática.
+var baseLay=null,saindo=false;
+function serLay(){return JSON.stringify({n:nomeLay,i:itens.map(function(i){var o={};for(var p in i)if(p[0]!=="_")o[p]=i[p];return o})},function(k,v){return typeof v==="number"&&v%1?Math.round(v*1000)/1000:v})}
+function temAlteracao(){return !hall&&baseLay!==null&&serLay()!==baseLay}
+["pointerdown","keydown","input","change"].forEach(function(ev){document.addEventListener(ev,function(){if(baseLay===null&&!hall)baseLay=serLay()},true)});
+function gravar(){
+  if(!lid)return false;                 // no hall não há nada aberto para salvar
+  if(!itens.length)return false;        // layout sem nenhum item não é guardado
+  var l=lerLays(),e=l.filter(function(x){return x.id===lid})[0],novoReg=false;
+  if(!e){
+    if(!rascunho)return false;          // layout apagado em outra aba: não deixa ele reaparecer
+    e={id:lid,nome:nomeLay,d:Date.now(),n:0};l.unshift(e);novoReg=true;
   }
+  try{
+    var its=itens.map(function(i){var o={};for(var p in i)if(p[0]!=="_")o[p]=i[p];return o});
+    localStorage.setItem(CH,JSON.stringify({nome:nomeLay,prox:prox,itens:its}));
+    e.nome=nomeLay;e.d=Date.now();e.n=its.length;delete e.p;
+    if(!gravaLays(l)){if(novoReg){try{localStorage.removeItem(CH)}catch(x){}}return false}
+    if(novoReg){
+      rascunho=false;
+      try{var q=new URLSearchParams(location.search);q.delete("novo");history.replaceState(null,"","?"+q.toString())}catch(x){}
+    }
+    baseLay=null;
+    return true;
+  }catch(err){return false}
+}
+/* remove da lista os layouts que ficaram sem nenhum item (o aberto agora, se houver, fica até sair dele) */
+function limparVazios(exceto){
+  var l=lerLays(),fora=[];
+  l.forEach(function(e){
+    if(e.id===exceto)return;
+    var raw=null;
+    try{raw=localStorage.getItem(chaveLay(e.id))}catch(x){return}
+    var n=0;
+    if(raw!=null){try{var d=JSON.parse(raw);n=d&&d.itens?d.itens.length:0}catch(x){return}} // ilegível: não mexe
+    if(n===0)fora.push(e.id);
+  });
+  if(!fora.length)return;
+  if(gravaLays(l.filter(function(e){return fora.indexOf(e.id)<0})))fora.forEach(function(id){try{localStorage.removeItem(chaveLay(id))}catch(x){}});
+}
+function agendar(){} // sem gravação automática: o layout só é salvo pelo botão Salvar
+function carregar(){
+  if(!lid)return;
+  var e=achaLay(lid),d=null;
+  try{d=JSON.parse(localStorage.getItem(CH)||"null")}catch(x){}
+  if(d){prox=d.prox||1;itens=d.itens||[];itens.forEach(function(i){if(i.t==="mapa"&&i.c&&!i.center){i.center=i.c;i.zoom=i.z;delete i.c;delete i.z}})}
+  nomeLay=(e&&e.nome)||(d&&d.nome)||nomeLay;
+  if(rascunho&&!e)nomeLay=padraoNome(lerLays());
+  document.title=nomeLay+" — Layout";
+}
 
 /* ---------- itens ---------- */
 /* Propriedades comuns: fundo, borda e giro. Sem valor salvo, mapa e legenda começam com fundo branco e borda. */
@@ -1807,7 +1933,7 @@ function ver(it,k){if(it[k]!==undefined)return it[k];return(k==="fundo"||k==="mo
 function estilo(it){
   var c=it._el&&it._el.querySelector(".cont");if(!c)return;
   c.style.background=ver(it,"fundo")?(it.fundoCor||"#ffffff"):"transparent";
-  c.style.border=ver(it,"moldura")?(it.molduraEsp===undefined?3:Math.max(1,Math.round(it.molduraEsp*3.7795)))+"px solid "+(it.molduraCor||"#25302a"):"0";
+  c.style.border=ver(it,"moldura")?(it.molduraEsp===undefined?3:Math.max(1,Math.round(it.molduraEsp*3.7795)))+"px solid "+(it.molduraCor||"#000000"):"0";
   c.style.borderRadius="6px";
   var gi=it.giro?"rotate("+it.giro+"deg)":"";
   if(it.t==="mapa"){c.style.transform="";it._el.style.transform=gi}else c.style.transform=gi; /* mapa: gira o item inteiro, como no layout completo */
@@ -1825,25 +1951,86 @@ function adicionar(t){
 }
 function montar(it){
   var el=document.createElement("div");el.className="it layout-item "+it.t+(it.mexer?" mexer":"");el.dataset.id=it.id;
-  el.innerHTML='<div class="cont"></div>'+(it.t==="mapa"?'<div class="map-placeholder-msg"></div>':'')+'<div class="al" aria-hidden="true"></div>';
+  el.innerHTML='<div class="cont"></div>'+(it.t==="mapa"?'<div class="map-placeholder-msg"></div>':'')+["nw","n","ne","e","se","s","sw","w"].map(function(h){return'<div class="al" data-h="'+h+'" aria-hidden="true"></div>'}).join("");
   $("pagina").appendChild(el);it._el=el;pos(it);
   if(it.t==="mapa")criarMapa(it);else desenhaConteudo(it);
-  el.addEventListener("pointerdown",function(e){if(e.target.classList.contains("al"))pegar(e,it,"t");else pegar(e,it,"m")});
+  el.addEventListener("pointerdown",function(e){if(e.target.classList.contains("al"))pegar(e,it,"r",e.target.dataset.h);else pegar(e,it,"m")});
 }
 function pos(it){var s=it._el.style;s.left=it.x+"px";s.top=it.y+"px";s.width=it.w+"px";s.height=it.h+"px"}
 function marcar(){itens.forEach(function(i){if(i._el)i._el.classList.toggle("sel",i.id===sel)})}
-function pegar(e,it,modo){
+/* ---------- guias inteligentes (ímã): bordas e centros dos outros itens e da folha ---------- */
+var SNAP_PX=6; /* distância em pixels de TELA, igual em qualquer zoom */
+function limpaGuias(){[].slice.call($("pagina").querySelectorAll(".smart-guide,.smart-guide-point")).forEach(function(e){e.remove()})}
+function alvosSnap(excl){
+  var xs=[0,W/2,W],ys=[0,H/2,H];
+  itens.forEach(function(i){if(i.id===excl||i.visible===false)return;xs.push(i.x,i.x+i.w/2,i.x+i.w);ys.push(i.y,i.y+i.h/2,i.y+i.h)});
+  return{xs:xs,ys:ys};
+}
+/* menor deslocamento que leva algum dos valores candidatos até um alvo (ou null) */
+function menorDelta(cands,alvos,lim){
+  var best=null;
+  cands.forEach(function(c){alvos.forEach(function(a){var d=a-c;if(Math.abs(d)<=lim&&(best===null||Math.abs(d)<Math.abs(best)))best=d})});
+  return best;
+}
+function coincide(v,alvos){return alvos.filter(function(a){return Math.abs(a-v)<=0.51})}
+function uniq(a){return a.filter(function(v,i){return a.indexOf(v)===i})}
+/* desenha as linhas magenta e os nós (pontos) onde o item encosta nelas */
+function desenhaGuias(vx,hy,L,T,R,B){
+  limpaGuias();var pg=$("pagina"),cx=(L+R)/2,cy=(T+B)/2;
+  function add(cls,x,y){var d=document.createElement("div");d.className=cls;if(x!==null)d.style.left=x+"px";if(y!==null)d.style.top=y+"px";pg.appendChild(d)}
+  vx.forEach(function(x){add("smart-guide vertical",x,null);[T,cy,B].forEach(function(y){add("smart-guide-point",x,y)})});
+  hy.forEach(function(y){add("smart-guide horizontal",null,y);[L,cx,R].forEach(function(x){add("smart-guide-point",x,y)})});
+  vx.forEach(function(x){hy.forEach(function(y){add("smart-guide-point",x,y)})});
+}
+function pegar(e,it,modo,dir){
   if(it.locked)return;
+  var ae=document.activeElement;if(ae&&ae!==document.body&&ae.blur)ae.blur();
   sel=it.id;marcar();props();
   if(modo==="m"&&it.t==="mapa"&&it.mexer)return; // mexendo dentro do mapa: o Leaflet cuida do arrasto
   e.preventDefault();e.stopPropagation();
-  var el=it._el,x0=e.clientX,y0=e.clientY,o={x:it.x,y:it.y,w:it.w,h:it.h};
+  var el=it._el,x0=e.clientX,y0=e.clientY,o={x:it.x,y:it.y,w:it.w,h:it.h},MW=40,MH=30;
+  var gi=(it.t==="mapa"&&it.giro)?it.giro*Math.PI/180:0; /* mapa girado: o arrasto é medido no eixo girado do item */
+  var al=alvosSnap(it.id);
   try{el.setPointerCapture(e.pointerId)}catch(x){}
-  function mv(ev){var dx=(ev.clientX-x0)/k,dy=(ev.clientY-y0)/k;
-    if(modo==="m"){it.x=Math.round(Math.max(0,Math.min(W-it.w,o.x+dx)));it.y=Math.round(Math.max(0,Math.min(H-it.h,o.y+dy)))}
-    else{it.w=Math.round(Math.max(40,o.w+dx));it.h=Math.round(Math.max(30,o.h+dy))}
-    pos(it);if(it._m)it._m.invalidateSize();if(modo==="t")desenhaConteudo(it);if(it.t==="mapa"){renderGridOverlayForItem(it);syncPos(it)}atualizaEscalas()}
-  function up(){el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up);el.removeEventListener("pointercancel",up);agendar()}
+  function mv(ev){
+    var dx=(ev.clientX-x0)/k,dy=(ev.clientY-y0)/k,lim=SNAP_PX/k,ima=!ev.altKey; /* segurar Alt solta o ímã */
+    if(gi){var c=Math.cos(-gi),s=Math.sin(-gi),rx=dx*c-dy*s,ry=dx*s+dy*c;dx=rx;dy=ry}
+    if(modo==="m"){
+      var nx=Math.max(0,Math.min(W-it.w,o.x+dx)),ny=Math.max(0,Math.min(H-it.h,o.y+dy)),vx=[],hy=[];
+      if(ima){
+        var ddx=menorDelta([nx,nx+it.w/2,nx+it.w],al.xs,lim),ddy=menorDelta([ny,ny+it.h/2,ny+it.h],al.ys,lim);
+        if(ddx!==null)nx=Math.max(0,Math.min(W-it.w,nx+ddx));
+        if(ddy!==null)ny=Math.max(0,Math.min(H-it.h,ny+ddy));
+        [nx,nx+it.w/2,nx+it.w].forEach(function(v){vx=vx.concat(coincide(v,al.xs))});
+        [ny,ny+it.h/2,ny+it.h].forEach(function(v){hy=hy.concat(coincide(v,al.ys))});
+      }
+      it.x=Math.round(nx);it.y=Math.round(ny);
+      if(ima&&(vx.length||hy.length))desenhaGuias(uniq(vx),uniq(hy),it.x,it.y,it.x+it.w,it.y+it.h);else limpaGuias();
+    }else{
+      var L=o.x,T=o.y,R=o.x+o.w,B=o.y+o.h,vx2=[],hy2=[];
+      if(dir.indexOf("e")>=0)R+=dx;if(dir.indexOf("w")>=0)L+=dx;
+      if(dir.indexOf("s")>=0)B+=dy;if(dir.indexOf("n")>=0)T+=dy;
+      if(ima){ /* só as bordas que a alça move grudam */
+        var d;
+        if(dir.indexOf("e")>=0&&(d=menorDelta([R],al.xs,lim))!==null){R+=d}
+        if(dir.indexOf("w")>=0&&(d=menorDelta([L],al.xs,lim))!==null){L+=d}
+        if(dir.indexOf("s")>=0&&(d=menorDelta([B],al.ys,lim))!==null){B+=d}
+        if(dir.indexOf("n")>=0&&(d=menorDelta([T],al.ys,lim))!==null){T+=d}
+      }
+      L=Math.max(0,L);T=Math.max(0,T);R=Math.min(W,R);B=Math.min(H,B);
+      if(R-L<MW){if(dir.indexOf("w")>=0)L=R-MW;else R=L+MW}
+      if(B-T<MH){if(dir.indexOf("n")>=0)T=B-MH;else B=T+MH}
+      if(ima){
+        if(dir.indexOf("e")>=0)vx2=vx2.concat(coincide(R,al.xs));
+        if(dir.indexOf("w")>=0)vx2=vx2.concat(coincide(L,al.xs));
+        if(dir.indexOf("s")>=0)hy2=hy2.concat(coincide(B,al.ys));
+        if(dir.indexOf("n")>=0)hy2=hy2.concat(coincide(T,al.ys));
+      }
+      it.x=Math.round(L);it.y=Math.round(T);it.w=Math.round(R)-it.x;it.h=Math.round(B)-it.y;
+      if(vx2.length||hy2.length)desenhaGuias(uniq(vx2),uniq(hy2),it.x,it.y,it.x+it.w,it.y+it.h);else limpaGuias();
+    }
+    pos(it);if(it._m)it._m.invalidateSize();if(modo==="r")desenhaConteudo(it);if(it.t==="mapa"){renderGridOverlayForItem(it);syncPos(it)}atualizaEscalas()}
+  function up(){el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up);el.removeEventListener("pointercancel",up);limpaGuias();agendar()}
   el.addEventListener("pointermove",mv);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up);
 }
 $("pagina").addEventListener("pointerdown",function(e){if(e.target===this){sel=null;marcar();props()}});
@@ -1892,16 +2079,24 @@ function fitVisivel(it,b){
 function desenhaConteudo(it){
   var c=it._el&&it._el.querySelector(".cont");if(!c)return;
   if(it.t==="mapa"){estilo(it);return}
-  var cor=it.cor||"#25302a";
+  var cor=it.cor||"#000000";
   if(it.t==="titulo"||it.t==="texto"){
     var ft=fmtTxt(it),jc=ft.align==="left"||ft.align==="justify"?"flex-start":ft.align==="right"?"flex-end":"center";
-    c.style.cssText="display:flex;align-items:center;justify-content:"+jc+";padding:4px 8px;white-space:pre-wrap;"+textFormatToCss(ft);
+    var av={top:"flex-start",bottom:"flex-end"}[it.valign]||"center";
+    c.style.cssText="display:flex;align-items:"+av+";justify-content:"+jc+";padding:4px 8px;white-space:pre-wrap;"+textFormatToCss(ft);
     c.textContent=it.txt;
-  }else if(it.t==="fig"){c.style.cssText="display:flex;align-items:center;justify-content:center;font-size:"+Math.min(it.w,it.h)*.8+"px;line-height:1";c.textContent=it.txt}
-  else if(it.t==="norte"){var cn=it.cor||"#25302a",e0=it.estiloN||"n0";c.innerHTML=norteSvg(e0,cn,it.cor2||(NORTES[e0]?"#ffffff":cn))}
+  }else if(it.t==="fig"){
+    c.style.cssText="display:flex;align-items:center;justify-content:center;font-size:"+Math.min(it.w,it.h)*.8+"px;line-height:1";
+    if(it.img){
+      var im=c.firstChild&&c.firstChild.tagName==="IMG"?c.firstChild:null;
+      if(!im||im.src!==it.img){c.textContent="";im=document.createElement("img");im.alt="";im.draggable=false;im.src=it.img;c.appendChild(im)}
+      im.style.cssText="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;object-fit:"+(it.ajuste||"contain");
+    }else c.textContent=it.txt;
+  }
+  else if(it.t==="norte"){var cn=it.cor||"#000000",e0=it.estiloN||"n0";c.innerHTML=norteSvg(e0,cn,it.cor2||(NORTES[e0]?"#ffffff":cn))}
   else if(it.t==="legenda"){
     var oc=it.lgOcultas||[],l=snap.camadas.filter(function(x){return x.visible&&oc.indexOf(x.id)<0});
-    c.innerHTML='<div class="lg" style="font-size:'+(it.lgTam||15)+'px"><b>'+esc(it.tit||"Legenda")+'</b>'+(l.length?l.map(function(x){var ov=(it.lgOv||{})[x.id]||{},sy=lgSym(x,ov),lb=ov.label!==undefined&&ov.label!==""?ov.label:x.name;return'<div style="white-space:pre-line"><i style="width:'+(ov.w>0?ov.w*3.78:16)+'px;height:'+(ov.h>0?ov.h*3.78:16)+'px;background:'+lgFill(sy)+';border:'+lgBord(sy)+'"></i>'+esc(lb)+'</div>'}).join(""):'<div>Nenhuma camada ainda</div>')+'</div>';
+    c.innerHTML='<div class="lg" style="font-size:'+(it.lgTam||15)+'px"><b style="font-size:'+(it.lgTitTam||it.lgTam||15)+'px">'+esc(it.tit||"Legenda")+'</b>'+(l.length?l.map(function(x){var ov=(it.lgOv||{})[x.id]||{},sy=lgSym(x,ov),lb=ov.label!==undefined&&ov.label!==""?ov.label:x.name;return'<div style="white-space:pre-line;font-size:'+(ov.tam>0?ov.tam:(it.lgTam||15))+'px"><i style="width:'+(ov.w>0?ov.w*3.78:16)+'px;height:'+(ov.h>0?ov.h*3.78:16)+'px;background:'+lgFill(sy)+';border:'+lgBord(sy)+'"></i>'+esc(lb)+'</div>'}).join(""):'<div>Nenhuma camada ainda</div>')+'</div>';
   }else if(it.t==="escala")atualizaEscalas();
   estilo(it);
 }
@@ -1933,17 +2128,55 @@ n6:["0 0 100 100",'<circle cx="50" cy="50" r="46" fill="@S@" stroke="@F@" stroke
 };
 function libN(){try{return JSON.parse(localStorage.getItem("mapinha:norteLib")||"[]")}catch(x){return[]}}
 function salvaLibN(l){try{localStorage.setItem("mapinha:norteLib",JSON.stringify(l))}catch(x){aviso("Sem espaço para guardar as setas importadas.")}}
+/* ---------- setas da pasta arrows/ (SVGs do QGIS, com marcadores param(...)) ----------
+   A pasta fica ao lado do layout-jr.html. O navegador não consegue listar uma pasta,
+   então os nomes ficam nesta lista: para somar uma seta nova, coloque o .svg na pasta
+   e acrescente o nome aqui. Precisa abrir o site por http(s); direto do arquivo o
+   navegador bloqueia a leitura. */
+var ARROWS_DIR="arrows/";
+var ARROWS=["NorthArrow_01.svg","NorthArrow_02.svg","NorthArrow_03.svg","NorthArrow_04.svg","NorthArrow_05.svg","NorthArrow_06.svg","NorthArrow_07.svg","NorthArrow_08.svg","NorthArrow_09.svg","NorthArrow_10.svg","NorthArrow_11.svg","Arrow_01.svg","Arrow_02.svg","Arrow_03.svg","Arrow_04.svg","Arrow_05.svg","Arrow_06.svg","Arrow_LOS.svg"];
+var arrowCache={},arrowPromise=null,arrowFim=false;
+function arrowId(n){return"a:"+n.replace(/\.svg$/i,"")}
+function limpaSvg(t){return String(t).replace(/<script[\s\S]*?<\/script>/gi,"").replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*')/gi,"")}
+function carregarArrows(){
+  if(arrowPromise)return arrowPromise;
+  arrowPromise=Promise.all(ARROWS.map(function(n){
+    return fetch(ARROWS_DIR+n).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){
+      if(/<svg/i.test(t))arrowCache[arrowId(n)]={nome:n,svg:limpaSvg(t)};
+    }).catch(function(){});
+  })).then(function(){
+    arrowFim=true;
+    itens.forEach(function(i){if(i.t==="norte"&&i._el)desenhaConteudo(i)});
+    var it=getIt(sel);if(it&&it.t==="norte")props();
+  });
+  return arrowPromise;
+}
+function arrowsDisponiveis(){return ARROWS.map(arrowId).filter(function(i){return arrowCache[i]})}
+/* troca os param(nome) [padrão] do QGIS pelas cores escolhidas (ou pelo padrão do próprio SVG) */
+function svgParam(t,cor,cor2){
+  return t.replace(/param\(([\w-]+)\)(?:[ \t]+(#[0-9a-fA-F]{3,8}\b|[-+]?\d*\.?\d+\b|[a-zA-Z]+\b))?/g,function(m,nome,pad){
+    if(nome==="fill")return cor||pad||"#000000";
+    if(nome==="outline")return cor2||pad||cor||"#000000";
+    return pad||"1"; /* opacidades e espessura: padrão do arquivo, ou 1 */
+  });
+}
 function norteSvg(id,cor,cor2){
   var a=NORTES[id];
   if(a)return'<svg viewBox="'+a[0]+'" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">'+a[1].replace(/@F@/g,cor).replace(/@S@/g,cor2||"#ffffff")+'</svg>';
-  var u=libN().filter(function(x){return x.id===id})[0];
+  var u=null;
+  if(id.indexOf("a:")===0){
+    u=arrowCache[id];
+    if(!u){carregarArrows();return arrowFim?norteSvg("n0",cor,cor2):""} /* ainda carregando: espera; arquivo ausente: seta padrão */
+  }else u=libN().filter(function(x){return x.id===id})[0];
   if(!u)return norteSvg("n0",cor,cor2);
-  var t=u.svg.replace(/param\(fill\)\s*(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)?/g,cor).replace(/param\(outline\)\s*(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)?/g,cor2||cor);
+  var t=svgParam(u.svg,cor,cor2||cor);
   return'<img alt="" src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(t)+'" style="width:100%;height:100%;object-fit:contain">';
 }
 function painelNorte(it){
-  var cor=it.cor||"#25302a",est=it.estiloN||"n0",lib=libN(),ids=Object.keys(NORTES).concat(lib.map(function(x){return x.id}));
-  var h='<div class="pl"><label>Estilo da seta</label><div class="nst">'+ids.map(function(i){var c2=it.cor2||(NORTES[i]?"#ffffff":cor);return'<button type="button" data-nst="'+i+'" class="'+(i===est?"on":"")+'" aria-label="Seta '+i+'">'+norteSvg(i,cor,c2)+'</button>'}).join("")+'</div>';
+  var cor=it.cor||"#000000",est=it.estiloN||"n0",lib=libN(),ids=Object.keys(NORTES).concat(arrowsDisponiveis(),lib.map(function(x){return x.id}));
+  carregarArrows();
+  var h='<div class="pl"><label>Estilo da seta</label><div class="nst">'+ids.map(function(i){var c2=it.cor2||(NORTES[i]?"#ffffff":cor);return'<button type="button" data-nst="'+i+'" class="'+(i===est?"on":"")+'" aria-label="Seta '+i+'"'+(arrowCache[i]?' title="'+arrowCache[i].nome+'"':'')+'>'+norteSvg(i,cor,c2)+'</button>'}).join("")+'</div>';
+  if(arrowFim&&!arrowsDisponiveis().length)h+='<p class="vazio" style="margin-top:8px;font-size:13px">Não consegui carregar as setas da pasta <b>arrows/</b>. Abra o site por um endereço http(s); direto do arquivo o navegador bloqueia a leitura.</p>';
   h+='<label class="imp">'+ic("mais")+'Importar SVG do QGIS<input type="file" id="n-imp" accept=".svg,image/svg+xml" multiple></label>';
   if(lib.length)h+=' <button type="button" class="mini perigo" data-nrm="1" style="margin-top:8px">Apagar importadas</button>';
   h+='</div><div class="lin"><label for="p-cor">Cor</label><input type="color" id="p-cor" value="'+cor+'"></div><div class="lin"><label for="p-cor2">Cor secundária / contorno</label><input type="color" id="p-cor2" value="'+(it.cor2||(NORTES[est]?"#ffffff":cor))+'"></div>';
@@ -1966,7 +2199,7 @@ $("prop").addEventListener("change",function(e){
 
 var FONTES=["Atkinson Hyperlegible","Arial","Verdana","Tahoma","Trebuchet MS","Times New Roman","Georgia","Courier New","Comic Sans MS","Impact"];
 function fmtTxt(it){
-  if(!it.fmt){var f=defaultTextFormat();f.family="Atkinson Hyperlegible";f.size=Math.round((it.tam||20)*75)/100;f.color=it.cor||"#25302a";f.bold=it.neg===undefined?it.t==="titulo":it.neg;f.align=it.alin||(it.t==="titulo"?"center":"left");f.lineHeight=115;it.fmt=f}
+  if(!it.fmt){var f=defaultTextFormat();f.family="Atkinson Hyperlegible";f.size=Math.round((it.tam||20)*75)/100;f.color=it.cor||"#000000";f.bold=it.neg===undefined?it.t==="titulo":it.neg;f.align=it.alin||(it.t==="titulo"?"center":"left");f.lineHeight=115;it.fmt=f}
   return it.fmt;
 }
 function tfN(l,k,v,st,mn){return'<div class="pl tf"><label>'+l+'</label><input type="number" data-tf="'+k+'" data-ty="n" step="'+st+'" value="'+v+'"'+(mn!==undefined?' min="'+mn+'"':"")+'></div>'}
@@ -1984,6 +2217,7 @@ function painelTexto(it){
   h+='<h3>Formatação</h3>'+tfS("Caixa","textCase",f.textCase,[["none","Normal"],["upper","MAIÚSCULAS"],["lower","minúsculas"],["capitalize","Capitalizar"]]);
   h+='<div class="par">'+tfN("Letras (mm)","letterSpacing",f.letterSpacing,0.1)+tfN("Palavras (mm)","wordSpacing",f.wordSpacing,0.1)+'</div>'+tfN("Altura da linha (%)","lineHeight",f.lineHeight,5,50);
   h+='<div class="acoes" style="margin-bottom:6px">'+[["left","Esquerda"],["center","Centro"],["right","Direita"],["justify","Justif."]].map(function(x){return'<button class="mini'+(f.align===x[0]?" on":"")+'" data-tfal="'+x[0]+'" type="button">'+x[1]+'</button>'}).join("")+'</div>';
+  h+='<div class="pl"><label>Alinhamento vertical</label></div><div class="acoes" style="margin-bottom:6px">'+[["top","Topo"],["middle","Meio"],["bottom","Abaixo"]].map(function(x){return'<button class="mini'+((it.valign||"middle")===x[0]?" on":"")+'" data-tfva="'+x[0]+'" type="button">'+x[1]+'</button>'}).join("")+'</div>';
   h+='<h3>Contorno (buffer)</h3>'+tfK("Desenhar contorno","bufferEnabled",f.bufferEnabled)+'<div class="par">'+tfN("Tamanho (mm)","bufferSize",f.bufferSize,0.1,0)+tfC("Cor","bufferColor",f.bufferColor)+'</div>';
   h+='<h3>Sombra</h3>'+tfK("Desenhar sombra","shadowEnabled",f.shadowEnabled)+'<div class="par">'+tfN("Ângulo","shadowAngle",f.shadowAngle,5)+tfN("Distância (mm)","shadowDistance",f.shadowDistance,0.1,0)+'</div><div class="par">'+tfN("Desfoque (mm)","shadowBlur",f.shadowBlur,0.1,0)+tfC("Cor","shadowColor",f.shadowColor)+'</div>';
   return h;
@@ -1996,7 +2230,7 @@ function aplicaTF(e){
   desenhaConteudo(it);agendar();
 }
 $("prop").addEventListener("input",aplicaTF);$("prop").addEventListener("change",aplicaTF);
-$("prop").addEventListener("click",function(e){var b=e.target.closest("button");if(!b||!b.dataset.tfal)return;var it=getIt(sel);if(!it)return;fmtTxt(it).align=b.dataset.tfal;desenhaConteudo(it);props();agendar()});
+$("prop").addEventListener("click",function(e){var b=e.target.closest("button");if(b&&b.dataset.tfva){var it0=getIt(sel);if(it0){it0.valign=b.dataset.tfva;desenhaConteudo(it0);props();agendar()}return}if(!b||!b.dataset.tfal)return;var it=getIt(sel);if(!it)return;fmtTxt(it).align=b.dataset.tfal;desenhaConteudo(it);props();agendar()});
 /* ---------- painel da direita ---------- */
 function ic(n){return'<svg><use href="#i-'+n+'"/></svg>'}
 function opt(v,t,cur){return'<option value="'+v+'"'+(cur===v?" selected":"")+'>'+t+'</option>'}
@@ -2027,14 +2261,18 @@ function props(){
   if(it.t==="titulo"||it.t==="texto")h+=painelTexto(it);
   if(it.t==="legenda"){
     var oc=it.lgOcultas||[],vis=snap.camadas.filter(function(x){return x.visible});
-    h+='<div class="pl"><label for="p-tit">Título da legenda</label><input type="text" id="p-tit" value="'+esc(it.tit||"")+'"></div><div class="pl"><label for="p-lgtam">Tamanho da letra</label><input type="range" id="p-lgtam" min="10" max="40" value="'+(it.lgTam||15)+'"></div><div class="pl"><label>Camadas na legenda</label>'+(vis.length?vis.map(function(x){return'<div class="lin"><label class="ck"><input type="checkbox" data-lg="'+x.id+'"'+(oc.indexOf(x.id)<0?" checked":"")+'> '+esc(x.name)+'</label><button type="button" class="mini" data-lged="'+x.id+'">Editar</button></div>'}).join(""):'<p class="vazio">Nenhuma camada visível ainda.</p>')+'</div>';
+    h+='<div class="pl"><label for="p-tit">Título da legenda</label><input type="text" id="p-tit" value="'+esc(it.tit||"")+'"></div><div class="par"><div class="pl"><label for="p-lgtit">Fonte do título (px)</label><input type="number" id="p-lgtit" min="6" max="120" step="1" value="'+(it.lgTitTam||it.lgTam||15)+'"></div><div class="pl"><label for="p-lgtam">Fonte das camadas (px)</label><input type="number" id="p-lgtam" min="6" max="120" step="1" value="'+(it.lgTam||15)+'"></div></div><div class="pl"><label>Camadas na legenda</label>'+(vis.length?vis.map(function(x){return'<div class="lin"><label class="ck"><input type="checkbox" data-lg="'+x.id+'"'+(oc.indexOf(x.id)<0?" checked":"")+'> '+esc(x.name)+'</label><button type="button" class="mini" data-lged="'+x.id+'">Editar</button></div>'}).join(""):'<p class="vazio">Nenhuma camada visível ainda.</p>')+'</div>';
   }
   if(it.t==="norte")h+=painelNorte(it);
   if(it.t==="escala")h+=painelEscala(it);
-  if(it.t==="fig")h+='<div class="pl"><label>Escolha a imagem</label><div class="figs">'+FIG.map(function(f){return'<button type="button" data-fig="'+f+'" aria-label="Imagem '+f+'">'+f+'</button>'}).join("")+'</div></div>';
+  if(it.t==="fig"){
+    h+='<div class="pl"><label>Imagem do computador</label><div class="acoes"><button class="mini" data-img="up" type="button">'+ic("imagem")+(it.img?'Trocar imagem':'Escolher arquivo')+'</button>'+(it.img?'<button class="mini perigo" data-img="rm" type="button">'+ic("lixo")+'Tirar imagem</button>':'')+'</div><p class="vazio" style="margin-top:6px;font-size:13px">JPG, PNG ou WebP, sem animação. Até 8 MB.</p></div>';
+    if(it.img)h+='<div class="pl"><label for="p-ajuste">Encaixe</label><select id="p-ajuste">'+opt("contain","Inteira (sem cortar)",it.ajuste||"contain")+opt("cover","Preencher (pode cortar)",it.ajuste||"contain")+opt("fill","Esticar",it.ajuste||"contain")+'</select></div>';
+    h+='<div class="pl"><label>Ou escolha um desenho</label><div class="figs">'+FIG.map(function(f){return'<button type="button" data-fig="'+f+'" aria-label="Imagem '+f+'">'+f+'</button>'}).join("")+'</div></div>';
+  }
   if(it.t==="mapa")h+=painelMexer(it)+painelCamadas(it)+'<h3>Escala</h3><div class="pl"><label for="p-esc">Escala do mapa</label><input type="text" id="p-esc" value="'+scaleTextForZoom(it.zoom)+'"></div>';
   if(it.t==="mapa")h+=painelMapa(it);
-  h+='<h3>Aparência</h3><div class="lin"><label><input type="checkbox" id="p-fun"'+(ver(it,"fundo")?" checked":"")+'> Fundo</label><input type="color" id="p-func" aria-label="Cor do fundo" value="'+(it.fundoCor||"#ffffff")+'"></div><div class="lin"><label><input type="checkbox" id="p-bor"'+(ver(it,"moldura")?" checked":"")+'> Borda</label><input type="color" id="p-borc" aria-label="Cor da borda" value="'+(it.molduraCor||"#25302a")+'"></div>';
+  h+='<h3>Aparência</h3><div class="lin"><label><input type="checkbox" id="p-fun"'+(ver(it,"fundo")?" checked":"")+'> Fundo</label><input type="color" id="p-func" aria-label="Cor do fundo" value="'+(it.fundoCor||"#ffffff")+'"></div><div class="lin"><label><input type="checkbox" id="p-bor"'+(ver(it,"moldura")?" checked":"")+'> Borda</label><input type="color" id="p-borc" aria-label="Cor da borda" value="'+(it.molduraCor||"#000000")+'"></div>';
   h+='<div class="pl"><label for="p-giro">Girar: '+(it.giro||0)+'°</label><input type="range" id="p-giro" min="-180" max="180" step="5" value="'+(it.giro||0)+'"></div>';
   if(it.t==="mapa")h+=painelMapaComum(it);
   h+='<hr class="sep">';
@@ -2044,7 +2282,7 @@ function props(){
 }
 $("prop").addEventListener("input",function(e){
   var it=getIt(sel);if(!it)return;var i=e.target.id,v=e.target.value;
-  if(i==="p-txt")it.txt=v;else if(i==="p-tam")it.tam=+v;else if(i==="p-cor")it.cor=v;else if(i==="p-tit")it.tit=v;else if(i==="p-lgtam")it.lgTam=+v;
+  if(i==="p-txt")it.txt=v;else if(i==="p-tam")it.tam=+v;else if(i==="p-cor")it.cor=v;else if(i==="p-tit")it.tit=v;else if(i==="p-lgtam")it.lgTam=+v;else if(i==="p-lgtit")it.lgTitTam=+v;
   else if(i==="p-func"){it.fundoCor=v;it.fundo=true;$("p-fun").checked=true;estilo(it);agendar();return}
   else if(i==="p-borc"){it.molduraCor=v;it.moldura=true;$("p-bor").checked=true;estilo(it);agendar();return}
   else if(i==="p-giro"){it.giro=+v;estilo(it);e.target.previousElementSibling.textContent="Girar: "+it.giro+"°";agendar();return}
@@ -2053,7 +2291,8 @@ $("prop").addEventListener("input",function(e){
 });
 $("prop").addEventListener("change",function(e){
   var it=getIt(sel);if(!it)return;var i=e.target.id,on=e.target.checked;
-  if(i==="p-fun"){it.fundo=on;estilo(it)}
+  if(i==="p-ajuste"){it.ajuste=e.target.value;desenhaConteudo(it)}
+  else if(i==="p-fun"){it.fundo=on;estilo(it)}
   else if(i==="p-bor"){it.moldura=on;estilo(it)}
   else if(i==="p-neg"){it.neg=on;desenhaConteudo(it)}
   else if(e.target.dataset.lg){var id=+e.target.dataset.lg,oc=(it.lgOcultas||[]).filter(function(x){return x!==id});if(!on)oc.push(id);it.lgOcultas=oc;desenhaConteudo(it)}
@@ -2062,20 +2301,110 @@ $("prop").addEventListener("change",function(e){
 });
 $("prop").addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;var it=getIt(sel);if(!it)return;
-  if(b.dataset.fig){it.txt=b.dataset.fig;desenhaConteudo(it);agendar();return}
+  if(b.dataset.img==="up"){abrirImagem(it);return}
+  if(b.dataset.img==="rm"){delete it.img;desenhaConteudo(it);props();agendar();return}
+  if(b.dataset.fig){it.txt=b.dataset.fig;delete it.img;desenhaConteudo(it);props();agendar();return}
   if(b.dataset.al){it.alin=b.dataset.al;desenhaConteudo(it);props();agendar();return}
   if(b.dataset.mex){it.mexer=!it.mexer;mexer(it);props();agendar();return}
   var a=b.dataset.a,ix=itens.indexOf(it);
-  if(a==="del"){if(it._m)it._m.remove();it._el.remove();itens.splice(ix,1);sel=null;marcar();props()}
+  if(a==="del"){apagarItem(it);return}
   else if(a==="dup"){var c=Object.assign({},it);c.lgOcultas=(it.lgOcultas||[]).slice();c.id="i"+prox++;c.x=Math.min(W-it.w,it.x+24);c.y=Math.min(H-it.h,it.y+24);Object.keys(c).forEach(function(p){if(p[0]==="_")delete c[p]});["scalebarFont","segmentWidthAdjust","center","grids","lgOv","fmt"].forEach(function(p){if(c[p])c[p]=JSON.parse(JSON.stringify(c[p]))});itens.push(c);montar(c);sel=c.id;marcar();props()}
   else if(a==="cima"&&ix<itens.length-1){itens.splice(ix,1);itens.push(it);$("pagina").appendChild(it._el)}
   else if(a==="baixo"&&ix>0){itens.splice(ix,1);itens.unshift(it);$("pagina").insertBefore(it._el,$("pagina").firstChild)}
   atualizaEscalas();listaItens();agendar();
 });
-document.querySelectorAll("[data-add]").forEach(function(b){b.onclick=function(){adicionar(b.dataset.add)}});
+document.querySelectorAll("[data-add]").forEach(function(b){b.onclick=function(){adicionar(b.dataset.add);if(b.dataset.add==="fig")abrirImagem(getIt(sel))}});
+function apagarItem(it){
+  var ix=itens.indexOf(it);if(ix<0)return;
+  if(it._m)it._m.remove();if(it._el)it._el.remove();
+  itens.splice(ix,1);sel=null;marcar();props();atualizaEscalas();listaItens();agendar();
+}
+/* campo onde a pessoa está digitando (Delete/Backspace devem apagar texto, não o item) */
+function emDigitacao(el){
+  if(!el||!el.tagName)return false;
+  if(el.isContentEditable||el.tagName==="TEXTAREA")return true;
+  if(el.tagName!=="INPUT")return false;
+  return !/^(checkbox|radio|range|color|file|button|submit|reset|image)$/i.test(el.type||"text");
+}
+/* ---------- imagem enviada do computador ---------- */
+var imgAlvo=null;
+function abrirImagem(it){
+  if(!it)return;imgAlvo=it.id;
+  var inp=$("f-img");inp.value="";inp.click();
+}
+/* Limites (em caracteres do data-URL guardado no navegador) */
+var IMG_MAX_ARQ=8*1024*1024; /* arquivo original: até 8 MB */
+var IMG_MAX_UMA=800000;      /* cada imagem, depois de reduzida: ~800 KB */
+var IMG_MAX_TOTAL=3000000;   /* todas as imagens deste layout somadas: ~3 MB */
+/* confere o conteúdo real do arquivo: só JPEG, PNG ou WebP, e nenhum animado */
+function tipoImagemEstatica(buf){
+  var b=new Uint8Array(buf),n=b.length;
+  function ascii(i,l){var t="";for(var k=i;k<i+l&&k<n;k++)t+=String.fromCharCode(b[k]);return t}
+  if(n>3&&b[0]===0xFF&&b[1]===0xD8&&b[2]===0xFF)return"jpeg";
+  if(n>8&&b[0]===0x89&&ascii(1,3)==="PNG"){
+    var i=8;
+    while(i+8<=n){
+      var len=(b[i]*16777216)+(b[i+1]<<16)+(b[i+2]<<8)+b[i+3],tp=ascii(i+4,4);
+      if(tp==="acTL")return"animada";
+      if(tp==="IDAT"||tp==="IEND")break;
+      i+=12+len;
+    }
+    return"png";
+  }
+  if(n>20&&ascii(0,4)==="RIFF"&&ascii(8,4)==="WEBP"){
+    if(ascii(12,4)==="VP8X"&&(b[20]&2))return"animada";
+    return"webp";
+  }
+  return"";
+}
+function lerImagemArquivo(f,limite,fn){
+  if(!f)return;
+  if(f.size>IMG_MAX_ARQ){aviso("Arquivo muito grande. O limite é 8 MB.",3500);return}
+  var r=new FileReader();
+  r.onerror=function(){aviso("Não consegui abrir a imagem.")};
+  r.onload=function(){
+    var tp=tipoImagemEstatica(r.result);
+    if(tp==="animada"){aviso("Imagens animadas não são aceitas. Use uma imagem parada.",3500);return}
+    if(!tp){aviso("Use uma imagem JPG, PNG ou WebP.",3500);return}
+    var u=URL.createObjectURL(f),im=new Image();
+    im.onerror=function(){URL.revokeObjectURL(u);aviso("Não consegui abrir a imagem.")};
+    im.onload=function(){
+      URL.revokeObjectURL(u);
+      var jpg=tp==="jpeg",out="",ok=false,lados=[1600,1200,1000,800,600],qs=jpg?[.85,.7,.55]:[0];
+      for(var i=0;i<lados.length&&!ok;i++){
+        var k=Math.min(1,lados[i]/Math.max(im.naturalWidth,im.naturalHeight));
+        var w=Math.max(1,Math.round(im.naturalWidth*k)),h=Math.max(1,Math.round(im.naturalHeight*k));
+        var cv=document.createElement("canvas");cv.width=w;cv.height=h;var cx=cv.getContext("2d");
+        if(jpg){cx.fillStyle="#fff";cx.fillRect(0,0,w,h)}
+        cx.drawImage(im,0,0,w,h);
+        for(var j=0;j<qs.length;j++){
+          out=jpg?cv.toDataURL("image/jpeg",qs[j]):cv.toDataURL("image/png");
+          if(out.length<=limite){ok=true;break}
+        }
+      }
+      if(!ok){aviso("Não consegui reduzir essa imagem o bastante. Tente uma menor.",4000);return}
+      fn(out);
+    };
+    im.src=u;
+  };
+  r.readAsArrayBuffer(f);
+}
+$("f-img").addEventListener("change",function(e){
+  var it=getIt(imgAlvo),f=e.target.files&&e.target.files[0];
+  e.target.blur();
+  if(!it||!f)return;
+  var usado=0;itens.forEach(function(x){if(x.id!==it.id&&x.img)usado+=x.img.length});
+  var limite=Math.min(IMG_MAX_UMA,IMG_MAX_TOTAL-usado);
+  if(limite<150000){aviso("O layout já tem imagens demais. Apague alguma antes de colocar outra.",4000);return}
+  lerImagemArquivo(f,limite,function(url){it.img=url;desenhaConteudo(it);props();agendar();aviso("Imagem colocada.")});
+});
 document.addEventListener("keydown",function(e){
-  var t=e.target.tagName;if(t==="INPUT"||t==="TEXTAREA")return;
-  if((e.key==="Delete"||e.key==="Backspace")&&sel){var b=document.querySelector('[data-a="del"]');if(b)b.click()}
+  if(e.key!=="Delete"&&e.key!=="Backspace")return;
+  if(e.ctrlKey||e.metaKey||e.altKey||e.defaultPrevented)return;
+  if(emDigitacao(e.target)||document.documentElement.classList.contains("hall"))return;
+  if(document.querySelector("#export-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
+  var it=getIt(sel);if(!it||it._lgEdit!=null)return;
+  e.preventDefault();apagarItem(it);
 });
 
 /* ---------- escala do mapa (1:N) e propriedades da barra de escala ---------- */
@@ -2121,7 +2450,7 @@ $("prop").addEventListener("input",function(e){if(e.target.id==="e-c1"||e.target
 
 
 /* ---------- propriedades do item da legenda (Rótulo + Personalizar) ---------- */
-function lgSym(l,ov){return Object.assign({fc:l.isRaster?"#999999":(l.color||"#3388cc"),fs:"solid",sc:"#25302a",sw:0.26,ss:"solid"},ov&&ov.sym||{})}
+function lgSym(l,ov){return Object.assign({fc:l.isRaster?"#999999":(l.color||"#3388cc"),fs:"solid",sc:"#000000",sw:0.26,ss:"solid"},ov&&ov.sym||{})}
 function lgFill(y){var c=y.fc,t=y.fs;if(t==="none")return"transparent";if(t==="solid")return c;
   var g={horizontal:"0deg",vertical:"90deg",bdiag:"45deg",fdiag:"135deg"},r=function(a){return"repeating-linear-gradient("+a+","+c+","+c+" 2px,transparent 2px,transparent 6px)"};
   return g[t]?r(g[t]):t==="cross"?r("0deg")+","+r("90deg"):c}
@@ -2131,6 +2460,7 @@ function painelLegItem(it,l){
   var ov=(it.lgOv||{})[l.id]||{},y=lgSym(l,ov),lb=ov.label!==undefined?ov.label:l.name;
   var h='<div class="acoes" style="margin-bottom:8px"><button class="mini" data-lgback="1" type="button">← Voltar</button></div><h2>Item da legenda</h2>';
   h+='<h3>Rótulo</h3><div class="pl"><label for="lg-rot">Texto que aparece na legenda</label><textarea id="lg-rot" rows="3">'+esc(lb)+'</textarea></div>';
+  h+='<div class="pl"><label for="lg-tam">Tamanho da letra deste item (px)</label><input type="number" id="lg-tam" min="6" max="120" step="1" placeholder="igual ao da legenda" value="'+(ov.tam||"")+'"></div>';
   h+='<h3>Personalizar o símbolo</h3><div class="lin"><label for="lg-fc">Cor de dentro</label><input type="color" id="lg-fc" value="'+lgHex(y.fc)+'"></div>';
   h+='<div class="pl"><label for="lg-fs">Jeito de pintar</label><select id="lg-fs">'+[["solid","Cheio"],["none","Sem pintura"],["horizontal","Listras deitadas"],["vertical","Listras em pé"],["cross","Quadriculado"],["bdiag","Diagonal /"],["fdiag","Diagonal \\"]].map(function(x){return opt(x[0],x[1],y.fs)}).join("")+'</select></div>';
   h+='<div class="lin"><label for="lg-sc">Cor do contorno</label><input type="color" id="lg-sc" value="'+lgHex(y.sc)+'"></div>';
@@ -2146,6 +2476,7 @@ $("prop").addEventListener("input",function(e){
   if(id==="lg-rot")ov.label=v;
   else if(id==="lg-w")ov.w=n>0?n:undefined;
   else if(id==="lg-h")ov.h=n>0?n:undefined;
+  else if(id==="lg-tam")ov.tam=n>0?n:undefined;
   else{ov.sym=ov.sym||{};var m={"lg-fc":"fc","lg-fs":"fs","lg-sc":"sc","lg-ss":"ss"};if(m[id])ov.sym[m[id]]=v;else if(id==="lg-sw")ov.sym.sw=Math.max(0,n||0)}
   desenhaConteudo(it);agendar();
 });
@@ -2162,7 +2493,7 @@ function painelMexer(it){
   return '<button type="button" class="mexer-btn" data-mex="1" aria-pressed="'+on+'">'+ic("mexer")+'<span><b>Mexer dentro do mapa</b><small>'+(on?"Ligado: arraste para deslocar o mapa e use a roda do mouse para o zoom.":"Desligado: arraste para mover a moldura. Toque para ligar.")+'</small></span></button>';
 }
 function painelCamadas(it){
-  return '<h3>Camadas</h3><label class="ck"><input type="checkbox" id="m-lockl"'+(it.lockLayers?" checked":"")+'> Travar camadas</label><label class="ck"><input type="checkbox" id="m-locks"'+(it.lockStyles?" checked":"")+(it.lockLayers?"":" disabled")+'> Travar as cores das camadas</label><p class="vazio" style="font-size:14px">Destravado, este mapa acompanha o que você liga, desliga e pinta no mapa principal.</p>';
+  return '<h3>Camadas</h3><label class="ck"><input type="checkbox" id="m-lockl"'+(it.lockLayers?" checked":"")+'> Travar camadas</label><label class="ck"><input type="checkbox" id="m-locks"'+(it.lockStyles?" checked":"")+'> Travar as cores das camadas</label><p class="vazio" style="font-size:14px">Destravado, este mapa acompanha o que você liga, desliga e pinta no mapa principal.</p>';
 }
 function painelMapa(it){
   if(!Array.isArray(it.grids))it.grids=[];
@@ -2715,7 +3046,7 @@ function mapaProps(e){
   function triggerProj4LoadIfNeeded(crsCode) {
     if (!crsCode || crsCode === '4326' || window.proj4) return;
     ensureProj4().then(() => {
-      layoutState.items.filter(i => i.type === 'map' && i.leaflet).forEach(renderGridOverlayForItem);
+      layoutState.items.filter(i => i.t === 'mapa' && i.leaflet).forEach(renderGridOverlayForItem);
       // Se o diálogo de propriedades da grade estiver aberto na aba
       // "Aparência", atualiza a mensagem "Carregando..." para "ativo" sem
       // precisar que o usuário mexa em outro campo.
@@ -3473,6 +3804,17 @@ function mapaProps(e){
     }
   }
 
+  // Cruzamento do segmento A→B (já no referencial do papel) com a borda `side` do item.
+  function edgeCross(A, B, side, W, H) {
+    const horiz = side === 'top' || side === 'bottom';
+    const e = side === 'top' || side === 'left' ? 0 : (horiz ? H : W);
+    const a = horiz ? A.y : A.x, b = horiz ? B.y : B.x;
+    if (Math.abs(b - a) < 1e-9) return null; // linha paralela à borda
+    const t = (e - a) / (b - a);
+    return horiz ? { x: A.x + t * (B.x - A.x), y: e }
+                 : { x: e, y: A.y + t * (B.y - A.y) };
+  }
+
   function renderGridAnnotations(item, gridDef, annotLayer, xs, ys, toPoint, pxW, pxH, map, mapRotationDeg, gridBounds) {
     if (!gridDef.enabled) return;
     if (gridDef.annotationsEnabled === false) return; // toggle mestre "Desenhar coordenadas" desligado
@@ -3521,10 +3863,13 @@ function mapaProps(e){
         if (cfg.mode === 'lat-only' && axis !== 'y') return;
         if (cfg.mode === 'lon-only' && axis !== 'x') return;
 
-        const gy = isVertical ? v : fixedCoord;
-        const gx = isVertical ? fixedCoord : v;
-        const rawP = toPoint(gy, gx);
-        const p = rotatePoint(rawP.x, rawP.y, counterRot);
+        // Âncora = onde a linha da grade (mesmo segmento A→B que é desenhado) cruza a
+        // borda do item, no referencial do papel (gira +mapRotation e cruza com a borda).
+        const A = isVertical ? toPoint(v, gridBounds.minX) : toPoint(gridBounds.maxY, v);
+        const B = isVertical ? toPoint(v, gridBounds.maxX) : toPoint(gridBounds.minY, v);
+        const p = edgeCross(rotatePoint(A.x, A.y, mapRotationDeg),
+                            rotatePoint(B.x, B.y, mapRotationDeg), side, pxW, pxH);
+        if (!p) return;
         if (isVertical ? !keepY(p.y) : !keepX(p.x)) return;
         const text = formatCoordinate(v, gridDef.coordFormat, gridDef.coordPrecision, axis, gridDef.customFormatExpression, gridNeedsReprojection(gridDef));
 
@@ -3599,7 +3944,7 @@ function mapaProps(e){
         // Cancela o giro que o texto herdaria do mapDiv rotacionado via CSS
         // (ver comentário no topo da função) — soma o ângulo oposto ao que
         // foi usado pra girar o ponto de volta.
-        rotateDeg -= counterRot;
+        rotateDeg += gridDef.followGridRotationAnnotations ? mapRotationDeg : 0;
         label.style.left = left + 'px';
         label.style.top = top + 'px';
         // ORDEM IMPORTA: no CSS, "transform" aplica as funções da DIREITA
@@ -3623,23 +3968,30 @@ function mapaProps(e){
   // existente (moveend/zoom, resize do item, rotação do mapa) — ver seção 4
   // do documento.
   function renderGridOverlayForItem(item) {
-    if (!item || item.type !== 'map' || !item.leaflet) return;
+    if (!item || item.t !== 'mapa' || !item.leaflet) return;
     const mapDiv = item.leaflet.getContainer();
     const gridsLayer = mapDiv.querySelector('.map-grids-layer');
     if (!gridsLayer) return;
     gridsLayer.innerHTML = '';
+    item._el.querySelectorAll(':scope > .map-grid-annotations-layer').forEach(e => e.remove());
     if (!Array.isArray(item.grids) || !item.grids.length) return;
 
     const rect = gridsLayer.getBoundingClientRect();
     // Fallback para quando o item ainda não tem layout (display:none, etc.)
-    const pxSize = { w: rect.width || item.w || 1, h: rect.height || item.h || 1 };
+    // offsetWidth/Height = tamanho de layout (sem a escala da página nem a rotação do mapa)
+    const pxSize = { w: gridsLayer.offsetWidth || item.w || 1, h: gridsLayer.offsetHeight || item.h || 1 };
 
     item.grids.forEach(gridDef => {
       const { xs, ys, toPoint, gridBounds } = renderGridOverlay(item, gridDef, gridsLayer, pxSize);
       if (!toPoint) return; // grade desativada: só o <svg> vazio foi criado
       const annotLayer = document.createElement('div');
       annotLayer.className = 'map-grid-annotations-layer';
-      gridsLayer.appendChild(annotLayer);
+      // Rótulos ficam em it._el (fora do .cont, que corta com overflow:hidden) e em
+      // coordenadas do papel; o mapa gira, a camada de rótulos não.
+      const cont = gridsLayer.closest('.cont');
+      annotLayer.style.cssText = 'left:' + cont.clientLeft + 'px;top:' + cont.clientTop +
+        'px;width:' + pxSize.w + 'px;height:' + pxSize.h + 'px;pointer-events:none;z-index:3';
+      cont.parentNode.appendChild(annotLayer);
       renderGridAnnotations(item, gridDef, annotLayer, xs, ys, toPoint, pxSize.w, pxSize.h, item.leaflet, item.mapRotation || 0, gridBounds);
     });
   }
@@ -3755,8 +4107,59 @@ function mapaProps(e){
   });
 
 /* ---------- barra de cima ---------- */
-$("salvar").onclick=function(){aviso(gravar()?"Layout \""+nomeLay+"\" salvo.":"Não deu para salvar (espaço do navegador cheio?).")};
-$("imprimir").onclick=function(){sel=null;marcar();props();atualizaEscalas();itens.forEach(function(i){if(i._m)i._m.invalidateSize()});aviso("Na janela que abrir, escolha \"Salvar como PDF\".",3500);setTimeout(function(){window.print()},300)};
+$("salvar").onclick=function(){if(!itens.length){aviso("Coloque pelo menos um item na folha antes de salvar.",3500);return}aviso(gravar()?"Layout \""+nomeLay+"\" salvo.":"Não deu para salvar (espaço do navegador cheio?).")};
+/* ---------- exportar: PNG ou PDF ---------- */
+function prepararExport(){sel=null;marcar();props();atualizaEscalas();itens.forEach(function(i){if(i._m)i._m.invalidateSize()})}
+function abrirExport(){$("export-overlay").classList.add("show")}
+function fecharExport(){$("export-overlay").classList.remove("show")}
+function carregarHtmlToImage(){
+  return new Promise(function(ok,erro){
+    if(window.htmlToImage)return ok(window.htmlToImage);
+    var s=document.createElement("script");
+    s.src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js";
+    s.onload=function(){window.htmlToImage?ok(window.htmlToImage):erro(new Error("lib"))};
+    s.onerror=function(){erro(new Error("rede"))};
+    document.head.appendChild(s);
+  });
+}
+function exportarPDF(){
+  fecharExport();prepararExport();
+  aviso("Na janela que abrir, escolha \"Salvar como PDF\".",3500);
+  setTimeout(function(){window.print()},300);
+}
+function exportarPNG(){
+  fecharExport();prepararExport();
+  aviso("Gerando a imagem…",20000);
+  carregarHtmlToImage().then(function(h){
+    // espera o Leaflet terminar de redesenhar e as imagens de fundo carregarem
+    return new Promise(function(r){setTimeout(r,500)}).then(function(){
+      // Renderização feita pelo próprio navegador (SVG/foreignObject): o mapa sai igual ao da tela.
+      return h.toBlob($("pagina"),{
+        pixelRatio:Math.min(3,Math.max(2,window.devicePixelRatio||2)),
+        width:1122,height:793,backgroundColor:"#ffffff",
+        style:{transform:"none",boxShadow:"none"},
+        filter:function(el){return !(el.classList&&(el.classList.contains("al")||el.classList.contains("smart-guide")||el.classList.contains("smart-guide-point")))}
+      });
+    });
+  }).then(function(blob){
+    if(!blob){aviso("Não deu para gerar a imagem.");return}
+    var nome=String(nomeLay||"layout").replace(/[\\\/:*?"<>|]+/g,"_").trim()||"layout";
+    var url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=nome+".png";document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url)},10000);
+    aviso("PNG exportado.");
+  }).catch(function(e){
+    console.error("Exportar PNG:",e);
+    aviso(e&&e.message==="rede"?"Não consegui carregar o gerador de imagem. Verifique sua conexão.":"Não deu para gerar a imagem.",4000);
+  });
+}
+$("imprimir").onclick=abrirExport;
+$("ex-png").onclick=exportarPNG;
+$("ex-pdf").onclick=exportarPDF;
+$("ex-close-btn").onclick=fecharExport;
+$("ex-cancel-btn").onclick=fecharExport;
+$("export-overlay").addEventListener("pointerdown",function(e){if(e.target===this)fecharExport()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&$("export-overlay").classList.contains("show"))fecharExport()});
 
 /* ---------- ajuste de tamanho da folha ---------- */
 function ajustar(){
@@ -3765,35 +4168,12 @@ function ajustar(){
 }
 window.addEventListener("resize",ajustar);
 
-let cpOverlay, cpPopover, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
-  let cpAlphaRow, cpAlphaFill, cpAlphaHandle, cpValRow, cpValFill, cpValHandle;
-  let cpSatRow, cpSatFill, cpSatHandle, cpTransparentCheckbox, cpRecentSwatchesEl, cpStandardSwatchesEl;
-  let cpTarget = null; // sempre um objeto { get(), set(hex), supportsTransparent, isTransparent(), setTransparent(bool) } | null
-  let cpHue = 120, cpSat = 1, cpVal = 1, cpAlpha = 100;
-  let cpRecentColors = [];
+let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
+  let cpValRow, cpValFill, cpValHandle, cpSatRow, cpSatFill, cpSatHandle, cpPrevOld, cpPrevNew;
+  let cpTarget = null; // { get(), set(hex) } | null
+  let cpOriginal = '#000000', cpDraft = '#000000';
+  let cpHue = 120, cpSat = 1, cpVal = 1;
   let cpWheelGeom = null;
-
-  const CP_STANDARD_COLORS = [
-    '#000000', '#ffffff', '#a4d8f0', '#3b96e3', '#8be084', '#f4a9a9', '#e83b3b', '#f4a742',
-  ];
-
-  function cpRenderSwatchRow(el, colors) {
-    el.innerHTML = '';
-    colors.forEach(c => {
-      const sw = document.createElement('div');
-      sw.className = 'cp-swatch';
-      sw.style.background = c;
-      sw.title = c;
-      sw.addEventListener('click', () => { cpSetColorFromHex(c); });
-      el.appendChild(sw);
-    });
-  }
-  function cpPushRecentColor(hex) {
-    cpRecentColors = cpRecentColors.filter(c => c.toLowerCase() !== hex.toLowerCase());
-    cpRecentColors.unshift(hex);
-    if (cpRecentColors.length > 16) cpRecentColors = cpRecentColors.slice(0, 16);
-    cpRenderSwatchRow(cpRecentSwatchesEl, cpRecentColors);
-  }
 
   function cpHsvToHex(h, s, v) {
     const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
@@ -3843,11 +4223,6 @@ let cpOverlay, cpPopover, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHan
     cpWheelHandle.style.top = (cy + rMid * Math.sin(rad)) + 'px';
   }
 
-  function cpUpdateAlphaBar() {
-    const hex = cpHsvToHex(cpHue, cpSat, cpVal);
-    cpAlphaFill.style.background = `linear-gradient(to right, rgba(0,0,0,0), ${hex})`;
-    cpAlphaHandle.style.left = (cpAlpha / 100 * cpAlphaRow.offsetWidth) + 'px';
-  }
   function cpUpdateValBar() {
     const hueSatColor = cpHsvToHex(cpHue, cpSat, 1);
     cpValFill.style.background = `linear-gradient(to right, #000000, ${hueSatColor})`;
@@ -3860,58 +4235,47 @@ let cpOverlay, cpPopover, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHan
     cpSatHandle.style.left = (cpSat * cpSatRow.offsetWidth) + 'px';
   }
 
-  function cpCurrentTargetColor() {
-    return cpTarget ? cpTarget.get() : '#000000';
+  function cpRefreshBars() {
+    cpUpdateWheelHandlePosition();
+    cpUpdateValBar();
+    cpUpdateSatBar();
   }
-  function cpApplyDraftColor(hex) {
-    if (cpTarget) cpTarget.set(hex);
+  // A cor escolhida fica só no modal (rascunho); só vai para o campo quando clicar em Aplicar.
+  function cpShowDraft(hex) {
+    cpDraft = hex;
     cpHex.value = hex.replace('#', '').toUpperCase();
+    cpPrevNew.style.background = hex;
   }
   function cpSetColorFromHex(hex) {
     const hsv = cpHexToHsv(hex);
     cpHue = hsv.h; cpSat = hsv.s; cpVal = hsv.v;
     cpDrawColorWheel();
-    cpUpdateWheelHandlePosition();
-    cpUpdateAlphaBar();
-    cpUpdateValBar();
-    cpUpdateSatBar();
-    cpApplyDraftColor(hex);
+    cpRefreshBars();
+    cpShowDraft(hex);
   }
   function cpSetColorFromHsv() {
-    const hex = cpHsvToHex(cpHue, cpSat, cpVal);
-    cpUpdateWheelHandlePosition();
-    cpUpdateAlphaBar();
-    cpUpdateValBar();
-    cpUpdateSatBar();
-    cpApplyDraftColor(hex);
+    cpRefreshBars();
+    cpShowDraft(cpHsvToHex(cpHue, cpSat, cpVal));
   }
 
-  // anchorEl: elemento (o botão-amostra) perto do qual o popover abre.
-  // target: objeto { get(), set(hex), supportsTransparent?, isTransparent()?, setTransparent(bool)? }
-  // `anchorEl` é mantido por compatibilidade com os chamadores existentes
-  // (decorateColorInputs passa o botão clicado), mas não é mais usado para
-  // posicionar o popover — agora ele abre centralizado na tela, como o
-  // diálogo de formatação de texto, em vez de ancorado perto do botão.
+  // anchorEl é mantido só por compatibilidade com os chamadores; o modal abre centralizado.
+  // target: { get(), set(hex) }
   function cpOpenPopover(anchorEl, target) {
     cpTarget = target;
-    const cur = cpCurrentTargetColor();
-    const hsv = cpHexToHsv(cur);
-    cpHue = hsv.h; cpSat = hsv.s; cpVal = hsv.v; cpAlpha = 100;
-    cpHex.value = cur.replace('#', '').toUpperCase();
-    const supportsTransparent = !!(target && target.supportsTransparent);
-    cpTransparentCheckbox.checked = supportsTransparent && target.isTransparent ? target.isTransparent() : false;
-    cpTransparentCheckbox.disabled = !supportsTransparent;
-    cpOverlay.classList.add('show');
-    cpDrawColorWheel();
-    cpUpdateWheelHandlePosition();
-    cpUpdateAlphaBar();
-    cpUpdateValBar();
-    cpUpdateSatBar();
+    cpOriginal = /^#[0-9a-f]{6}$/i.test(target.get()) ? target.get() : '#000000';
+    cpPrevOld.style.background = cpOriginal;
+    cpOverlay.classList.add('show'); // precisa estar visível para medir as barras
+    cpSetColorFromHex(cpOriginal);
   }
   function cpClosePopover() {
     cpOverlay.classList.remove('show');
-    cpPushRecentColor(cpCurrentTargetColor());
     cpTarget = null;
+  }
+  function cpApplyAndClose() {
+    const t = cpTarget, hex = cpDraft;
+    const mudou = hex.toLowerCase() !== cpOriginal.toLowerCase();
+    cpClosePopover();
+    if (t && mudou) t.set(hex);
   }
 
   // Substitui visualmente um <input type="color"> existente por um botão
@@ -3961,10 +4325,6 @@ let cpOverlay, cpPopover, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHan
             input.dispatchEvent(new Event('input', { bubbles: true }));
             input.dispatchEvent(new Event('change', { bubbles: true }));
           },
-          // Nenhum campo de cor do layout tem hoje um estado "transparente"
-          // associado (ao contrário de draft.fillStyle/strokeStyle no
-          // mapa principal) — o checkbox fica sempre desabilitado aqui.
-          supportsTransparent: false,
         });
       });
     });
@@ -3972,96 +4332,58 @@ let cpOverlay, cpPopover, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHan
 
   function initColorPickerPopover() {
     cpOverlay = document.getElementById('color-picker-overlay');
-    cpPopover = document.getElementById('color-picker-popover');
     cpNative = document.getElementById('cp-native-color');
     cpHex = document.getElementById('cp-hex-input');
     cpWheelBox = document.getElementById('cp-wheel-box');
     cpWheelCanvas = document.getElementById('cp-wheel-canvas');
     cpWheelHandle = document.getElementById('cp-wheel-handle');
-    cpAlphaRow = document.getElementById('cp-alpha-row');
-    cpAlphaFill = document.getElementById('cp-alpha-fill');
-    cpAlphaHandle = document.getElementById('cp-alpha-handle');
     cpValRow = document.getElementById('cp-val-row');
     cpValFill = document.getElementById('cp-val-fill');
     cpValHandle = document.getElementById('cp-val-handle');
     cpSatRow = document.getElementById('cp-sat-row');
     cpSatFill = document.getElementById('cp-sat-fill');
     cpSatHandle = document.getElementById('cp-sat-handle');
-    cpTransparentCheckbox = document.getElementById('cp-transparent-checkbox');
-    cpRecentSwatchesEl = document.getElementById('cp-recent-swatches');
-    cpStandardSwatchesEl = document.getElementById('cp-standard-swatches');
+    cpPrevOld = document.getElementById('cp-prev-old');
+    cpPrevNew = document.getElementById('cp-prev-new');
 
-    cpRenderSwatchRow(cpStandardSwatchesEl, CP_STANDARD_COLORS);
-
-    let cpHueDragging = false;
-    function wheelPointFromEvent(e) {
-      const rect = cpWheelBox.getBoundingClientRect();
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    // Arrastar com mouse, caneta ou dedo
+    function arrastar(el, fn) {
+      el.addEventListener('pointerdown', (e) => {
+        if (e.button > 0) return;
+        e.preventDefault();
+        el.setPointerCapture(e.pointerId);
+        fn(e);
+      });
+      el.addEventListener('pointermove', (e) => { if (el.hasPointerCapture(e.pointerId)) fn(e); });
     }
-    function handleWheelPointer(e) {
-      const pt = wheelPointFromEvent(e);
-      const size = 190, cx = size/2, cy = size/2;
-      const dx = pt.x - cx, dy = pt.y - cy;
-      let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+    arrastar(cpWheelBox, (e) => {
+      const rect = cpWheelBox.getBoundingClientRect();
+      let angle = Math.atan2(e.clientY - rect.top - 95, e.clientX - rect.left - 95) * 180 / Math.PI + 90;
       if (angle < 0) angle += 360;
       cpHue = angle;
       cpDrawColorWheel();
       cpSetColorFromHsv();
-    }
-    cpWheelBox.addEventListener('mousedown', (e) => { cpHueDragging = true; handleWheelPointer(e); });
-    document.addEventListener('mousemove', (e) => { if (cpHueDragging) handleWheelPointer(e); });
-    document.addEventListener('mouseup', () => { cpHueDragging = false; });
-
-    let cpAlphaDragging = false;
-    function handleAlphaPointer(e) {
-      const rect = cpAlphaRow.getBoundingClientRect();
-      let pct = (e.clientX - rect.left) / rect.width * 100;
-      pct = Math.max(0, Math.min(100, pct));
-      cpAlpha = pct;
-      cpUpdateAlphaBar();
-    }
-    cpAlphaRow.addEventListener('mousedown', (e) => { cpAlphaDragging = true; handleAlphaPointer(e); });
-    document.addEventListener('mousemove', (e) => { if (cpAlphaDragging) handleAlphaPointer(e); });
-    document.addEventListener('mouseup', () => { cpAlphaDragging = false; });
-
-    let cpValDragging = false;
-    function handleValPointer(e) {
+    });
+    arrastar(cpValRow, (e) => {
       const rect = cpValRow.getBoundingClientRect();
-      let x = (e.clientX - rect.left) / rect.width;
-      x = Math.max(0, Math.min(1, x));
-      cpVal = x;
+      cpVal = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       cpSetColorFromHsv();
-    }
-    cpValRow.addEventListener('mousedown', (e) => { cpValDragging = true; handleValPointer(e); });
-    document.addEventListener('mousemove', (e) => { if (cpValDragging) handleValPointer(e); });
-    document.addEventListener('mouseup', () => { cpValDragging = false; });
-
-    let cpSatDragging = false;
-    function handleSatPointer(e) {
+    });
+    arrastar(cpSatRow, (e) => {
       const rect = cpSatRow.getBoundingClientRect();
-      let x = (e.clientX - rect.left) / rect.width;
-      x = Math.max(0, Math.min(1, x));
-      cpSat = x;
+      cpSat = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       cpSetColorFromHsv();
-    }
-    cpSatRow.addEventListener('mousedown', (e) => { cpSatDragging = true; handleSatPointer(e); });
-    document.addEventListener('mousemove', (e) => { if (cpSatDragging) handleSatPointer(e); });
-    document.addEventListener('mouseup', () => { cpSatDragging = false; });
-
-    cpHex.addEventListener('change', () => {
-      let v = cpHex.value.replace('#', '').trim();
-      if (/^[0-9a-fA-F]{6}$/.test(v)) cpSetColorFromHex('#' + v.toLowerCase());
     });
 
-    cpTransparentCheckbox.addEventListener('change', () => {
-      if (!cpTarget || !cpTarget.supportsTransparent || !cpTarget.setTransparent) return;
-      cpTarget.setTransparent(cpTransparentCheckbox.checked);
+    cpHex.addEventListener('change', () => {
+      const v = cpHex.value.replace('#', '').trim();
+      if (/^[0-9a-fA-F]{6}$/.test(v)) cpSetColorFromHex('#' + v.toLowerCase());
+      else cpHex.value = cpDraft.replace('#', '').toUpperCase();
     });
 
     document.getElementById('cp-menu-copy').addEventListener('click', () => {
-      navigator.clipboard && navigator.clipboard.writeText(cpCurrentTargetColor()).catch(() => {});
+      navigator.clipboard && navigator.clipboard.writeText(cpDraft).catch(() => {});
       aviso('Cor copiada.');
-      cpClosePopover();
     });
     function cpParseColorFromText(text) {
       if (!text) return null;
@@ -4084,32 +4406,25 @@ let cpOverlay, cpPopover, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHan
       try {
         const text = navigator.clipboard ? await navigator.clipboard.readText() : '';
         const hex = cpParseColorFromText(text);
-        if (hex) {
-          cpSetColorFromHex(hex);
-          aviso('Cor colada.');
-          cpClosePopover();
-        } else {
-          aviso('Nada de válido na área de transferência.');
-        }
+        if (hex) { cpSetColorFromHex(hex); aviso('Cor colada.'); }
+        else aviso('Nada de válido na área de transferência.');
       } catch (err) {
         aviso('Não foi possível ler a área de transferência.');
       }
     });
-    document.getElementById('cp-menu-pick').addEventListener('click', () => {
-      aviso('Capturar cor da tela não disponível nesta simulação.');
-    });
     document.getElementById('cp-menu-choose').addEventListener('click', (e) => {
       e.stopPropagation();
-      cpNative.value = cpCurrentTargetColor();
+      cpNative.value = cpDraft;
       cpNative.click();
     });
     cpNative.addEventListener('input', () => cpSetColorFromHex(cpNative.value));
 
-    // Fecha ao clicar no fundo escurecido (fora do card) — mesmo padrão do
-    // diálogo de formatação de texto — ou nos botões X / OK do cabeçalho/rodapé.
-    cpOverlay.addEventListener('mousedown', (e) => { if (e.target === cpOverlay) cpClosePopover(); });
-    document.getElementById('cp-close-btn').addEventListener('click', () => cpClosePopover());
-    document.getElementById('cp-ok-btn').addEventListener('click', () => cpClosePopover());
+    document.getElementById('cp-ok-btn').addEventListener('click', cpApplyAndClose);
+    document.getElementById('cp-cancel-btn').addEventListener('click', cpClosePopover);
+    document.getElementById('cp-close-btn').addEventListener('click', cpClosePopover);
+    // Toque no fundo escurecido fecha (só se o toque COMEÇOU no fundo, não ao soltar um arraste ali).
+    cpOverlay.addEventListener('pointerdown', (e) => { if (e.target === cpOverlay) cpClosePopover(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && cpOverlay.classList.contains('show')) cpClosePopover(); });
   }
 
 
@@ -4206,12 +4521,124 @@ function moverNaPilha(mid,tid,depois){
 /* mantém a lista em dia e volta para Propriedades ao pegar um item na folha */
 var _props=props;props=function(){_props.apply(this,arguments);listaItens()};
 var _montar=montar;montar=function(it){_montar(it);if(it.visible===false)aplicaVis(it);if(it.locked)aplicaTrava(it)};
-var _pegar=pegar;pegar=function(e,it,m){aba("prop");_pegar(e,it,m)};
+var _pegar=pegar;pegar=function(e,it,m,d){aba("prop");_pegar(e,it,m,d)};
 var _adicionar=adicionar;adicionar=function(t){aba("prop");_adicionar(t)};
 
-carregar();bumpGrid();ajustar();initColorPickerPopover();
-itens.forEach(montar);props();
-window.addEventListener("beforeunload",gravar);
+/* ---------- tela "Layouts": criar novo, abrir, editar título, duplicar, excluir ---------- */
+var ovL=$("lays-ov"),grL=$("lays-grade"),renId=null,delId=null;
+function nomeMapa(){
+  if(!mapaId)return"";
+  try{var m=JSON.parse(localStorage.getItem("mapinha:projetos-index")||"[]").filter(function(x){return x.id===mapaId})[0];return(m&&m.t)||""}catch(e){return""}
+}
+function fmtData(t){try{return new Date(t).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})}catch(e){return""}}
+function irPara(id,novo){var q=new URLSearchParams();if(mapaId)q.set("mapa",mapaId);if(id)q.set("layout",id);if(id&&novo)q.set("novo","1");location.search="?"+q.toString()}
+function padraoNome(l){var n=l.length+1,ok;do{var t="Layout "+n++;ok=!l.some(function(x){return x.nome===t})}while(!ok);return t}
+function ico(id){return'<svg aria-hidden="true"><use href="#'+id+'"/></svg>'}
+function mini(cls,icon,txt,a,id){return'<button type="button" class="mini '+cls+'" data-a="'+a+'"'+(id?' data-id="'+id+'"':'')+'>'+(icon?ico(icon):'')+txt+'</button>'}
+function desenhaLays(){
+  var l=lerLays().slice().sort(function(a,b){return(b.d||0)-(a.d||0)}),h=[];
+  if(!l.length)h.push('<p class="vazio">Nenhum layout criado ainda. Quando você criar um layout, ele aparece aqui.</p>');
+  l.forEach(function(e){
+    var at=lid&&e.id===lid,id=esc(e.id),n=e.n||0,c='<article class="ly-card'+(at?' atual':'')+'">';
+    c+='<button type="button" class="ly-abrir" data-a="abrir" data-id="'+id+'" aria-label="Abrir layout '+esc(e.nome)+'"><div class="ly-info"><b title="'+esc(e.nome)+'">'+esc(e.nome)+'</b><small>'+(at?'Aberto agora · ':'')+n+(n===1?' item':' itens')+(e.d?' · '+esc(fmtData(e.d)):'')+'</small></div></button>';
+    if(renId===e.id){
+      c+='<div class="ly-edita"><input class="ly-ren" type="text" maxlength="60" value="'+esc(e.nome)+'" aria-label="Novo título do layout">'+mini("ok","i-salvar","Salvar título","salvaren",id)+mini("","","Cancelar","cancelaren")+'</div>';
+    }else if(delId===e.id){
+      c+='<div class="ly-aviso"><p>Excluir "'+esc(e.nome)+'"? Isso não pode ser desfeito.</p><div class="ly-acoes" style="padding:0">'+mini("sim","i-lixo","Sim, excluir","confexcluir",id)+mini("","","Cancelar","cancelaexcluir")+'</div></div>';
+    }else{
+      c+='<div class="ly-acoes">'+mini("","i-lapis","Editar título","renomear",id)+mini("","i-copia","Duplicar","duplicar",id)+mini("perigo","i-lixo","Excluir","excluir",id)+'</div>';
+    }
+    h.push(c+'</article>');
+  });
+  grL.innerHTML=h.join("");
+  if(renId){var inp=grL.querySelector(".ly-ren");if(inp){inp.focus();inp.select()}}
+}
+function mostrarHall(){
+  renId=null;delId=null;
+  document.title="Layouts — GisJr";
+  $("lays-sub").textContent=mapaId?"Mapa: "+(nomeMapa()||"sem nome"):"";
+  $("lays-sub").hidden=!mapaId;
+  desenhaLays();ovL.scrollTop=0;
+}
+function erroEspaco(){aviso("Não deu para salvar (espaço do navegador cheio?).",4000)}
+function criar(){
+  irPara(novoLid(),true); // nada é guardado agora: o layout só entra na lista ao salvar com pelo menos 1 item
+}
+function abrirLay(id){irPara(id)}
+function renomearLay(id,nome){
+  var l=lerLays(),e=l.filter(function(x){return x.id===id})[0];
+  if(!e)return;
+  e.nome=nome;gravaLays(l);
+  if(id===lid){nomeLay=nome;document.title=nome+" — Layout"}
+}
+function duplicarLay(id){
+  if(id===lid)gravar();
+  var l=lerLays(),i=l.findIndex(function(x){return x.id===id});
+  if(i<0)return;
+  var e=l[i],raw=null,novo=novoLid();
+  if(!(e.n>0)){aviso("Esse layout não tem itens, então não pode ser duplicado.",3500);return}
+  try{raw=localStorage.getItem(chaveLay(id))}catch(x){}
+  if(raw==null)raw=JSON.stringify({nome:e.nome,prox:1,itens:[]});
+  var c={id:novo,nome:e.nome+" (cópia)",d:Date.now(),n:e.n||0};
+  try{localStorage.setItem(chaveLay(novo),raw)}catch(x){erroEspaco();return}
+  l.splice(i+1,0,c);
+  if(!gravaLays(l)){try{localStorage.removeItem(chaveLay(novo))}catch(x){}erroEspaco();return}
+  desenhaLays();aviso("Layout duplicado.");
+}
+function excluirLay(id){
+  var l=lerLays().filter(function(x){return x.id!==id});
+  delId=null;
+  if(!gravaLays(l)){erroEspaco();desenhaLays();return}   // tira da lista primeiro: assim o salvamento ao sair não o recria
+  try{localStorage.removeItem(chaveLay(id))}catch(e){}
+  desenhaLays();aviso("Layout excluído.");
+}
+function salvaRen(){
+  var inp=grL.querySelector(".ly-ren"),id=renId,v=inp?inp.value.trim():"";
+  renId=null;
+  if(id&&v)renomearLay(id,v);
+  desenhaLays();
+}
+function clickLays(e){
+  var b=e.target.closest("[data-a]");if(!b)return;
+  var a=b.dataset.a,id=b.dataset.id;
+  if(a==="criar")criar();
+  else if(a==="abrir")abrirLay(id);
+  else if(a==="renomear"){renId=id;delId=null;desenhaLays()}
+  else if(a==="salvaren")salvaRen();
+  else if(a==="cancelaren"){renId=null;desenhaLays()}
+  else if(a==="duplicar")duplicarLay(id);
+  else if(a==="excluir"){delId=id;renId=null;desenhaLays()}
+  else if(a==="confexcluir")excluirLay(id);
+  else if(a==="cancelaexcluir"){delId=null;desenhaLays()}
+}
+ovL.addEventListener("click",clickLays);
+grL.addEventListener("keydown",function(e){
+  if(!e.target.classList.contains("ly-ren"))return;
+  if(e.key==="Enter"){e.preventDefault();salvaRen()}
+  else if(e.key==="Escape"){e.preventDefault();e.stopPropagation();renId=null;desenhaLays()}
+});
+
+/* ---------- sair do layout para o hall ---------- */
+function irHall(){saindo=true;irPara("")}
+function abrirSair(){$("sair-overlay").classList.add("show");$("sd-cancela").focus()}
+function fecharSair(){$("sair-overlay").classList.remove("show")}
+$("b-lays").onclick=function(){if(temAlteracao())abrirSair();else irHall()};
+$("sd-cancela").onclick=fecharSair;
+$("sd-sai").onclick=function(){fecharSair();irHall()};
+$("sair-overlay").addEventListener("pointerdown",function(e){if(e.target===this)fecharSair()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&$("sair-overlay").classList.contains("show"))fecharSair()});
+
+if(hall){
+  migrarAntigo();
+  limparVazios("");
+  mostrarHall();
+}else{
+  limparVazios(lid);
+  carregar();bumpGrid();ajustar();initColorPickerPopover();
+  itens.forEach(montar);props();
+  // fechar/recarregar a aba com alterações não salvas: o navegador mostra a própria caixa de confirmação
+  window.addEventListener("beforeunload",function(e){if(saindo||!temAlteracao())return;e.preventDefault();e.returnValue="";return""});
+}
 })();
 </script>
 </body>

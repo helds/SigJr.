@@ -43,6 +43,7 @@ h1{font-size:24px;margin:8px 0 14px}
 .novo small{color:var(--tinta-2);font-size:15px}
 .novo:hover{background:var(--papel)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.cards>.vazio{grid-column:1/-1}
 .card{display:flex;flex-direction:column;background:var(--papel);border:2px solid var(--linha);border-radius:10px;overflow:hidden}
 .abrir{border:0;background:none;padding:0;text-align:left;width:100%}
 .abrir:hover b{color:var(--agua)}
@@ -1392,107 +1393,32 @@ body.arrastando-corpo,body.arrastando-corpo *{cursor:grabbing!important;user-sel
   }
   .lbl-pos-grid button.active .lbl-pos-dot { background: var(--accent); }
 
-  /* --- Painel de seleção de cor (roda de cores estilo QGIS) --- */
-  #color-picker-popover {
-    display:none;
-    position:fixed;
-    z-index:1000;
-    background:var(--bg-suave);
-    border:1px solid var(--borda-2);
-    box-shadow:2px 3px 10px rgba(0,0,0,0.3);
-    padding:10px;
-    width:255px;
-    font-size:12px;
-  }
-  #color-picker-popover.show { display:block; }
-  #color-picker-popover .cp-transparent-row {
-    display:flex; align-items:center; gap:6px;
-    margin-bottom:8px;
-  }
-  #color-picker-popover .cp-transparent-row input[type=checkbox] { margin:0; }
-  #color-picker-popover .cp-wheel-box {
-    position:relative;
-    width:190px; height:190px;
-    margin:2px auto 8px auto;
-    cursor:crosshair;
-    user-select:none;
-  }
-  #color-picker-popover .cp-wheel-box canvas { position:absolute; top:0; left:0; }
-  #color-picker-popover .cp-wheel-handle {
-    position:absolute;
-    width:9px; height:9px;
-    border:2px solid #000;
-    border-radius:50%;
-    box-shadow:0 0 0 1px #fff;
-    transform:translate(-50%,-50%);
-    pointer-events:none;
-  }
-  #color-picker-popover .cp-alpha-row {
-    position:relative;
-    height:16px;
-    margin-bottom:8px;
-    cursor:pointer;
-    background-image:
-      linear-gradient(45deg,#bbb 25%,transparent 25%),
-      linear-gradient(-45deg,#bbb 25%,transparent 25%),
-      linear-gradient(45deg,transparent 75%,#bbb 75%),
-      linear-gradient(-45deg,transparent 75%,#bbb 75%);
-    background-size:8px 8px;
-    background-position:0 0,0 4px,4px -4px,-4px 0px;
-    border:1px solid var(--borda-2);
-  }
-  #color-picker-popover .cp-alpha-fill {
-    position:absolute; top:0; left:0; right:0; bottom:0;
-  }
-  #color-picker-popover .cp-alpha-handle {
-    position:absolute; top:-2px;
-    width:4px; height:20px;
-    background:#333; border:1px solid #fff;
-    transform:translateX(-50%);
-    pointer-events:none;
-  }
-  #color-picker-popover .cp-sv-row {
-    position:relative;
-    height:16px;
-    margin-bottom:8px;
-    cursor:crosshair;
-    border:1px solid var(--borda-2);
-  }
-  #color-picker-popover .cp-sv-fill {
-    position:absolute; top:0; left:0; right:0; bottom:0;
-  }
-  #color-picker-popover .cp-sv-handle {
-    position:absolute; top:-2px;
-    width:4px; height:20px;
-    background:#333; border:1px solid #fff;
-    transform:translateX(-50%);
-    pointer-events:none;
-  }
-  #color-picker-popover .cp-bar-label {
-    font-size:10.5px; color:#555; margin:0 0 2px 1px;
-  }
-  #color-picker-popover .cp-hex-row { display:flex; align-items:center; gap:6px; margin-top:2px; }
-  #color-picker-popover .cp-hex-row input { flex:1; border:1px solid var(--borda); border-radius:2px; padding:3px 6px; background:var(--bg-campo); }
-  #color-picker-popover .cp-section-label {
-    background:#c8c8c8; color:var(--tinta);
-    font-size:10.5px; font-weight:600;
-    padding:2px 6px; margin:8px 0 4px 0;
-  }
-  #color-picker-popover .cp-swatches { display:grid; grid-template-columns: repeat(8, 1fr); gap:3px; }
-  #color-picker-popover .cp-swatch { width:100%; aspect-ratio:1; border:1px solid rgba(0,0,0,0.3); cursor:pointer; border-radius:1px; }
-  #color-picker-popover .cp-menu {
-    margin-top:6px;
-    border-top:1px solid #ccc;
-    padding-top:4px;
-  }
-  #color-picker-popover .cp-menu-item {
-    padding:4px 4px;
-    cursor:pointer;
-    color:var(--text);
-  }
-  #color-picker-popover .cp-menu-item:hover { background: var(--hover); }
-  #color-picker-popover .cp-menu-item.disabled { color:#a0a0a0; cursor:default; }
-  #color-picker-popover .cp-menu-item.disabled:hover { background:transparent; }
+  /* ---------- Seletor de cor: janela modal (Fechar / Aplicar) ---------- */
+  #color-picker-overlay{display:none;position:fixed;inset:0;z-index:4700;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
+  #color-picker-overlay.show{display:flex}
+  #color-picker-popover{display:flex;flex-direction:column;width:300px;max-width:100%;max-height:100%;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);font-size:14px;overflow:hidden}
+  #color-picker-popover .cp-header{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 16px;font-weight:700;font-size:16px;border-bottom:2px solid var(--linha)}
+  #color-picker-popover .cp-close{border:0;background:none;color:var(--tinta-2);font-size:26px;line-height:1;width:36px;height:36px;border-radius:8px;cursor:pointer}
+  #color-picker-popover .cp-close:hover{background:var(--bg-hover)}
+  #color-picker-popover .cp-body{padding:12px 16px;overflow-y:auto;min-height:0}
+  #color-picker-popover .cp-footer{display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:2px solid var(--linha)}
+  #color-picker-popover .cp-btn{padding:8px 16px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--linha);background:var(--card);color:var(--tinta)}
+  #color-picker-popover .cp-btn:hover{border-color:var(--agua)}
+  #color-picker-popover .cp-btn.cp-ok-btn{background:var(--agua);border-color:var(--agua);color:var(--papel)}
+  #color-picker-popover .cp-wheel-box{position:relative;width:190px;height:190px;margin:2px auto 12px auto;cursor:crosshair;touch-action:none}
+  #color-picker-popover .cp-wheel-box canvas{position:absolute;top:0;left:0}
+  #color-picker-popover .cp-wheel-handle{position:absolute;width:12px;height:12px;border:2px solid #000;border-radius:50%;box-shadow:0 0 0 1px #fff;transform:translate(-50%,-50%);pointer-events:none}
+  #color-picker-popover .cp-bar-label{font-size:12px;color:var(--tinta-2);margin:0 0 3px 1px}
+  #color-picker-popover .cp-sv-row{position:relative;height:22px;margin-bottom:12px;cursor:crosshair;touch-action:none;border:1px solid color-mix(in srgb,var(--tinta) 35%,transparent)}
+  #color-picker-popover .cp-sv-fill{position:absolute;top:0;left:0;right:0;bottom:0}
+  #color-picker-popover .cp-sv-handle{position:absolute;top:-3px;width:6px;height:28px;background:#333;border:1px solid #fff;border-radius:2px;transform:translateX(-50%);pointer-events:none}
+  #color-picker-popover .cp-hex-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+  #color-picker-popover .cp-hex-row input{flex:1;min-width:0;border:2px solid var(--linha);border-radius:8px;padding:6px 8px;font:inherit;background:var(--bg-campo);color:var(--tinta);text-transform:uppercase}
+  #color-picker-popover .cp-prev{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--tinta-2)}
+  #color-picker-popover .cp-prev i{display:block;width:34px;height:26px;border:2px solid var(--linha);border-radius:6px}
+  #color-picker-popover .cp-menu{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  #color-picker-popover .cp-menu-item{flex:1 1 0;padding:7px 10px;font:inherit;font-size:13px;border:2px solid var(--linha);border-radius:8px;background:var(--card);color:var(--tinta);cursor:pointer}
+  #color-picker-popover .cp-menu-item:hover{border-color:var(--agua)}
 
   /* --- Rodapé de botões (OK / Cancelar / Aplicar / Ajuda) --- */
   #lp-footer {
@@ -1645,15 +1571,16 @@ html[data-tema] .renderer-picker-icon.rp-graduated{background:linear-gradient(to
 html[data-tema] table#qnl-fields-table td{border-bottom:1px solid var(--borda)}
 html[data-tema] .vsym-classes-table tbody td{border-bottom:1px solid var(--borda)}
 html[data-tema] .lbl-expr-btn{color:var(--tinta-2)}
-html[data-tema] #color-picker-popover .cp-alpha-handle{border:1px solid var(--bg-campo)}
 html[data-tema] #color-picker-popover .cp-sv-handle{border:1px solid var(--bg-campo)}
-html[data-tema] #color-picker-popover .cp-bar-label{color:var(--tinta-2)}
-html[data-tema] #color-picker-popover .cp-menu{border-top:1px solid var(--borda)}
 html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
 
 /* tema: seletor no topo */
 #tema{position:absolute;right:16px;top:50%;transform:translateY(-50%);padding:6px 10px;font:inherit;font-size:14px;border:2px solid var(--linha);border-radius:8px;background:var(--card);color:var(--tinta);cursor:pointer}
 #tema:hover{border-color:var(--agua)}
+.grupo-tema{align-items:center;margin-left:auto}
+.tema-lab{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--tinta-2)}
+#tema-mapa{position:static;transform:none;padding:6px 10px;font:inherit;font-size:14px;border:2px solid var(--linha);border-radius:8px;background:var(--card);color:var(--tinta);cursor:pointer}
+#tema-mapa:hover{border-color:var(--agua)}
 
 /* olho aberto / fechado nas camadas */
 .cam.off{opacity:1}
@@ -1691,6 +1618,7 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
   <symbol id="i-refazer" viewBox="0 0 24 24"><path d="M15 6l5 5-5 5M20 11H10a5 5 0 000 10h4"/></symbol>
   <symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/></symbol>
   <symbol id="i-regua" viewBox="0 0 24 24"><path d="M2 8h20v8H2zM6 8v3M10 8v4M14 8v3M18 8v4"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><path d="M3 2l12 6-5 2-2 5z"/><circle cx="17" cy="17" r="5.5"/><path d="M17 14.9v.01M17 17.2v2.4"/></symbol>
   <symbol id="i-selec" viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-2 6z"/></symbol>
   <symbol id="i-tabela" viewBox="0 0 24 24"><path d="M3 5h18v14H3zM3 10h18M3 15h18M9 5v14"/></symbol>
   <symbol id="i-desselec" viewBox="0 0 24 24"><path d="M5 3l12 6-5 2-2 5zM15 16l6 6M21 16l-6 6"/></symbol>
@@ -1710,11 +1638,11 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
 </header>
 <script>
 (function(){
-  var d=document.documentElement,sel=document.getElementById("tema"),OK=["claro","escuro","oceano","ameixa","brasa"],t="claro";
-  function ap(){if(t==="claro")d.removeAttribute("data-tema");else d.setAttribute("data-tema",t);sel.value=t}
+  var d=document.documentElement,sels=[].slice.call(document.querySelectorAll(".tema-sel,#tema")),OK=["claro","escuro","oceano","ameixa","brasa"],t="claro";
+  function ap(){if(t==="claro")d.removeAttribute("data-tema");else d.setAttribute("data-tema",t);sels.forEach(function(x){x.value=t})}
   try{var v=localStorage.getItem("mapinha:tema");t=v&&OK.indexOf(v)>=0?v:(!v&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"escuro":"claro")}catch(x){}
   ap();
-  sel.addEventListener("change",function(){t=sel.value;ap();try{localStorage.setItem("mapinha:tema",t)}catch(x){}});
+  sels.forEach(function(sel){sel.addEventListener("change",function(){t=sel.value;ap();try{localStorage.setItem("mapinha:tema",t)}catch(x){}})});
   window.addEventListener("storage",function(e){if(e.key==="mapinha:tema"&&OK.indexOf(e.newValue)>=0){t=e.newValue;ap()}});
 })();
 </script>
@@ -1754,9 +1682,13 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
       <button class="b" id="b-calc" title="Calculadora de campo: cria ou atualiza um campo com uma expressão"><svg><use href="#i-calc"/></svg>Calcular</button>
     </div>
     <div class="grupo">
+      <button class="b" id="b-id" aria-pressed="false" title="Identificar feição: clique numa feição do mapa para ver os atributos (clique de novo para sair)"><svg><use href="#i-info"/></svg>Identificar feição</button>
       <button class="b" id="b-selec" aria-pressed="false" title="Selecionar feição: clique numa feição do mapa (clique de novo para sair)"><svg><use href="#i-selec"/></svg>Selecionar feição</button>
       <button class="b" id="b-desselec" title="Desselecionar todas as feições"><svg><use href="#i-desselec"/></svg>Desselecionar</button>
       <button class="b" id="b-remover" title="Remover as feições selecionadas"><svg><use href="#i-x"/></svg>Remover feição</button>
+    </div>
+    <div class="grupo grupo-tema">
+      <label class="tema-lab">Tema<select class="tema-sel" id="tema-mapa" aria-label="Tema de cores"><option value="claro">Claro</option><option value="escuro">Escuro</option><option value="oceano">Oceano</option><option value="ameixa">Ameixa</option><option value="brasa">Brasa</option></select></label>
     </div>
   </div>
   <input type="file" id="arq" accept=".zip,.gpkg,.tif,.tiff,application/zip,application/x-zip-compressed" multiple style="display:none">
@@ -2160,6 +2092,8 @@ function excluirMapa(id){
   mapas=mapas.filter(function(x){return x.id!==id});gravarIndice();
   if(atual===id){atual=null;clearTimeout(autoT);autoT=null}
   idbApagar(id).catch(function(e){console.error(e)});
+  // os layouts do mapa (tela Layouts) vão junto
+  try{var ks=[],i,k;for(i=0;i<localStorage.length;i++){k=localStorage.key(i);if(k==="mapinha:layouts:"+id||k==="mapinha:layout:"+id||k.indexOf("mapinha:layout:"+id+":")===0)ks.push(k)}ks.forEach(function(k){localStorage.removeItem(k)})}catch(e){}
 }
   var edit=null,del=null,NS="http://www.w3.org/2000/svg";
   function h(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
@@ -4333,10 +4267,10 @@ const POINT_ANCHOR_TO_DIRECTION = {
   function fazerPan(){pararModos();aviso("Pan: arraste o mapa para navegar.")}
   // Identificar (o index.html marca esta ferramenta como "não implementada": criada aqui do zero)
   var modoId=false;
-  function pararId(){modoId=false;mapEl.classList.remove("select-feature-cursor")}
+  function pararId(){modoId=false;var bi=byId("b-id");if(bi){bi.classList.remove("active");bi.setAttribute("aria-pressed","false")}mapEl.classList.remove("select-feature-cursor")}
   function iniciarId(){
     if(!camadas.length){aviso("Adicione uma camada para identificar feições.");return}
-    pararRegua();pararZoom();pararSel();modoId=true;mapEl.classList.add("select-feature-cursor");
+    pararRegua();pararZoom();pararSel();modoId=true;var bi=byId("b-id");bi.classList.add("active");bi.setAttribute("aria-pressed","true");mapEl.classList.add("select-feature-cursor");
     aviso("Identificar: clique numa feição do mapa.");
   }
   function identificarClique(e){
@@ -4372,8 +4306,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     {n:"Visualizar",it:[
       {r:"Pan",f:fazerPan},{r:"Ver tudo",f:verTudo},
       {r:"Vista anterior",f:function(){irVista(-1)},off:function(){return viewHistory.index<=0}},
-      {r:"Próxima vista",f:function(){irVista(1)},off:function(){return viewHistory.index>=viewHistory.stack.length-1}},
-      "-",{r:"Identificar feições",f:iniciarId}]},
+      {r:"Próxima vista",f:function(){irVista(1)},off:function(){return viewHistory.index>=viewHistory.stack.length-1}}]},
     {n:"Desenhar feições",it:[
       {r:"Ponto",f:function(){iniciarDesenho("ponto")}},{r:"Linha",f:function(){iniciarDesenho("linha")}},{r:"Polígono",f:function(){iniciarDesenho("poligono")}},
       "-",{r:"Círculo",f:function(){iniciarDesenho("circulo")}},{r:"Retângulo",f:function(){iniciarDesenho("retangulo")}},{r:"Elipse",f:function(){iniciarDesenho("elipse")}}]},
@@ -5206,6 +5139,14 @@ const POINT_ANCHOR_TO_DIRECTION = {
     this.blur();
     if(era){aviso("Modo de seleção desligado. As feições já selecionadas continuam selecionadas.");return} // só o modo desliga; a seleção permanece
     modoSel=true;this.setAttribute("aria-pressed","true");this.classList.add("active");mapEl.classList.add("select-feature-cursor");
+  });
+
+  byId("b-id").addEventListener("click",function(){
+    var era=modoId;
+    pararRegua();pararZoom();pararSel();pararId();
+    this.blur();
+    if(era){aviso("Identificação desligada.");return}
+    iniciarId();
   });
 
   /* Régua: botão esquerdo marca pontos; clicar no último ponto (ou duplo clique / Enter) termina;
@@ -7212,100 +7153,82 @@ function initCG(c){
 })();
 </script>
 <style>
-/* Popover de cor do index: acima da janela Propriedades (z-index 4000) e com as variáveis que faltavam */
-#color-picker-popover{z-index:4700;--panel-border:var(--borda);--hover:#e2e2e2;--text-dim:#444;font-family:inherit;color:#25302a}
-#color-picker-popover .cp-hex-row label,#color-picker-popover .cp-transparent-row label{font-size:12px}
+
+/* ================= Interface sem seleção de texto ================= */
+/* Nada da interface pode ser selecionado/arrastado como texto; só caixas de texto. */
+html,body,*,*::before,*::after{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,[contenteditable=""],[contenteditable="true"],[contenteditable=""] *,[contenteditable="true"] *{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+/* botões de rádio, caixas de marcar, cores e sliders não têm texto a selecionar */
+input[type=checkbox],input[type=radio],input[type=range],input[type=color],input[type=button],input[type=submit],input[type=file]{-webkit-user-select:none;user-select:none}
+
+/* ================= Barra de rolagem personalizada da barra de ferramentas ================= */
+.barra,#menubar{overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:auto;-ms-overflow-style:auto}
+.barra::-webkit-scrollbar,#menubar::-webkit-scrollbar{display:block;width:12px;height:12px;background:transparent}
+.barra::-webkit-scrollbar-track,#menubar::-webkit-scrollbar-track{margin:0 10px;background:transparent}
+.barra::-webkit-scrollbar-thumb,#menubar::-webkit-scrollbar-thumb{min-width:48px;border:4px solid transparent;border-radius:999px;background:color-mix(in srgb,var(--agua) 45%,transparent);background-clip:padding-box;transition:background-color .15s}
+.barra::-webkit-scrollbar-thumb:hover,#menubar::-webkit-scrollbar-thumb:hover{background:var(--agua);background-clip:padding-box}
+.barra::-webkit-scrollbar-thumb:active,#menubar::-webkit-scrollbar-thumb:active{background:var(--sol);background-clip:padding-box}
+.barra::-webkit-scrollbar-corner,#menubar::-webkit-scrollbar-corner{background:transparent}
+/* Firefox */
+@supports (-moz-appearance:none){
+  .barra,#menubar{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--agua) 55%,transparent) transparent}
+}
 </style>
-  <div id="color-picker-popover">
-    <div class="cp-transparent-row">
-      <input type="checkbox" id="cp-transparent-checkbox">
-      <label for="cp-transparent-checkbox">Preenchimento Transparente</label>
+<div id="color-picker-overlay">
+  <div id="color-picker-popover" role="dialog" aria-modal="true" aria-labelledby="cp-titulo">
+    <div class="cp-header">
+      <span id="cp-titulo">Selecionar cor</span>
+      <button type="button" class="cp-close" id="cp-close-btn" aria-label="Fechar">&times;</button>
     </div>
-    <div class="cp-wheel-box" id="cp-wheel-box">
-      <canvas id="cp-wheel-canvas" width="190" height="190"></canvas>
-      <div class="cp-wheel-handle" id="cp-wheel-handle"></div>
+    <div class="cp-body">
+      <div class="cp-wheel-box" id="cp-wheel-box">
+        <canvas id="cp-wheel-canvas" width="190" height="190"></canvas>
+        <div class="cp-wheel-handle" id="cp-wheel-handle"></div>
+      </div>
+      <div class="cp-bar-label">Brilho</div>
+      <div class="cp-sv-row" id="cp-val-row">
+        <div class="cp-sv-fill" id="cp-val-fill"></div>
+        <div class="cp-sv-handle" id="cp-val-handle"></div>
+      </div>
+      <div class="cp-bar-label">Saturação</div>
+      <div class="cp-sv-row" id="cp-sat-row">
+        <div class="cp-sv-fill" id="cp-sat-fill"></div>
+        <div class="cp-sv-handle" id="cp-sat-handle"></div>
+      </div>
+      <div class="cp-hex-row">
+        <span>#</span>
+        <input type="text" id="cp-hex-input" maxlength="6" autocomplete="off" spellcheck="false">
+        <span class="cp-prev"><i id="cp-prev-old"></i>Atual</span>
+        <span class="cp-prev"><i id="cp-prev-new"></i>Nova</span>
+      </div>
+      <div class="cp-menu">
+        <button type="button" class="cp-menu-item" id="cp-menu-copy">Copiar</button>
+        <button type="button" class="cp-menu-item" id="cp-menu-paste">Colar</button>
+        <button type="button" class="cp-menu-item" id="cp-menu-choose">Escolher…</button>
+      </div>
     </div>
-    <div class="cp-bar-label">Transparência</div>
-    <div class="cp-alpha-row" id="cp-alpha-row">
-      <div class="cp-alpha-fill" id="cp-alpha-fill"></div>
-      <div class="cp-alpha-handle" id="cp-alpha-handle"></div>
-    </div>
-    <div class="cp-bar-label">Brilho</div>
-    <div class="cp-sv-row" id="cp-val-row">
-      <div class="cp-sv-fill" id="cp-val-fill"></div>
-      <div class="cp-sv-handle" id="cp-val-handle"></div>
-    </div>
-    <div class="cp-bar-label">Saturação</div>
-    <div class="cp-sv-row" id="cp-sat-row">
-      <div class="cp-sv-fill" id="cp-sat-fill"></div>
-      <div class="cp-sv-handle" id="cp-sat-handle"></div>
-    </div>
-    <div class="cp-hex-row">
-      <span>#</span>
-      <input type="text" id="cp-hex-input" maxlength="6">
-    </div>
-    <div class="cp-section-label">Cores recentes</div>
-    <div class="cp-swatches" id="cp-recent-swatches"></div>
-    <div class="cp-section-label">Cores Padrão</div>
-    <div class="cp-swatches" id="cp-standard-swatches"></div>
-    <div class="cp-menu">
-      <div class="cp-menu-item" id="cp-menu-copy">Copiar Cor</div>
-      <div class="cp-menu-item" id="cp-menu-paste">Colar Cor</div>
-      <div class="cp-menu-item" id="cp-menu-pick">Capturar Cor</div>
-      <div class="cp-menu-item" id="cp-menu-choose">Escolher Cor...</div>
+    <div class="cp-footer">
+      <button type="button" class="cp-btn" id="cp-cancel-btn">Fechar</button>
+      <button type="button" class="cp-btn cp-ok-btn" id="cp-ok-btn">Aplicar</button>
     </div>
   </div>
-  <input type="color" id="cp-native-color" style="position:fixed; top:-100px; left:-100px; width:1px; height:1px; opacity:0; pointer-events:none;">
+</div>
+<input type="color" id="cp-native-color" data-cp-decorated="1" style="position:fixed; top:-100px; left:-100px; width:1px; height:1px; opacity:0; pointer-events:none;">
 <script>
 (function(){
-  var cpPopover=document.getElementById('color-picker-popover');
+  var cpOverlay=document.getElementById('color-picker-overlay');
   var cpNative=document.getElementById('cp-native-color');
   var cpHex=document.getElementById('cp-hex-input');
   var cpWheelBox=document.getElementById('cp-wheel-box');
   var cpWheelCanvas=document.getElementById('cp-wheel-canvas');
   var cpWheelHandle=document.getElementById('cp-wheel-handle');
-  var cpAlphaRow=document.getElementById('cp-alpha-row');
-  var cpAlphaFill=document.getElementById('cp-alpha-fill');
-  var cpAlphaHandle=document.getElementById('cp-alpha-handle');
-  var cpValRow=document.getElementById('cp-val-row');
-  var cpValFill=document.getElementById('cp-val-fill');
-  var cpValHandle=document.getElementById('cp-val-handle');
-  var cpSatRow=document.getElementById('cp-sat-row');
-  var cpSatFill=document.getElementById('cp-sat-fill');
-  var cpSatHandle=document.getElementById('cp-sat-handle');
-  var cpTransparentCheckbox=document.getElementById('cp-transparent-checkbox');
-  var cpRecentSwatchesEl=document.getElementById('cp-recent-swatches');
-  var cpStandardSwatchesEl=document.getElementById('cp-standard-swatches');
-  var cpTarget=null, cpAnchor=null;
-  var cpHue=120,cpSat=1,cpVal=1,cpAlpha=100;
-  var recentColors=[],CHAVE_REC='mapinha:cores-recentes';
-  function cargaRecentes(){
-    try{var l=JSON.parse(localStorage.getItem(CHAVE_REC));if(Array.isArray(l))recentColors=l.filter(function(x){return /^#[0-9a-f]{6}$/i.test(x)})}catch(x){}
-    renderSwatchRow(cpRecentSwatchesEl,recentColors);
-  }
-  var cpWheelGeom=null;
+  var cpValRow=document.getElementById('cp-val-row'),cpValFill=document.getElementById('cp-val-fill'),cpValHandle=document.getElementById('cp-val-handle');
+  var cpSatRow=document.getElementById('cp-sat-row'),cpSatFill=document.getElementById('cp-sat-fill'),cpSatHandle=document.getElementById('cp-sat-handle');
+  var cpPrevOld=document.getElementById('cp-prev-old'),cpPrevNew=document.getElementById('cp-prev-new');
+  var cpTarget=null,cpOriginal='#000000',cpDraft='#000000';
+  var cpHue=120,cpSat=1,cpVal=1,cpWheelGeom=null;
 
   function toast(t){var e=document.getElementById('aviso-t');if(!e)return;e.textContent=t;e.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(function(){e.hidden=true},2800)}
-
-  var STANDARD_COLORS=['#000000','#ffffff','#a4d8f0','#3b96e3','#8be084','#f4a9a9','#e83b3b','#f4a742'];
-  function renderSwatchRow(el,colors){
-    el.innerHTML='';
-    colors.forEach(function(c){
-      var sw=document.createElement('div');
-      sw.className='cp-swatch';sw.style.background=c;sw.title=c;
-      sw.addEventListener('click',function(){setColorFromHex(c)});
-      el.appendChild(sw);
-    });
-  }
-  renderSwatchRow(cpStandardSwatchesEl,STANDARD_COLORS);
-  function pushRecentColor(hex){
-    cargaRecentes();
-    recentColors=recentColors.filter(function(c){return c.toLowerCase()!==hex.toLowerCase()});
-    recentColors.unshift(hex);
-    if(recentColors.length>16)recentColors=recentColors.slice(0,16);
-    try{localStorage.setItem(CHAVE_REC,JSON.stringify(recentColors))}catch(x){}
-    renderSwatchRow(cpRecentSwatchesEl,recentColors);
-  }
 
   function hsvToHex(h,s,v){
     var c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c,r=0,g=0,b=0;
@@ -7326,7 +7249,6 @@ function initCG(c){
     if(h<0)h+=360;
     return {h:h,s:max===0?0:d/max,v:max};
   }
-
   function drawColorWheel(){
     var ctx=cpWheelCanvas.getContext('2d');
     var size=190,cx=size/2,cy=size/2,rOuter=size/2-2,rInner=rOuter-18;
@@ -7347,11 +7269,6 @@ function initCG(c){
     cpWheelHandle.style.left=(cpWheelGeom.cx+rMid*Math.cos(rad))+'px';
     cpWheelHandle.style.top=(cpWheelGeom.cy+rMid*Math.sin(rad))+'px';
   }
-  function updateAlphaBar(){
-    var hex=hsvToHex(cpHue,cpSat,cpVal);
-    cpAlphaFill.style.background='linear-gradient(to right, rgba(0,0,0,0), '+hex+')';
-    cpAlphaHandle.style.left=(cpAlpha/100*cpAlphaRow.offsetWidth)+'px';
-  }
   function updateValBar(){
     cpValFill.style.background='linear-gradient(to right, #000000, '+hsvToHex(cpHue,cpSat,1)+')';
     cpValHandle.style.left=(cpVal*cpValRow.offsetWidth)+'px';
@@ -7360,99 +7277,62 @@ function initCG(c){
     cpSatFill.style.background='linear-gradient(to right, '+hsvToHex(cpHue,0,cpVal)+', '+hsvToHex(cpHue,1,cpVal)+')';
     cpSatHandle.style.left=(cpSat*cpSatRow.offsetWidth)+'px';
   }
-  function refreshBars(){updateWheelHandlePosition();updateAlphaBar();updateValBar();updateSatBar()}
+  function refreshBars(){updateWheelHandlePosition();updateValBar();updateSatBar()}
 
-  function currentTargetColor(){return cpTarget?cpTarget.get():'#000000'}
-  function applyColor(hex){
-    if(cpTarget)cpTarget.set(hex);
-    cpHex.value=hex.replace('#','').toUpperCase();
-  }
+  // A cor escolhida fica só no modal (rascunho); só vai para o campo quando clicar em Aplicar.
+  function showDraft(hex){cpDraft=hex;cpHex.value=hex.replace('#','').toUpperCase();cpPrevNew.style.background=hex}
   function setColorFromHex(hex){
     var hsv=hexToHsv(hex);
     cpHue=hsv.h;cpSat=hsv.s;cpVal=hsv.v;
-    drawColorWheel();refreshBars();applyColor(hex);
+    drawColorWheel();refreshBars();showDraft(hex);
   }
-  function setColorFromHsv(){
-    refreshBars();applyColor(hsvToHex(cpHue,cpSat,cpVal));
+  function setColorFromHsv(){refreshBars();showDraft(hsvToHex(cpHue,cpSat,cpVal))}
+
+  function openColorPicker(target){
+    cpTarget=target;cpOriginal=target.get();
+    cpPrevOld.style.background=cpOriginal;
+    cpOverlay.classList.add('show'); // precisa estar visível para medir as barras
+    setColorFromHex(cpOriginal);
+  }
+  function closeColorPicker(){cpOverlay.classList.remove('show');cpTarget=null}
+  function applyColorPicker(){
+    var t=cpTarget,hex=cpDraft,mudou=hex.toLowerCase()!==cpOriginal.toLowerCase();
+    closeColorPicker();
+    if(t&&mudou)t.set(hex);
   }
 
-  function openColorPopover(anchorEl,target){
-    cpTarget=target;cpAnchor=anchorEl;
-    var rect=anchorEl.getBoundingClientRect();
-    var cur=currentTargetColor();
-    var hsv=hexToHsv(cur);
-    cpHue=hsv.h;cpSat=hsv.s;cpVal=hsv.v;cpAlpha=100;
-    cpHex.value=cur.replace('#','').toUpperCase();
-    cpTransparentCheckbox.checked=false;cpTransparentCheckbox.disabled=true;
-    cpPopover.classList.add('show');
-    drawColorWheel();refreshBars();
-    var top=rect.bottom+4,left=rect.left,popW=255,popH=495;
-    if(left+popW>window.innerWidth)left=window.innerWidth-popW-8;
-    if(left<8)left=8;
-    if(top+popH>window.innerHeight)top=Math.max(8,rect.top-popH-4);
-    cpPopover.style.top=top+'px';cpPopover.style.left=left+'px';
+  // Arrastar com mouse, caneta ou dedo
+  function arrastar(el,fn){
+    el.addEventListener('pointerdown',function(e){
+      if(e.button>0)return;
+      e.preventDefault();el.setPointerCapture(e.pointerId);fn(e);
+    });
+    el.addEventListener('pointermove',function(e){if(el.hasPointerCapture(e.pointerId))fn(e)});
   }
-  function closeColorPopover(){
-    if(!cpPopover.classList.contains('show'))return;
-    cpPopover.classList.remove('show');
-    pushRecentColor(currentTargetColor());
-    cpTarget=null;cpAnchor=null;
-  }
-
-  // Anel de matiz
-  var cpHueDragging=false;
-  function handleWheelPointer(e){
+  arrastar(cpWheelBox,function(e){
     var rect=cpWheelBox.getBoundingClientRect();
-    var dx=e.clientX-rect.left-95,dy=e.clientY-rect.top-95;
-    var angle=Math.atan2(dy,dx)*180/Math.PI+90;
+    var angle=Math.atan2(e.clientY-rect.top-95,e.clientX-rect.left-95)*180/Math.PI+90;
     if(angle<0)angle+=360;
     cpHue=angle;drawColorWheel();setColorFromHsv();
-  }
-  cpWheelBox.addEventListener('mousedown',function(e){cpHueDragging=true;handleWheelPointer(e)});
-  document.addEventListener('mousemove',function(e){if(cpHueDragging)handleWheelPointer(e)});
-  document.addEventListener('mouseup',function(){cpHueDragging=false});
-
-  // Transparência (apenas visual, igual ao index)
-  var cpAlphaDragging=false;
-  function handleAlphaPointer(e){
-    var rect=cpAlphaRow.getBoundingClientRect();
-    cpAlpha=Math.max(0,Math.min(100,(e.clientX-rect.left)/rect.width*100));
-    updateAlphaBar();
-  }
-  cpAlphaRow.addEventListener('mousedown',function(e){cpAlphaDragging=true;handleAlphaPointer(e)});
-  document.addEventListener('mousemove',function(e){if(cpAlphaDragging)handleAlphaPointer(e)});
-  document.addEventListener('mouseup',function(){cpAlphaDragging=false});
-
-  // Brilho
-  var cpValDragging=false;
-  function handleValPointer(e){
+  });
+  arrastar(cpValRow,function(e){
     var rect=cpValRow.getBoundingClientRect();
-    cpVal=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
-    setColorFromHsv();
-  }
-  cpValRow.addEventListener('mousedown',function(e){cpValDragging=true;handleValPointer(e)});
-  document.addEventListener('mousemove',function(e){if(cpValDragging)handleValPointer(e)});
-  document.addEventListener('mouseup',function(){cpValDragging=false});
-
-  // Saturação
-  var cpSatDragging=false;
-  function handleSatPointer(e){
+    cpVal=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));setColorFromHsv();
+  });
+  arrastar(cpSatRow,function(e){
     var rect=cpSatRow.getBoundingClientRect();
-    cpSat=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
-    setColorFromHsv();
-  }
-  cpSatRow.addEventListener('mousedown',function(e){cpSatDragging=true;handleSatPointer(e)});
-  document.addEventListener('mousemove',function(e){if(cpSatDragging)handleSatPointer(e)});
-  document.addEventListener('mouseup',function(){cpSatDragging=false});
+    cpSat=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));setColorFromHsv();
+  });
 
   cpHex.addEventListener('change',function(){
     var v=cpHex.value.replace('#','').trim();
     if(/^[0-9a-fA-F]{6}$/.test(v))setColorFromHex('#'+v.toLowerCase());
+    else cpHex.value=cpDraft.replace('#','').toUpperCase();
   });
 
   document.getElementById('cp-menu-copy').addEventListener('click',function(){
-    if(navigator.clipboard)navigator.clipboard.writeText(currentTargetColor()).catch(function(){});
-    toast('Cor copiada.');closeColorPopover();
+    if(navigator.clipboard)navigator.clipboard.writeText(cpDraft).catch(function(){});
+    toast('Cor copiada.');
   });
   function parseColorFromText(text){
     if(!text)return null;
@@ -7468,30 +7348,31 @@ function initCG(c){
     try{
       var text=navigator.clipboard?await navigator.clipboard.readText():'';
       var hex=parseColorFromText(text);
-      if(hex){setColorFromHex(hex);toast('Cor colada.');closeColorPopover()}
+      if(hex){setColorFromHex(hex);toast('Cor colada.')}
       else toast('Nada de válido na área de transferência.');
     }catch(err){toast('Não foi possível ler a área de transferência.')}
   });
-  document.getElementById('cp-menu-pick').addEventListener('click',function(){
-    if(window.EyeDropper){
-      new EyeDropper().open().then(function(r){setColorFromHex(r.sRGBHex.toLowerCase())}).catch(function(){});
-    }else toast('Capturar cor da tela não disponível neste navegador.');
-  });
   document.getElementById('cp-menu-choose').addEventListener('click',function(e){
     e.stopPropagation();
-    cpNative.value=currentTargetColor();
+    cpNative.value=cpDraft;
     cpNative.click();
   });
   cpNative.addEventListener('input',function(){setColorFromHex(cpNative.value)});
 
-  // Liga o popover a todo <input type="color"> da página (inclusive os criados depois)
+  document.getElementById('cp-ok-btn').addEventListener('click',applyColorPicker);
+  document.getElementById('cp-cancel-btn').addEventListener('click',closeColorPicker);
+  document.getElementById('cp-close-btn').addEventListener('click',closeColorPicker);
+  // toque no fundo escurecido fecha (só se o toque COMEÇOU no fundo, não ao soltar um arraste ali)
+  cpOverlay.addEventListener('pointerdown',function(e){if(e.target===cpOverlay)closeColorPicker()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&cpOverlay.classList.contains('show'))closeColorPicker()});
+
+  // Liga o modal a todo <input type="color"> da página (inclusive os criados depois)
   document.addEventListener('click',function(e){
     var t=e.target;
     if(t&&t.tagName==='INPUT'&&t.type==='color'&&t.id!=='cor-nativa'&&t.id!=='cp-native-color'){
       e.preventDefault();e.stopPropagation();
-      if(cpAnchor===t&&cpPopover.classList.contains('show')){closeColorPopover();return}
-      closeColorPopover();
-      openColorPopover(t,{
+      if(t.disabled)return;
+      openColorPicker({
         get:function(){return /^#[0-9a-f]{6}$/i.test(t.value)?t.value:'#000000'},
         set:function(hex){
           t.value=hex;
@@ -7499,11 +7380,8 @@ function initCG(c){
           t.dispatchEvent(new Event('change',{bubbles:true}));
         }
       });
-      return;
     }
-    if(cpPopover.classList.contains('show')&&!cpPopover.contains(t))closeColorPopover();
   },true);
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeColorPopover()});
 })();
 </script>
 <script>
