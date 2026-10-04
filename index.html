@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GisJr</title>
+<title>GisJr.</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
@@ -1396,6 +1396,13 @@ body.arrastando-corpo,body.arrastando-corpo *{cursor:grabbing!important;user-sel
   /* ---------- Seletor de cor: janela modal (Fechar / Aplicar) ---------- */
   #color-picker-overlay{display:none;position:fixed;inset:0;z-index:4700;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
   #color-picker-overlay.show{display:flex}
+  /* seletor de cor: janela flutuante e arrastável, sem fundo escuro e sem bloquear o resto da tela */
+  #color-picker-overlay{background:transparent!important;pointer-events:none;padding:0!important;display:none!important}
+  #color-picker-overlay.show{display:block!important}
+  #color-picker-overlay #color-picker-popover{position:fixed;left:0;top:0;margin:0;pointer-events:auto;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);box-shadow:0 12px 36px rgba(0,0,0,.5)}
+  #color-picker-popover .cp-header{cursor:move;user-select:none;-webkit-user-select:none;touch-action:none}
+  #color-picker-popover .cp-header .cp-close{cursor:pointer}
+  #color-picker-popover.cp-arrastando{opacity:.93}
   #color-picker-popover{display:flex;flex-direction:column;width:300px;max-width:100%;max-height:100%;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);font-size:14px;overflow:hidden}
   #color-picker-popover .cp-header{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 16px;font-weight:700;font-size:16px;border-bottom:2px solid var(--linha)}
   #color-picker-popover .cp-close{border:0;background:none;color:var(--tinta-2);font-size:26px;line-height:1;width:36px;height:36px;border-radius:8px;cursor:pointer}
@@ -1412,6 +1419,8 @@ body.arrastando-corpo,body.arrastando-corpo *{cursor:grabbing!important;user-sel
   #color-picker-popover .cp-sv-row{position:relative;height:22px;margin-bottom:12px;cursor:crosshair;touch-action:none;border:1px solid color-mix(in srgb,var(--tinta) 35%,transparent)}
   #color-picker-popover .cp-sv-fill{position:absolute;top:0;left:0;right:0;bottom:0}
   #color-picker-popover .cp-sv-handle{position:absolute;top:-3px;width:6px;height:28px;background:#333;border:1px solid #fff;border-radius:2px;transform:translateX(-50%);pointer-events:none}
+  #color-picker-popover .cp-alpha-row{background:repeating-conic-gradient(#bdbdbd 0% 25%,#fff 0% 50%) 0 0/12px 12px}
+  #color-picker-popover #cp-alpha-box[hidden]{display:none}
   #color-picker-popover .cp-hex-row{display:flex;align-items:center;gap:8px;margin-top:4px}
   #color-picker-popover .cp-hex-row input{flex:1;min-width:0;border:2px solid var(--linha);border-radius:8px;padding:6px 8px;font:inherit;background:var(--bg-campo);color:var(--tinta);text-transform:uppercase}
   #color-picker-popover .cp-prev{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--tinta-2)}
@@ -1551,6 +1560,9 @@ html[data-tema] select,html[data-tema] input:not([type=checkbox]):not([type=radi
 html[data-tema] select option{background:var(--card);color:var(--tinta)}
 html[data-tema] ::placeholder{color:var(--tinta-2);opacity:.8}
 html[data-tema] .leaflet-popup-content-wrapper,html[data-tema] .leaflet-popup-tip,html[data-tema] .leaflet-tooltip{background:var(--card);color:var(--tinta);border-color:var(--borda)}
+/* Rótulos do mapa nunca têm caixa de fundo, em nenhum tema (a caixa só existe se o usuário ligar "Fundo" nos rótulos) */
+html[data-tema] .leaflet-tooltip.qw-label{background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important}
+html[data-tema] .leaflet-tooltip.qw-label::before,html[data-tema] .leaflet-tooltip.qw-label::after{background:transparent!important;border-color:transparent!important}
 html[data-tema] .b.standby:hover{background:var(--gj-red)}
 html[data-tema] table#attr-table th{background:var(--bg-suave)}
 html[data-tema] table#attr-table td{border:1px solid var(--borda)}
@@ -1577,10 +1589,6 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
 /* tema: seletor no topo */
 #tema{position:absolute;right:16px;top:50%;transform:translateY(-50%);padding:6px 10px;font:inherit;font-size:14px;border:2px solid var(--linha);border-radius:8px;background:var(--card);color:var(--tinta);cursor:pointer}
 #tema:hover{border-color:var(--agua)}
-.grupo-tema{align-items:center;margin-left:auto}
-.tema-lab{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--tinta-2)}
-#tema-mapa{position:static;transform:none;padding:6px 10px;font:inherit;font-size:14px;border:2px solid var(--linha);border-radius:8px;background:var(--card);color:var(--tinta);cursor:pointer}
-#tema-mapa:hover{border-color:var(--agua)}
 
 /* olho aberto / fechado nas camadas */
 .cam.off{opacity:1}
@@ -1633,17 +1641,35 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
 </svg>
 
 <header id="topo">
-  <div class="logo">Gis<span>Jr</span></div>
+  <div class="logo">Gis<span>Jr.</span></div>
   <select id="tema" aria-label="Tema de cores"><option value="claro">Claro</option><option value="escuro">Escuro</option><option value="oceano">Oceano</option><option value="ameixa">Ameixa</option><option value="brasa">Brasa</option></select>
 </header>
 <script>
 (function(){
-  var d=document.documentElement,sels=[].slice.call(document.querySelectorAll(".tema-sel,#tema")),OK=["claro","escuro","oceano","ameixa","brasa"],t="claro";
-  function ap(){if(t==="claro")d.removeAttribute("data-tema");else d.setAttribute("data-tema",t);sels.forEach(function(x){x.value=t})}
-  try{var v=localStorage.getItem("mapinha:tema");t=v&&OK.indexOf(v)>=0?v:(!v&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"escuro":"claro")}catch(x){}
+  var d=document.documentElement,OK=["claro","escuro","oceano","ameixa","brasa"],
+      NOMES={claro:"Claro",escuro:"Escuro",oceano:"Oceano",ameixa:"Ameixa",brasa:"Brasa"},t="claro",KEY="mapinha:tema";
+  function sels(){return [].slice.call(document.querySelectorAll(".tema-sel,#tema"))}
+  function ap(){
+    if(t==="claro")d.removeAttribute("data-tema");else d.setAttribute("data-tema",t);
+    sels().forEach(function(x){if(x.value!==t)x.value=t});
+    try{window.dispatchEvent(new CustomEvent("gisjr:tema",{detail:t}))}catch(x){}
+  }
+  function set(v){
+    if(OK.indexOf(v)<0)return;
+    t=v;ap();
+    try{localStorage.setItem(KEY,t)}catch(x){}
+  }
+  try{var v=localStorage.getItem(KEY);t=v&&OK.indexOf(v)>=0?v:(!v&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"escuro":"claro")}catch(x){}
   ap();
-  sels.forEach(function(sel){sel.addEventListener("change",function(){t=sel.value;ap();try{localStorage.setItem("mapinha:tema",t)}catch(x){}})});
-  window.addEventListener("storage",function(e){if(e.key==="mapinha:tema"&&OK.indexOf(e.newValue)>=0){t=e.newValue;ap()}});
+  // delegação: funciona para qualquer seletor, mesmo os criados depois deste script (ex.: o de dentro do projeto)
+  document.addEventListener("change",function(e){
+    var el=e.target;
+    if(el&&el.matches&&el.matches(".tema-sel,#tema"))set(el.value);
+  });
+  // garante o valor certo nos seletores assim que o DOM completo existir
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ap);else ap();
+  window.addEventListener("storage",function(e){if(e.key===KEY&&OK.indexOf(e.newValue)>=0){t=e.newValue;ap()}});
+  window.gisTema={get:function(){return t},set:set,lista:OK.slice(),nome:function(k){return NOMES[k]||k}};
 })();
 </script>
 
@@ -1686,9 +1712,6 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
       <button class="b" id="b-selec" aria-pressed="false" title="Selecionar feição: clique numa feição do mapa (clique de novo para sair)"><svg><use href="#i-selec"/></svg>Selecionar feição</button>
       <button class="b" id="b-desselec" title="Desselecionar todas as feições"><svg><use href="#i-desselec"/></svg>Desselecionar</button>
       <button class="b" id="b-remover" title="Remover as feições selecionadas"><svg><use href="#i-x"/></svg>Remover feição</button>
-    </div>
-    <div class="grupo grupo-tema">
-      <label class="tema-lab">Tema<select class="tema-sel" id="tema-mapa" aria-label="Tema de cores"><option value="claro">Claro</option><option value="escuro">Escuro</option><option value="oceano">Oceano</option><option value="ameixa">Ameixa</option><option value="brasa">Brasa</option></select></label>
     </div>
   </div>
   <input type="file" id="arq" accept=".zip,.gpkg,.tif,.tiff,application/zip,application/x-zip-compressed" multiple style="display:none">
@@ -1740,7 +1763,7 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
       <div id="lp-info" role="tabpanel" aria-labelledby="aba-info" hidden><table class="kv" id="lp-tab-info"></table></div>
       <div id="lp-simb" role="tabpanel" aria-labelledby="aba-simb">
         <div class="lp-linha"><label for="lp-tipo">Tipo de símbolo</label>
-          <select id="lp-tipo"><option value="single">Símbolo simples</option><option value="none">Sem símbolos</option><option value="categorized">Categorizado</option><option value="graduated">Graduado</option></select></div>
+          <select id="lp-tipo"><option value="none">Sem símbolos</option><option value="single" selected>Símbolo simples</option><option value="categorized">Categorizado</option><option value="graduated">Graduado</option></select></div>
         <div class="lp-prev" aria-hidden="true"><span id="lp-prev"></span></div>
         <div id="lp-simples">
           <div class="lp-linha"><label for="lp-cor">Cor de preenchimento</label><input type="color" id="lp-cor"></div>
@@ -2143,7 +2166,7 @@ function excluirMapa(id){
   function byId(i){return document.getElementById(i)}
   var mapEl=byId("map"),map=null,camadas=[],ativaId=null,proxId=1;
   var modoZoom=null,modoSel=false,medindo=null;
-  var hist={pilha:[],i:-1,max:60},restaurando=false;
+  var hist={pilha:[],i:-1,max:10,E:null},restaurando=false;
   var CORES=["#e6194b","#3cb44b","#4363d8","#f58231","#911eb4","#42d4f4","#f032e6","#bfef45","#469990","#9a6324"];
   var VISTA_INICIAL={c:[-9.7,-36.0],z:7};
 
@@ -2151,7 +2174,7 @@ function excluirMapa(id){
     if(!window.L){aviso("O mapa não carregou — verifique sua conexão com a internet.");return}
     if(!map){
       map=L.map("map",{zoomControl:false,attributionControl:false,zoomSnap:0,zoomDelta:0.25}).setView(VISTA_INICIAL.c,VISTA_INICIAL.z);
-      map.on("zoomend",function(){camadas.forEach(function(c){if(c.labeling&&c.labeling.enabled)rotular(c)})}); // visibilidade por escala
+      map.on("zoomend",function(){camadas.forEach(function(c){if(c.labeling&&c.labeling.enabled)rotular(c)});agendarSyncLayout()}); // visibilidade por escala; o layout precisa do zoom atual para manter a posição dos rótulos
       map.on("click",identificarClique);map.on("moveend zoomend",pushViewHistorySoon);
       // Aproximar/Afastar: com o modo ativo, um clique no mapa dá zoom centrado no ponto clicado.
       map.on("click",function(e){
@@ -2572,7 +2595,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
         const shadowLayersAll = [];
         if (labeling.shadow && labeling.shadow.enabled) {
           const sh = labeling.shadow;
-          const { r: sr, g: sg, b: sb } = hexToRgb(sh.color);
+          const [sr, sg, sb] = hexToRgb(sh.color);
           const shadowAlpha = (sh.opacity / 100).toFixed(2);
           const shadowRgba = `rgba(${sr},${sg},${sb},${shadowAlpha})`;
           // QGIS define a sombra por ângulo (sentido anti-horário, 0° = direita) e
@@ -2587,23 +2610,15 @@ const POINT_ANCHOR_TO_DIRECTION = {
         }
         if (labeling.buffer && labeling.buffer.enabled) {
           const bufferPx = Math.max(0.1, mmToPx(labeling.buffer.size));
-          const { r, g, b } = hexToRgb(labeling.buffer.color);
+          const [r, g, b] = hexToRgb(labeling.buffer.color);
           const bufferAlpha = (labeling.buffer.opacity / 100).toFixed(2);
           const bufferRgba = `rgba(${r},${g},${b},${bufferAlpha})`;
-          // Técnica de contorno via text-shadow empilhado em várias direções (funciona em
-          // qualquer navegador, ao contrário de -webkit-text-stroke sozinho) — aproxima o
-          // "Buffer de texto" do QGIS. Quanto maior o buffer, mais amostras no anel para
-          // manter o contorno contínuo (sem "picos") ao redor das letras.
-          const steps = bufferPx <= 2 ? 8 : 16;
-          for (let i = 0; i < steps; i++) {
-            const angle = (2 * Math.PI * i) / steps;
-            const dx = (bufferPx * Math.cos(angle)).toFixed(2);
-            const dy = (bufferPx * Math.sin(angle)).toFixed(2);
-            shadowLayersAll.push(`${dx}px ${dy}px 0 ${bufferRgba}`);
-          }
-          // Reforço para navegadores WebKit/Blink: contorno vetorial mais nítido por cima do text-shadow.
-          styleParts.push(`-webkit-text-stroke:${(bufferPx * 0.6).toFixed(1)}px ${bufferRgba}`);
+          // Contorno único: um traço (stroke) desenhado ATRÁS do preenchimento (paint-order),
+          // com o dobro da espessura, para o buffer crescer só para fora das letras.
+          // Sem cópias deslocadas do texto.
+          styleParts.push(`-webkit-text-stroke:${(bufferPx * 2).toFixed(2)}px ${bufferRgba}`);
           styleParts.push(`paint-order:stroke fill`);
+          styleParts.push(`stroke-linejoin:round`);
         }
         if (shadowLayersAll.length) {
           styleParts.push(`text-shadow:${shadowLayersAll.join(',')}`);
@@ -2613,7 +2628,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
         // ---- Plano de Fundo: envolve o texto num contêiner com background/padding/border-radius ----
         if (labeling.background && labeling.background.enabled) {
           const bg = labeling.background;
-          const { r, g, b } = hexToRgb(bg.color);
+          const [r, g, b] = hexToRgb(bg.color);
           const bgAlpha = (bg.opacity / 100).toFixed(2);
           const padXPx = Math.max(0, mmToPx(bg.padX)).toFixed(1);
           const padYPx = Math.max(0, mmToPx(bg.padY)).toFixed(1);
@@ -2868,6 +2883,9 @@ const POINT_ANCHOR_TO_DIRECTION = {
     ["Linha de chamada","sub"],
     ["callout.enabled","Desenhar linha de chamada","chk"],["callout.color","Cor da linha","cor"],["callout.width","Espessura da linha (mm)","num",0.1,5,0.1]
   ];
+  // Posição vertical: na tela, valor maior = rótulo para cima (internamente continua o deslocamento em pixels do Leaflet, positivo = para baixo)
+  var ROT_INV_Y={"positioning.point.offsetY":1,"positioning.polygon.offsetY":1,"positioning.line.offset":1};
+  function rotNeg(v){return v===0?0:-v}
   function rotGet(p){return p.split(".").reduce(function(o,k){return o&&o[k]},rotDraft)}
   function rotSet(p,v){var a=p.split("."),o=rotDraft;while(a.length>1)o=o[a.shift()];o[a[0]]=v}
   function initRot(c){
@@ -2909,6 +2927,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     byId("rot-campo").value=campos.indexOf(rotDraft.field)>-1?rotDraft.field:"";
     box.querySelectorAll("[data-p]").forEach(function(el){
       var v=rotGet(el.dataset.p);
+      if(ROT_INV_Y[el.dataset.p]&&typeof v==="number")v=rotNeg(v);
       if(el.type==="checkbox")el.checked=!!v;else el.value=el.type==="color"?hex6(v):v;
     });
     mostrarRot();
@@ -2922,12 +2941,13 @@ const POINT_ANCHOR_TO_DIRECTION = {
     else if(el.dataset&&el.dataset.p){
       var v;
       if(el.type==="checkbox")v=el.checked;
-      else if(el.type==="number"){v=parseFloat(String(el.value).replace(",","."));if(!isFinite(v))return}
+      else if(el.type==="number"){v=parseFloat(String(el.value).replace(",","."));if(!isFinite(v))return;if(ROT_INV_Y[el.dataset.p])v=rotNeg(v)}
       else v=el.value;
       rotSet(el.dataset.p,v);
     }else return;
     mostrarRot();
     c.labeling=JSON.parse(JSON.stringify(rotDraft));rotular(c); // mostra no mapa na hora; só vira histórico ao Aplicar/OK
+    agendarSyncLayout(40); // e o layout acompanha na hora
   }
   // Grava o que mudou na aba Rótulos. Devolve true se havia mudança.
   function commitRot(c){
@@ -3247,7 +3267,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     if(c.visible)c.leaf.addTo(map);
     selIds=new Set([c.id]);ativaId=c.id;ancora=c.id;
     if(!op.semAjuste)ajustar([c]);
-    aposMudar(op.semHist);
+    aposMudar(op.semHist,true);
     return c;
   }
   async function lerRasterZip(l,zip){
@@ -4226,7 +4246,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
         layer.geojson.features = features;
         layer.sel = new Set();
         layer.leaf.clearLayers();
-        layer.leaf.addData(layer.geojson);rotular(layer);aposMudar();
+        layer.leaf.addData(layer.geojson);rotular(layer);aposMudar(false,layer);
 
         let msg = `${eliminatedCount} polígono(s) eliminado(s) (fundido(s) ao vizinho de maior fronteira).`;
         if (notMergedNames.length > 0) {
@@ -4250,7 +4270,8 @@ const POINT_ANCHOR_TO_DIRECTION = {
       var bounds=map.getBounds(),last=viewHistory.stack[viewHistory.index];
       if(last&&last.equals(bounds,0.0001))return;
       viewHistory.stack=viewHistory.stack.slice(0,viewHistory.index+1);
-      viewHistory.stack.push(bounds);viewHistory.index=viewHistory.stack.length-1;
+      viewHistory.stack.push(bounds);if(viewHistory.stack.length>10)viewHistory.stack.shift(); // guarda no máximo as 10 últimas vistas
+      viewHistory.index=viewHistory.stack.length-1;
     },400);
   }
   function irVista(d){
@@ -4314,7 +4335,10 @@ const POINT_ANCHOR_TO_DIRECTION = {
       {sec:"Geoprocessamento"},
       {r:"Buffer…",f:runBuffer},{r:"Recortar…",f:runClip},{r:"Fecho convexo…",f:runConvexHull},{r:"Diferença…",f:runDifference},
       {r:"Dissolver…",f:runDissolve},{r:"Interseção…",f:runIntersect},{r:"Diferença simétrica…",f:runSymmetricalDifference},{r:"União…",f:runUnion},
-      "-",{r:"Eliminar polígonos selecionados…",f:runEliminateSelected}]}
+      "-",{r:"Eliminar polígonos selecionados…",f:runEliminateSelected}]},
+    {n:"Tema",it:(window.gisTema?window.gisTema.lista:["claro"]).map(function(k){
+      return {r:function(){return (window.gisTema&&window.gisTema.get()===k?"\u2713 ":"\u2003 ")+window.gisTema.nome(k)},f:function(){window.gisTema.set(k)}};
+    })}
   ];
   (function(){
     var bar=byId("menubar"),drop=h("div");drop.id="mb-drop";drop.hidden=true;document.body.appendChild(drop);
@@ -4329,7 +4353,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
         m.it.forEach(function(it){
           if(it==="-"){drop.appendChild(h("div","mb-sep"));return}
           if(it.sec){drop.appendChild(h("div","mb-sec",it.sec));return}
-          var x=h("button",null,it.r);x.type="button";x.disabled=!!(it.off&&it.off());
+          var x=h("button",null,typeof it.r==="function"?it.r():it.r);x.type="button";x.disabled=!!(it.off&&it.off());
           x.addEventListener("click",function(){fechar();it.f()});drop.appendChild(x);
         });
         var r=b.getBoundingClientRect();drop.hidden=false;
@@ -4375,7 +4399,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
       }catch(err){console.error("Falha ao colar estilo em \""+l.name+"\":",err);falhou++}
     });
     renderCamadas();
-    if(ok){empilhar();aviso("Estilo aplicado em "+ok+" camada"+(ok===1?"":"s")+(pulou?" ("+pulou+" ignorada"+(pulou===1?"":"s")+": tipo incompatível)":"")+(falhou?" — "+falhou+" com erro":"")+".")}
+    if(ok){empilhar(false,true);aviso("Estilo aplicado em "+ok+" camada"+(ok===1?"":"s")+(pulou?" ("+pulou+" ignorada"+(pulou===1?"":"s")+": tipo incompatível)":"")+(falhou?" — "+falhou+" com erro":"")+".")}
     else if(falhou)aviso("Não foi possível aplicar o estilo (erro ao desenhar).");
     else aviso("O estilo copiado é de outro tipo de camada e não pôde ser aplicado.");
   }
@@ -4413,12 +4437,12 @@ const POINT_ANCHOR_TO_DIRECTION = {
   }
 
   /* ---- Depois de qualquer mudança nas camadas ---- */
-  function aposMudar(semHist){
+  function aposMudar(semHist,mud){
     normalizarGrupos();podarGrupos();
     selIds.forEach(function(id){if(!camadaPorId(id))selIds.delete(id)});
     if(!camadaPorId(ativaId))ativaId=null;
     ordenarPaineis();renderCamadas();atualizarBotoes();
-    if(!semHist)empilhar();
+    if(!semHist)empilhar(false,mud);
   }
   function addCamada(nome,gj,op){
     op=op||{};
@@ -4429,7 +4453,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     rotular(c);
     selIds=new Set([c.id]);ativaId=c.id;ancora=c.id;
     if(!op.semAjuste)ajustar([c]);
-    aposMudar(op.semHist);
+    aposMudar(op.semHist,true);
     return c;
   }
   function defVis(c,v){
@@ -4438,12 +4462,12 @@ const POINT_ANCHOR_TO_DIRECTION = {
     if(v){c.leaf.addTo(map);rotular(c)}else{map.removeLayer(c.leaf);clearLabelAnchors(c.id)}
     return true;
   }
-  function alternarVis(c){defVis(c,!c.visible);renderCamadas();empilhar()}
+  function alternarVis(c){defVis(c,!c.visible);renderCamadas();empilhar(false,true)}
   function mostrarOcultar(lista,v,msg){
     var mudou=false;
     lista.forEach(function(c){if(defVis(c,v))mudou=true});
     renderCamadas();
-    if(mudou)empilhar();
+    if(mudou)empilhar(false,true);
     if(msg)aviso(msg);
   }
   function todasCamadas(v){
@@ -4504,11 +4528,11 @@ const POINT_ANCHOR_TO_DIRECTION = {
   function renomearCamada(c,novo){
     if(!novo||novo===c.name){renderCamadas();return}
     if(camadas.some(function(x){return x!==c&&x.name===novo})){aviso("Já existe uma camada com esse nome.");renderCamadas();return}
-    c.name=novo;renderCamadas();empilhar();
+    c.name=novo;renderCamadas();empilhar(false,true);
   }
   function renomearGrupo(g,novo){
     if(!novo||novo===g.nome){renderCamadas();return}
-    g.nome=novo;renderCamadas();empilhar();
+    g.nome=novo;renderCamadas();empilhar(false,true);
   }
   // Toque longo (celular/tablet) abre o menu de contexto, como o botão direito no computador.
   function pressLongo(el,fn){
@@ -4639,7 +4663,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
       el.removeEventListener("pointermove",mover);el.removeEventListener("pointerup",fim);el.removeEventListener("pointercancel",fim);
       try{el.releasePointerCapture(e.pointerId)}catch(x){}
       limpar();document.body.classList.remove("arrastando-corpo");
-      if(ev.type==="pointerup"&&alvo&&moverSelecao(ids,alvo)){aposMudar();aviso("Camada"+(ids.length>1?"s movidas.":" movida."))}
+      if(ev.type==="pointerup"&&alvo&&moverSelecao(ids,alvo)){aposMudar(false,true);aviso("Camada"+(ids.length>1?"s movidas.":" movida."))}
       else renderCamadas();
     }
     el.addEventListener("pointermove",mover);el.addEventListener("pointerup",fim);el.addEventListener("pointercancel",fim);
@@ -4672,7 +4696,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     camadas.splice(camadas.indexOf(c)+1,0,cp);ordenarPaineis();
     if(cp.visible)cp.leaf.addTo(map);
     selIds=new Set([cp.id]);ativaId=cp.id;ancora=cp.id;
-    aposMudar();aviso("Camada duplicada como \""+cp.name+"\".");
+    aposMudar(false,true);aviso("Camada duplicada como \""+cp.name+"\".");
   }
   function moverExtremo(topo){
     var ids=Array.from(selIds);
@@ -4680,7 +4704,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     var mov=camadas.filter(function(c){return selIds.has(c.id)}),resto=camadas.filter(function(c){return !selIds.has(c.id)});
     mov.forEach(function(c){c.groupId=null});
     camadas=topo?resto.concat(mov):mov.concat(resto);
-    aposMudar();aviso(topo?"Movida ao topo.":"Movida para a base.");
+    aposMudar(false,true);aviso(topo?"Movida ao topo.":"Movida para a base.");
   }
   function agrupar(){
     var ids=Array.from(selIds);
@@ -4693,7 +4717,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     mov.forEach(function(c){c.groupId=g.id});
     grupos.push(g);camadas=novo;
     renomeando={t:"g",id:g.id};
-    aposMudar();
+    aposMudar(false,true);
     aviso(ids.length+" camadas agrupadas. Digite o nome do grupo.");
   }
   function desagrupar(){
@@ -4702,7 +4726,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     var n=Object.keys(gids).length;
     if(!n){aviso("Nenhuma das camadas selecionadas está em um grupo.");return}
     camadas.forEach(function(c){if(c.groupId!=null&&gids[c.groupId])c.groupId=null});
-    aposMudar();aviso(n+(n===1?" grupo desfeito.":" grupos desfeitos."));
+    aposMudar(false,true);aviso(n+(n===1?" grupo desfeito.":" grupos desfeitos."));
   }
   function recolherTodos(v){grupos.forEach(function(g){g.recolhido=v});renderCamadas()}
   function baixarBlob(blob,nome){
@@ -4737,7 +4761,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     });
     selIds=new Set();ancora=null;
     ativaId=camadas.length?camadas[camadas.length-1].id:null;
-    aposMudar();
+    aposMudar(false,true);
     aviso(ids.length===1?"Camada removida.":ids.length+" camadas removidas.");
   }
 
@@ -4947,11 +4971,11 @@ const POINT_ANCHOR_TO_DIRECTION = {
   }
   function definirFundo(k){
     if(!window.L){aviso("As bibliotecas do mapa não carregaram — verifique sua conexão.");return}
-    garantirMapa();aplicarFundo({k:k,visible:true});empilhar();
+    garantirMapa();aplicarFundo({k:k,visible:true});empilhar(false,true);
     aviso("Mapa de fundo: "+FUNDOS[k].nome+".");
   }
-  byId("fundo-vis").addEventListener("click",function(){if(fundo){aplicarFundo({k:fundo.k,visible:!fundo.visible});empilhar()}});
-  byId("fundo-x").addEventListener("click",function(){aplicarFundo(null);empilhar();aviso("Mapa de fundo removido.")});
+  byId("fundo-vis").addEventListener("click",function(){if(fundo){aplicarFundo({k:fundo.k,visible:!fundo.visible});empilhar(false,true)}});
+  byId("fundo-x").addEventListener("click",function(){aplicarFundo(null);empilhar(false,true);aviso("Mapa de fundo removido.")});
   function abrirAdicionar(){
     var ov=byId("dlg"),box=h("div","dlg-box"),ant=document.activeElement;
     box.setAttribute("role","dialog");box.setAttribute("aria-modal","true");
@@ -5025,12 +5049,99 @@ const POINT_ANCHOR_TO_DIRECTION = {
     if(s.fundo&&FUNDOS[s.fundo.k])s.fundo.d=FUNDOS[s.fundo.k]; // o Layout lê a descrição pronta (URL, crédito, zoom)
     return s;
   }
-  function empilhar(semAuto){
+  /* ---------- Histórico por diferenças: guarda só o que mudou (antes → depois), até hist.max ações ---------- */
+  var CAMPOS_CAM=["name","color","visible","groupId","symbology","labeling","isRaster","opacity","originalFileName"];
+  function js(v){return JSON.stringify(v===undefined?null:v)}
+  var gvSeq=0; // versão do conteúdo geográfico de cada camada (c._gv): igual à guardada = não precisa reconverter
+  function capturar(prev,mud){
+    // mud: undefined = reconverte tudo (seguro) | true = nenhuma feição mudou | camada = só ela mudou
+    var cam={},ordem=[];
+    camadas.forEach(function(c){
+      var L={},g=c.geojson,fs=null,m,gv,rec=prev&&prev.cam[c.id];
+      CAMPOS_CAM.forEach(function(n){L[n]=js(n==="groupId"?(c.groupId==null?null:c.groupId):(n==="symbology"||n==="labeling"?(c[n]||null):(n==="isRaster"?(c.isRaster||null):c[n])))});
+      var suja=(mud===undefined)||(mud!==true&&mud===c);
+      var igual=rec&&!suja&&c._gv!==undefined&&rec.gv===c._gv&&((rec.fs===null)===!(g&&Array.isArray(g.features)))&&(!rec.fs||rec.fs.length===g.features.length);
+      if(igual){m=rec.m;fs=rec.fs;gv=rec.gv}
+      else{
+        if(g&&Array.isArray(g.features)){
+          fs=g.features.map(js);var o={};for(var k in g)if(k!=="features")o[k]=g[k];m=js(o);
+        }else m=js(g);
+        gv=++gvSeq;c._gv=gv;
+      }
+      cam[c.id]={id:c.id,L:L,m:m,fs:fs,gv:gv};ordem.push(c.id);
+    });
+    return{cam:cam,ordem:ordem,
+      grupos:js((grupos||[]).map(function(g){var o={};for(var k in g)if(k!=="recolhido")o[k]=g[k];return o})),
+      ativaId:ativaId,proxId:proxId,proxGrupo:proxGrupo,fundo:js(fundo)};
+  }
+  function paraFoto(E){ // volta ao formato que reconstruir() entende
+    var pj=function(s){return JSON.parse(s)};
+    return{
+      camadas:E.ordem.map(function(id){
+        var x=E.cam[id],o={id:x.id};
+        CAMPOS_CAM.forEach(function(n){o[n]=pj(x.L[n])});
+        var g=pj(x.m);if(x.fs)g.features=x.fs.map(pj);
+        o.geojson=g;return o;
+      }),
+      grupos:pj(E.grupos),ativaId:E.ativaId,proxId:E.proxId,proxGrupo:E.proxGrupo,fundo:pj(E.fundo)
+    };
+  }
+  function difE(A,B){ // só o que mudou entre A e B (ou null se nada mudou)
+    var p={cam:{}},ch=false;
+    Object.keys(B.cam).forEach(function(k){
+      var a=A.cam[k],b=B.cam[k];
+      if(!a){p.cam[k]={t:"+",c:b};ch=true;return}
+      if((a.fs===null)!==(b.fs===null)){p.cam[k]={t:"*",de:a,para:b};ch=true;return}
+      var q={t:"~",f:{}},mud=false;
+      CAMPOS_CAM.forEach(function(n){if(a.L[n]!==b.L[n]){q.f[n]=[a.L[n],b.L[n]];mud=true}});
+      if(a.m!==b.m){q.m=[a.m,b.m];mud=true}
+      if(a.fs&&a.fs!==b.fs){
+        var la=a.fs.length,lb=b.fs.length,s0=0,s1=0;
+        while(s0<la&&s0<lb&&a.fs[s0]===b.fs[s0])s0++;
+        while(s1<la-s0&&s1<lb-s0&&a.fs[la-1-s1]===b.fs[lb-1-s1])s1++;
+        if(!(s0===la&&la===lb)){q.s={i:s0,de:a.fs.slice(s0,la-s1),para:b.fs.slice(s0,lb-s1)};mud=true}
+      }
+      if(mud){p.cam[k]=q;ch=true}
+    });
+    Object.keys(A.cam).forEach(function(k){if(!B.cam[k]){p.cam[k]={t:"-",c:A.cam[k]};ch=true}});
+    if(JSON.stringify(A.ordem)!==JSON.stringify(B.ordem)){p.o=[A.ordem,B.ordem];ch=true}
+    [["grupos","g"],["ativaId","a"],["proxId","x"],["proxGrupo","y"],["fundo","fd"]].forEach(function(r){
+      if(A[r[0]]!==B[r[0]]){p[r[1]]=[A[r[0]],B[r[0]]];ch=true}
+    });
+    return ch?p:null;
+  }
+  function aplicarE(E,p,fw){ // fw=true refaz (usa "depois"); fw=false desfaz (usa "antes"). Não altera E nem p.
+    var k=fw?1:0,N={cam:Object.assign({},E.cam),ordem:E.ordem,grupos:E.grupos,ativaId:E.ativaId,proxId:E.proxId,proxGrupo:E.proxGrupo,fundo:E.fundo};
+    Object.keys(p.cam).forEach(function(id){
+      var q=p.cam[id];
+      if(q.t==="+"){if(fw)N.cam[id]=q.c;else delete N.cam[id]}
+      else if(q.t==="-"){if(fw)delete N.cam[id];else N.cam[id]=q.c}
+      else if(q.t==="*"){N.cam[id]=fw?q.para:q.de}
+      else{
+        var o=N.cam[id],L=Object.assign({},o.L),m=o.m,fs=o.fs;
+        Object.keys(q.f).forEach(function(n){L[n]=q.f[n][k]});
+        if(q.m)m=q.m[k];
+        if(q.s){var rem=fw?q.s.de.length:q.s.para.length,ins=fw?q.s.para:q.s.de;fs=fs.slice(0,q.s.i).concat(ins,fs.slice(q.s.i+rem))}
+        N.cam[id]={id:o.id,L:L,m:m,fs:fs,gv:(q.m||q.s)?++gvSeq:o.gv};
+      }
+    });
+    if(p.o)N.ordem=p.o[k];if(p.g)N.grupos=p.g[k];if(p.a)N.ativaId=p.a[k];
+    if(p.x)N.proxId=p.x[k];if(p.y)N.proxGrupo=p.y[k];if(p.fd)N.fundo=p.fd[k];
+    return N;
+  }
+  function empilhar(semAuto,mud){
     if(restaurando||!map)return;
-    hist.pilha=hist.pilha.slice(0,hist.i+1);
-    hist.pilha.push(foto());
-    if(hist.pilha.length>hist.max)hist.pilha.shift();
-    hist.i=hist.pilha.length-1;if(!semAuto){naoExportado=true;agendarAutosave()}agendarSyncLayout();
+    var B=capturar(hist.i<0?null:hist.E,mud);
+    if(hist.i<0||!hist.E){hist.E=B;hist.pilha=[];hist.i=0} // ponto de partida: não é uma ação
+    else{
+      var p=difE(hist.E,B);hist.E=B;
+      if(p){
+        hist.pilha=hist.pilha.slice(0,hist.i);hist.pilha.push(p);
+        if(hist.pilha.length>hist.max)hist.pilha.shift();
+        hist.i=hist.pilha.length;
+      }
+    }
+    if(!semAuto){naoExportado=true;agendarAutosave()}agendarSyncLayout();
     atualizarBotoes();
   }
   function reconstruir(snap){
@@ -5058,13 +5169,14 @@ const POINT_ANCHOR_TO_DIRECTION = {
     restaurando=false;
     renderCamadas();atualizarBotoes();
   }
+  function reatribuirGv(){camadas.forEach(function(c){var r=hist.E&&hist.E.cam[c.id];if(r)c._gv=r.gv})}
   function desfazer(){
     if(!map||hist.i<=0)return;fecharPropriedades();
-    hist.i--;reconstruir(hist.pilha[hist.i]);naoExportado=true;agendarAutosave();aviso("Ação desfeita.");
+    hist.E=aplicarE(hist.E,hist.pilha[hist.i-1],false);hist.i--;reconstruir(paraFoto(hist.E));reatribuirGv();naoExportado=true;agendarAutosave();aviso("Ação desfeita.");
   }
   function refazer(){
-    if(!map||hist.i>=hist.pilha.length-1)return;fecharPropriedades();
-    hist.i++;reconstruir(hist.pilha[hist.i]);naoExportado=true;agendarAutosave();aviso("Ação refeita.");
+    if(!map||hist.i<0||hist.i>=hist.pilha.length)return;fecharPropriedades();
+    hist.E=aplicarE(hist.E,hist.pilha[hist.i],true);hist.i++;reconstruir(paraFoto(hist.E));reatribuirGv();naoExportado=true;agendarAutosave();aviso("Ação refeita.");
   }
   byId("b-desfazer").addEventListener("click",desfazer);
   byId("b-refazer").addEventListener("click",refazer);
@@ -5094,7 +5206,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     camadas.forEach(function(c){map.removeLayer(c.leaf);clearLabelAnchors(c.id)});camadas=[];ativaId=null;proxId=1;
     grupos=[];proxGrupo=1;selIds=new Set();ancora=null;renomeando=null;
     restaurando=false;
-    hist={pilha:[],i:-1,max:60};
+    hist={pilha:[],i:-1,max:10,E:null};
     if(snap){
       reconstruir(snap);
       var v=snap.view||VISTA_INICIAL;map.setView(v.c,v.z,{animate:false});
@@ -5111,7 +5223,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     byId("b-regua").disabled=!tem;
     byId("rem-cam").disabled=!selIds.size;
     byId("b-desfazer").disabled=hist.i<=0;
-    byId("b-refazer").disabled=hist.i>=hist.pilha.length-1;
+    byId("b-refazer").disabled=hist.i<0||hist.i>=hist.pilha.length;
     byId("vazio-mapa").hidden=tem||!!fundo;
     if(!tem)pararRegua();
   }
@@ -5297,7 +5409,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     tabTitulo(c);
   }
   // Depois de mudar atributos/feições: refaz a camada no mapa, guarda no histórico e redesenha a tabela.
-  function atualizarFeicoes(c){c.leaf.clearLayers();c.leaf.addData(c.geojson);rotular(c);empilhar();renderTabela()}
+  function atualizarFeicoes(c){c.leaf.clearLayers();c.leaf.addData(c.geojson);rotular(c);empilhar(false,c);renderTabela()}
 
   function editarCelula(c,td,i,campo){
     var f=c.geojson.features[i],props=f.properties||(f.properties={}),ant=props[campo],feito=false;
@@ -5693,7 +5805,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     if(!idx.length){aviso("Nenhuma feição selecionada.");return}
     idx.forEach(function(i){c.geojson.features.splice(i,1)});
     c.sel.clear();c.leaf.clearLayers();c.leaf.addData(c.geojson);rotular(c);
-    empilhar();atualizarTabela();
+    empilhar(false,c);atualizarTabela();
     aviso(idx.length+" feição(ões) excluída(s) de \""+c.name+"\".");
   });
 
@@ -5739,7 +5851,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
       novas.push(c);
     }
     if(pj.project&&pj.project.basemap&&!fundo)aplicarFundo(pj.project.basemap);
-    if(novas.length){ajustar(novas);aposMudar()}
+    if(novas.length){ajustar(novas);aposMudar(false,true)}
     aviso("Projeto importado: "+novas.length+" camada(s)."+(pul?" ("+pul+" mapa base ou raster sem arquivo, não importada(s))":""));
   }
   // Shapefile dentro do .zip (.shp, .shx, .dbf e, se houver, .prj/.cpg).
@@ -5834,7 +5946,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
         novas.push(addCamada(nome,t.gj,{semAjuste:true,semHist:true}));tot+=t.gj.features.length;
       }
       if(!novas.length){aviso("Nada importado de \""+f.name+"\".");return}
-      ajustar(novas);aposMudar();
+      ajustar(novas);aposMudar(false,true);
       aviso("\""+f.name+"\" importado: "+novas.length+" camada(s), "+tot+" feições."+(r.estr.length?" Atenção: SRID "+r.estr.join(", ")+" não é WGS84 e pode ficar fora do lugar.":""));
     }catch(err){console.error(err);aviso("Erro ao ler \""+f.name+"\": "+err.message)}
   }
@@ -5924,7 +6036,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
       c.geojson.features.push({type:"Feature",properties:p,geometry:g});
       c.leaf.clearLayers();c.leaf.addData(c.geojson);rotular(c);
       selIds=new Set([c.id]);ativaId=c.id;ancora=c.id;
-      renderCamadas();empilhar();
+      renderCamadas();empilhar(false,c);
       aviso("Feição adicionada à camada \""+c.name+"\".");
     }else{
       var nome=await nomeParaImportar(r.nome);
@@ -6126,14 +6238,14 @@ const POINT_ANCHOR_TO_DIRECTION = {
   function aplicarProp(){
     var c=camadaPorId(propId);
     if(!c){fecharPropriedades();return false}
-    if(c.isRaster){var nb=JSON.stringify({s:c.symbology,o:c.opacity});if(nb!==rBk){rBk=nb;empilhar();aviso("Simbologia do raster \""+c.name+"\" atualizada.")}return true}
+    if(c.isRaster){var nb=JSON.stringify({s:c.symbology,o:c.opacity});if(nb!==rBk){rBk=nb;empilhar(false,true);aviso("Simbologia do raster \""+c.name+"\" atualizada.")}return true}
     var rotMudou=commitRot(c);
     var rr=propDraft.renderer;
     if(rr==="categorized"||rr==="graduated"){
-      live();propBk=JSON.stringify(c.symbology||null);propTocado={};renderCamadas();empilhar();
+      live();propBk=JSON.stringify(c.symbology||null);propTocado={};renderCamadas();empilhar(false,true);
       aviso("Simbologia da camada \""+c.name+"\" atualizada.");return true;
     }
-    if(!Object.keys(propTocado).length){if(rotMudou){empilhar();aviso('Rótulos da camada atualizados.')}return true}
+    if(!Object.keys(propTocado).length){if(rotMudou){empilhar(false,true);aviso('Rótulos da camada atualizados.')}return true}
     if(propTocado.esp&&propDraft.strokeStyle!=="none"){
       var v=parseFloat(String(byId("lp-esp").value).replace(",","."));
       if(!isFinite(v)||v<0){aviso("Digite uma espessura de contorno válida (0 ou mais).");byId("lp-esp").focus();return false}
@@ -6157,7 +6269,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     c.symbology=sym;
     restilizar(c);renderCamadas();
     if(propTocado.cor&&c.color!==corAntes)guardarRecente(c.color);
-    propBk=JSON.stringify(c.symbology||null);propTocado={};empilhar();
+    propBk=JSON.stringify(c.symbology||null);propTocado={};empilhar(false,true);
     aviso("Simbologia da camada \""+c.name+"\" atualizada.");
     return true;
   }
@@ -7139,7 +7251,7 @@ function initCG(c){
     };
   }
   function enviarLayout(completo){try{if(chLay&&map)chLay.postMessage({type:"snapshot",snapshot:instantaneoLayout(completo===true)})}catch(e){console.error("Layout:",e)}}
-  function agendarSyncLayout(){if(!chLay)return;clearTimeout(syncT);syncT=setTimeout(enviarLayout,300)}
+  function agendarSyncLayout(ms){if(!chLay)return;clearTimeout(syncT);syncT=setTimeout(function(){enviarLayout()},ms==null?300:ms)}
   if(chLay)chLay.onmessage=function(e){if(e.data&&e.data.type==="pedido")enviarLayout(true)};
   byId("b-layout").addEventListener("click",function(){
     if(!camadas.length){aviso("Adicione uma camada ao mapa antes de montar o layout.");return}
@@ -7175,7 +7287,7 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
 }
 </style>
 <div id="color-picker-overlay">
-  <div id="color-picker-popover" role="dialog" aria-modal="true" aria-labelledby="cp-titulo">
+  <div id="color-picker-popover" role="dialog" aria-modal="false" aria-labelledby="cp-titulo">
     <div class="cp-header">
       <span id="cp-titulo">Selecionar cor</span>
       <button type="button" class="cp-close" id="cp-close-btn" aria-label="Fechar">&times;</button>
@@ -7194,6 +7306,13 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
       <div class="cp-sv-row" id="cp-sat-row">
         <div class="cp-sv-fill" id="cp-sat-fill"></div>
         <div class="cp-sv-handle" id="cp-sat-handle"></div>
+      </div>
+      <div id="cp-alpha-box" hidden>
+        <div class="cp-bar-label">Opacidade <span id="cp-alpha-val">100%</span></div>
+        <div class="cp-sv-row cp-alpha-row" id="cp-alpha-row">
+          <div class="cp-sv-fill" id="cp-alpha-fill"></div>
+          <div class="cp-sv-handle" id="cp-alpha-handle"></div>
+        </div>
       </div>
       <div class="cp-hex-row">
         <span>#</span>
@@ -7226,6 +7345,8 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
   var cpSatRow=document.getElementById('cp-sat-row'),cpSatFill=document.getElementById('cp-sat-fill'),cpSatHandle=document.getElementById('cp-sat-handle');
   var cpPrevOld=document.getElementById('cp-prev-old'),cpPrevNew=document.getElementById('cp-prev-new');
   var cpTarget=null,cpOriginal='#000000',cpDraft='#000000';
+  var cpAlphaBox=document.getElementById('cp-alpha-box'),cpAlphaRow=document.getElementById('cp-alpha-row'),cpAlphaFill=document.getElementById('cp-alpha-fill'),cpAlphaHandle=document.getElementById('cp-alpha-handle'),cpAlphaVal=document.getElementById('cp-alpha-val');
+  var cpAlpha=1,cpAlphaOrig=1,cpAlphaOn=false;
   var cpHue=120,cpSat=1,cpVal=1,cpWheelGeom=null;
 
   function toast(t){var e=document.getElementById('aviso-t');if(!e)return;e.textContent=t;e.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(function(){e.hidden=true},2800)}
@@ -7277,10 +7398,19 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
     cpSatFill.style.background='linear-gradient(to right, '+hsvToHex(cpHue,0,cpVal)+', '+hsvToHex(cpHue,1,cpVal)+')';
     cpSatHandle.style.left=(cpSat*cpSatRow.offsetWidth)+'px';
   }
-  function refreshBars(){updateWheelHandlePosition();updateValBar();updateSatBar()}
+  function rgbaOf(hex,a){return 'rgba('+parseInt(hex.substr(1,2),16)+','+parseInt(hex.substr(3,2),16)+','+parseInt(hex.substr(5,2),16)+','+a+')'}
+  // amostra com xadrez por trás, para a transparência aparecer
+  function paintSwatch(el,hex,a){var c=rgbaOf(hex,a);el.style.background='linear-gradient('+c+','+c+'), repeating-conic-gradient(#bdbdbd 0% 25%, #fff 0% 50%) 0 0/10px 10px'}
+  function updateAlphaBar(){
+    var hex=hsvToHex(cpHue,cpSat,cpVal);
+    cpAlphaFill.style.background='linear-gradient(to right, '+rgbaOf(hex,0)+', '+hex+')';
+    cpAlphaHandle.style.left=(cpAlpha*cpAlphaRow.offsetWidth)+'px';
+    cpAlphaVal.textContent=Math.round(cpAlpha*100)+'%';
+  }
+  function refreshBars(){updateWheelHandlePosition();updateValBar();updateSatBar();updateAlphaBar()}
 
   // A cor escolhida fica só no modal (rascunho); só vai para o campo quando clicar em Aplicar.
-  function showDraft(hex){cpDraft=hex;cpHex.value=hex.replace('#','').toUpperCase();cpPrevNew.style.background=hex}
+  function showDraft(hex){cpDraft=hex;cpHex.value=hex.replace('#','').toUpperCase();paintSwatch(cpPrevNew,hex,cpAlpha)}
   function setColorFromHex(hex){
     var hsv=hexToHsv(hex);
     cpHue=hsv.h;cpSat=hsv.s;cpVal=hsv.v;
@@ -7290,15 +7420,22 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
 
   function openColorPicker(target){
     cpTarget=target;cpOriginal=target.get();
-    cpPrevOld.style.background=cpOriginal;
+    // a barra de opacidade só aparece quando o campo tem uma opacidade ligada a ele
+    cpAlphaOn=!!(target.setAlpha&&target.getAlpha);
+    cpAlpha=cpAlphaOn?Math.max(0,Math.min(1,(parseFloat(target.getAlpha())||0)/100)):1;
+    cpAlphaOrig=cpAlpha;cpAlphaBox.hidden=!cpAlphaOn;
+    paintSwatch(cpPrevOld,cpOriginal,cpAlpha);
     cpOverlay.classList.add('show'); // precisa estar visível para medir as barras
+    cpPosicionar();
     setColorFromHex(cpOriginal);
   }
   function closeColorPicker(){cpOverlay.classList.remove('show');cpTarget=null}
   function applyColorPicker(){
     var t=cpTarget,hex=cpDraft,mudou=hex.toLowerCase()!==cpOriginal.toLowerCase();
+    var pct=Math.round(cpAlpha*100),mudouA=!!(t&&cpAlphaOn&&pct!==Math.round(cpAlphaOrig*100));
     closeColorPicker();
     if(t&&mudou)t.set(hex);
+    if(t&&mudouA)t.setAlpha(pct);
   }
 
   // Arrastar com mouse, caneta ou dedo
@@ -7322,6 +7459,12 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
   arrastar(cpSatRow,function(e){
     var rect=cpSatRow.getBoundingClientRect();
     cpSat=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));setColorFromHsv();
+  });
+
+  arrastar(cpAlphaRow,function(e){
+    var rect=cpAlphaRow.getBoundingClientRect();
+    cpAlpha=Math.round(Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width))*100)/100;
+    updateAlphaBar();showDraft(cpDraft);
   });
 
   cpHex.addEventListener('change',function(){
@@ -7362,24 +7505,68 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
   document.getElementById('cp-ok-btn').addEventListener('click',applyColorPicker);
   document.getElementById('cp-cancel-btn').addEventListener('click',closeColorPicker);
   document.getElementById('cp-close-btn').addEventListener('click',closeColorPicker);
-  // toque no fundo escurecido fecha (só se o toque COMEÇOU no fundo, não ao soltar um arraste ali)
-  cpOverlay.addEventListener('pointerdown',function(e){if(e.target===cpOverlay)closeColorPicker()});
+  // Janela flutuante: arrasta pelo cabeçalho; o fundo não escurece nem bloqueia mais a tela
+  var cpPop=document.getElementById('color-picker-popover'),cpHead=cpPop.querySelector('.cp-header'),cpPos=null;
+  function cpColocar(x,y){
+    var mx=Math.max(0,window.innerWidth-cpPop.offsetWidth),my=Math.max(0,window.innerHeight-cpPop.offsetHeight);
+    cpPos={x:Math.min(Math.max(0,x),mx),y:Math.min(Math.max(0,y),my)};
+    cpPop.style.left=cpPos.x+'px';cpPop.style.top=cpPos.y+'px';
+  }
+  function cpPosicionar(){
+    if(cpPos)cpColocar(cpPos.x,cpPos.y);
+    else cpColocar((window.innerWidth-cpPop.offsetWidth)/2,Math.max(8,(window.innerHeight-cpPop.offsetHeight)/3));
+  }
+  cpHead.addEventListener('pointerdown',function(e){
+    if(e.button>0||e.target.closest('.cp-close'))return;
+    var r=cpPop.getBoundingClientRect(),dx=e.clientX-r.left,dy=e.clientY-r.top;
+    cpPop.classList.add('cp-arrastando');
+    try{cpHead.setPointerCapture(e.pointerId)}catch(_){}
+    function mover(ev){cpColocar(ev.clientX-dx,ev.clientY-dy)}
+    function soltar(ev){
+      cpPop.classList.remove('cp-arrastando');
+      cpHead.removeEventListener('pointermove',mover);cpHead.removeEventListener('pointerup',soltar);cpHead.removeEventListener('pointercancel',soltar);
+      try{cpHead.releasePointerCapture(ev.pointerId)}catch(_){}
+    }
+    cpHead.addEventListener('pointermove',mover);cpHead.addEventListener('pointerup',soltar);cpHead.addEventListener('pointercancel',soltar);
+    e.preventDefault();
+  });
+  window.addEventListener('resize',function(){if(cpOverlay.classList.contains('show'))cpPosicionar()});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&cpOverlay.classList.contains('show'))closeColorPicker()});
 
+  // Qual campo de opacidade acompanha esta cor (ou null se a cor não tem opacidade própria)
+  function opacidadeDaCor(t){
+    var ref=t.getAttribute('data-alpha-for');
+    if(ref)return document.getElementById(ref);
+    if(t.id==='lp-cor')return document.getElementById('lp-opac'); // preenchimento do símbolo simples
+    var p=t.dataset&&t.dataset.p,box=document.getElementById('lp-rot');
+    if(p&&box&&box.contains(t)&&/color$/i.test(p)) // rótulos: color→opacity, buffer.color→buffer.opacity, etc.
+      return box.querySelector('[data-p="'+p.replace(/color$/i,'opacity')+'"]');
+    return null;
+  }
   // Liga o modal a todo <input type="color"> da página (inclusive os criados depois)
   document.addEventListener('click',function(e){
     var t=e.target;
     if(t&&t.tagName==='INPUT'&&t.type==='color'&&t.id!=='cor-nativa'&&t.id!=='cp-native-color'){
       e.preventDefault();e.stopPropagation();
       if(t.disabled)return;
-      openColorPicker({
+      var alvo={
         get:function(){return /^#[0-9a-f]{6}$/i.test(t.value)?t.value:'#000000'},
         set:function(hex){
           t.value=hex;
           t.dispatchEvent(new Event('input',{bubbles:true}));
           t.dispatchEvent(new Event('change',{bubbles:true}));
         }
-      });
+      };
+      var oe=opacidadeDaCor(t);
+      if(oe&&!oe.disabled){
+        alvo.getAlpha=function(){return oe.value};
+        alvo.setAlpha=function(p){
+          oe.value=p;
+          oe.dispatchEvent(new Event('input',{bubbles:true}));
+          oe.dispatchEvent(new Event('change',{bubbles:true}));
+        };
+      }
+      openColorPicker(alvo);
     }
   },true);
 })();

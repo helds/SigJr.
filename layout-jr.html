@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Layout — GisJr</title>
+<title>Layout — GisJr.</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -63,6 +63,27 @@ aside h2{font-size:17px;margin:0 0 10px}
 .it .fundo-cred{position:absolute;right:3px;bottom:3px;max-width:92%;z-index:5;font-size:8px;line-height:1.2;padding:1px 4px;background:rgba(255,255,255,.82);color:#333;border-radius:2px;pointer-events:none}
 .it .fundo-cred a{color:inherit;text-decoration:none}
 .it.sel{outline:2px solid var(--sol);outline-offset:0}
+/* ---- seleção múltipla e menus de organizar (Levantar / Alinhar / Distribuir / Redimensionar) ---- */
+.it.multi{outline:2px dashed var(--sol);outline-offset:0}
+#lista-itens li.multi{background:var(--agua-claro)}
+.dd{display:flex;align-items:stretch;flex:none;border-radius:8px}
+.dd .b{min-width:84px;border-top-right-radius:0;border-bottom-right-radius:0;border-right-color:transparent}
+.dd-seta{display:flex;align-items:flex-end;justify-content:center;width:20px;padding:0 0 12px;border:2px solid transparent;border-left:0;border-radius:0 8px 8px 0;background:transparent;cursor:pointer}
+.dd-seta::before{content:"";border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--agua)}
+.dd:hover .b,.dd:hover .dd-seta,.dd.open .b,.dd.open .dd-seta{background:var(--agua-claro);border-color:var(--agua)}
+.dd:hover .b,.dd.open .b{border-right-color:transparent}
+.dd.off{opacity:.45}
+.dd.off .b,.dd.off .dd-seta{cursor:default}
+.dd.off:hover .b,.dd.off:hover .dd-seta{background:transparent;border-color:transparent}
+#menu-org{display:none;position:fixed;z-index:9200;min-width:270px;padding:4px;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.3);font-size:15px;user-select:none}
+#menu-org.show{display:block}
+#menu-org .mo-i{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;cursor:pointer;white-space:nowrap}
+#menu-org .mo-i:hover:not(.off){background:var(--agua-claro)}
+#menu-org .mo-i.off{opacity:.45;cursor:default}
+#menu-org .mo-i svg{width:22px;height:22px;flex:none;fill:none;stroke:var(--agua);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#menu-org .mo-t{flex:1}
+#menu-org .mo-a{margin-left:18px;font-size:13px;color:var(--tinta-2)}
+
 .it .al{display:none;position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;box-sizing:border-box;border-radius:3px;background:#fff;border:2px solid var(--sol);box-shadow:0 1px 3px rgba(0,0,0,.35);z-index:1000;touch-action:none}
 .it .al::after{content:"";position:absolute;inset:-9px} /* área de toque maior que o quadradinho */
 .it.sel .al{display:block}
@@ -87,7 +108,7 @@ aside h2{font-size:17px;margin:0 0 10px}
 .it.mapa .cont{z-index:0}
 .leaflet-container{background:#fff;font:inherit}
 .it.mapa .leaflet-container{background:transparent}
-.it.mapa .map-leaflet-div{position:absolute;left:-50%;top:-50%;width:200%;height:200%;transform-origin:center center}
+.it.mapa .map-leaflet-div{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:center center}
 .map-placeholder-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;color:var(--tinta-2);font-size:14px;pointer-events:none;z-index:1}
 .it.mapa .leaflet-tooltip.qw-label{background:transparent;border:none;box-shadow:none;padding:0;border-radius:0;color:inherit;white-space:normal;pointer-events:none}
 .it.mapa .leaflet-tooltip.qw-label::before{display:none}
@@ -95,10 +116,18 @@ aside h2{font-size:17px;margin:0 0 10px}
 .it.escala .cont{display:flex;flex-direction:column;align-items:center;justify-content:center}
 .pl input[type=number],.pl select{width:100%;font:inherit;padding:6px 8px;border:2px solid var(--agua);border-radius:8px;background:var(--campo);color:var(--tinta)}
 .pl input:disabled{opacity:.5}
+.esc-wrap{position:relative;display:block}
+.esc-wrap #p-esc{width:100%;padding-right:30px;box-sizing:border-box}
+.esc-wrap .esc-setas{position:absolute;right:5px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px}
+.esc-wrap .esc-seta{width:20px;height:13px;padding:0;border:0;border-radius:3px;background:transparent;color:var(--tinta-2);cursor:pointer;font-size:9px;line-height:13px;text-align:center}
+.esc-wrap .esc-seta:hover{background:var(--agua-claro);color:var(--tinta)}
+.esc-wrap .esc-seta:active{background:var(--agua);color:#fff}
 .lg{padding:8px 12px;height:100%;overflow:hidden;font-size:15px}
 .lg b{display:block;margin-bottom:4px}
 .lg div{display:flex;align-items:center;gap:8px;margin:2px 0}
 .lg i{width:16px;height:16px;border:1px solid #000000;border-radius:3px;flex:none}
+.lg .lgg{display:block;margin:4px 0}
+.lg .lgg .lgc{padding-left:6px}
 .esc{display:flex;flex-direction:column;justify-content:flex-end;height:100%;font-size:14px;color:#000000;padding:4px}
 .esc .r{height:10px;border:2px solid #000000;border-top:0;margin-top:2px}
 .pl{margin-bottom:12px}
@@ -111,6 +140,17 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
 .lin{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .lin label,.ck{flex:1;display:flex;align-items:center;gap:8px;color:var(--tinta);font-size:16px;margin:0}
 .ck{margin:0 0 6px}
+.lgrow{background:var(--agua-claro);border:2px solid var(--linha);border-left:6px solid var(--agua);border-radius:8px;padding:6px 8px;margin-bottom:6px;gap:6px;cursor:grab;user-select:none}
+.lgrow:hover{border-color:var(--agua)}
+.lgrow.arrastando{opacity:.4}
+.lgrow.sobre-cima{box-shadow:0 -3px 0 0 var(--agua)}
+.lgrow.sobre-baixo{box-shadow:0 3px 0 0 var(--agua)}
+.lgrow{min-width:0}
+.lgrow .ck{min-width:0;overflow:hidden}
+.lgrow .lg-nome{min-width:0;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lgrow .lg-alca{flex:none;color:var(--agua);font-size:20px;line-height:1;cursor:grab}
+.lgrow .mini{padding:4px 8px;min-width:0;flex:none}
+.lgrow .mini:disabled{opacity:.4;cursor:not-allowed}
 .lin input[type=checkbox],.ck input{width:20px;height:20px;accent-color:var(--agua);flex:none;margin:0}
 .lin input[type=color]{width:56px;height:38px;padding:2px;border:2px solid var(--linha);border-radius:6px;background:var(--campo);flex:none}
 .mini.on{background:var(--agua-claro);border-color:var(--agua)}
@@ -135,61 +175,56 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
   #palco{padding:0;background:none;overflow:visible;display:block}
   #caixa{width:1122px!important;height:793px!important}
   #pagina{transform:none!important;box-shadow:none}
-  .it.sel{outline:0}.it .al,.smart-guide,.smart-guide-point{display:none!important}
+  .it.sel,.it.multi{outline:0}.it .al,.smart-guide,.smart-guide-point{display:none!important}
+  #menu-org{display:none!important}
 }
-  /* ---- Diálogo "Modificar grade…" ---- */
-  #grid-dialog-overlay {
-    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:9000;
-    align-items:center; justify-content:center;
-  }
-  #grid-dialog-overlay.show { display:flex; }
-  .grid-dialog {
-    background:var(--card); border-radius:5px; box-shadow:0 8px 28px rgba(0,0,0,0.35);
-    width:480px; max-width:92vw; max-height:86vh; display:flex; flex-direction:column;
-    font-size:12.5px; color:var(--text);
-  }
-  .grid-dialog-header {
-    padding:10px 14px; font-weight:700; border-bottom:1px solid var(--panel-border);
-    display:flex; align-items:center; justify-content:space-between;
-  }
-  .grid-dialog-header .grid-dialog-close { cursor:pointer; color:var(--text-dim); font-size:16px; line-height:1; padding:2px 4px; }
-  .grid-dialog-header .grid-dialog-close:hover { color:var(--text); }
-  .grid-dialog-tabs { display:flex; border-bottom:1px solid var(--panel-border); background:var(--panel-bg); flex-shrink:0; }
-  .grid-dialog-tab {
-    padding:7px 12px; cursor:pointer; font-size:12px; color:var(--text-dim);
-    border-bottom:2px solid transparent; white-space:nowrap;
-  }
-  .grid-dialog-tab:hover { color:var(--text); background:var(--hover); }
-  .grid-dialog-tab.active { color:var(--text); border-bottom-color:var(--accent); font-weight:600; background:var(--card); }
-  .grid-dialog-body { padding:12px 14px; overflow-y:auto; flex:1; }
-  .grid-dialog-pane { display:none; }
-  .grid-dialog-pane.active { display:block; }
-  .grid-dialog-footer {
-    display:flex; justify-content:flex-end; gap:6px; padding:8px 14px 14px; border-top:1px solid var(--panel-border);
-  }
-  .grid-dialog-footer button {
-    padding:5px 14px; font-size:12px; border-radius:3px; cursor:pointer; border:1px solid var(--panel-border); background:var(--agua-claro);
-  }
-  .grid-dialog-footer button.primary { border:1px solid var(--accent-dark, #2b6ca3); background:var(--accent, #3388cc); color:var(--card); }
-  .grid-subsection-title {
-    font-weight:600; font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.02em;
-    margin:12px 0 5px; padding-top:8px; border-top:1px solid var(--linha);
-  }
-  .grid-subsection-title:first-child { margin-top:0; padding-top:0; border-top:none; }
-  .grid-side-block { border:1px solid var(--panel-border); border-radius:3px; padding:7px 8px; margin-bottom:7px; background:var(--papel); }
-  .grid-side-block-title { font-weight:600; font-size:12px; margin-bottom:5px; }
-  .grid-dialog-body .prop-row label { width:125px; }
-  .prop-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
-  .prop-row label { width:110px; flex-shrink:0; color:var(--text-dim); }
-  .prop-row input[type="number"], .prop-row input[type="text"], .prop-row select {
-    flex:1; padding:3px 5px; border:1px solid var(--panel-border); border-radius:2px; font-size:12px;
-  }
-  .prop-row.prop-row-checkbox label { width:auto; flex:1; color:var(--text); }
-  .prop-row.prop-row-checkbox input[type="checkbox"] { flex:0 0 auto; margin:0; cursor:pointer; }
-  .prop-row.prop-row-radio-group { flex-wrap:wrap; margin-top:-2px; }
-  .prop-row.prop-row-radio-group label { width:auto; display:flex; align-items:center; gap:3px; color:var(--text); cursor:pointer; }
-  .prop-row.prop-row-radio-group input[type="radio"] { margin:0; cursor:pointer; }
-  .prop-hint { color:var(--text-dim); font-size:11px; line-height:1.4; }
+  /* ---- Janela "Modificar grade…": flutuante, arrastável, no estilo da janela de cores ---- */
+  #grid-dialog-overlay{display:none;position:fixed;inset:0;z-index:9000;pointer-events:none}
+  #grid-dialog-overlay.show{display:block}
+  #grid-dialog{position:absolute;left:0;top:0;display:flex;flex-direction:column;width:min(440px,calc(100vw - 16px));height:min(640px,calc(100vh - 16px));height:min(640px,calc(100dvh - 16px));pointer-events:auto;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);font-size:14px;overflow:hidden;animation:gd-in .14s ease-out}
+  #grid-dialog.arrastando{box-shadow:0 18px 46px rgba(0,0,0,.5);opacity:.92}
+  @keyframes gd-in{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){#grid-dialog{animation:none}}
+  #grid-dialog .gd-header{display:flex;align-items:center;gap:4px;padding:8px 8px 8px 8px;border-bottom:2px solid var(--linha);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+  #grid-dialog.arrastando .gd-header{cursor:grabbing}
+  #grid-dialog .gd-grip{flex:none;width:18px;height:22px;color:var(--tinta-2);opacity:.75}
+  #grid-dialog .gd-title{flex:1;min-width:0;font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #grid-dialog .gd-close{flex:none;border:0;background:none;color:var(--tinta-2);font-size:26px;line-height:1;width:36px;height:36px;border-radius:8px;cursor:pointer}
+  #grid-dialog .gd-close:hover{background:var(--agua-claro)}
+  #grid-dialog .gd-tabs{display:flex;flex:none;border-bottom:2px solid var(--linha)}
+  #grid-dialog .gd-tab{flex:1;padding:10px 6px;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;background:transparent;font-size:15px;color:var(--tinta-2)}
+  #grid-dialog .gd-tab[aria-selected="true"]{border-bottom-color:var(--agua);color:var(--tinta);font-weight:700}
+  #grid-dialog .gd-tab:hover:not([aria-selected="true"]){background:var(--agua-claro)}
+  #grid-dialog .gd-body{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 14px}
+  #grid-dialog .gd-sec{margin:16px 0 8px;font-size:15px;font-weight:700}
+  #grid-dialog .gd-body>.gd-sec:first-child{margin-top:10px}
+  #grid-dialog .gd-row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);align-items:center;gap:10px;margin-bottom:8px}
+  #grid-dialog .gd-row>label{color:var(--tinta-2);line-height:1.25}
+  #grid-dialog input[type="number"],#grid-dialog input[type="text"],#grid-dialog select{width:100%;min-width:0;font:inherit;font-size:14px;padding:6px 8px;border:2px solid var(--linha);border-radius:8px;background:var(--campo);color:var(--tinta)}
+  /* setas ▲▼ para mudar os valores numéricos, sempre visíveis */
+  #grid-dialog input[type="number"]{-moz-appearance:auto;appearance:auto}
+  #grid-dialog input[type="number"]::-webkit-inner-spin-button{opacity:1;cursor:pointer;margin:0}
+  #grid-dialog input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;width:0;height:0;margin:0}
+  #grid-dialog input:focus,#grid-dialog select:focus{border-color:var(--agua)}
+  #grid-dialog select:disabled,#grid-dialog input:disabled{opacity:.55}
+  #grid-dialog .gd-unit{position:relative;display:block}
+  #grid-dialog .gd-unit.has-unit input{padding-right:8px}
+  #grid-dialog .gd-unit em{position:absolute;right:30px;top:50%;transform:translateY(-50%);font-style:normal;font-size:12px;color:var(--tinta-2);pointer-events:none}
+  #grid-dialog .gd-color{display:flex}
+  #grid-dialog .gd-color .cp-color-swatch-btn{width:64px;height:34px;flex:none;border:2px solid var(--linha);border-radius:8px}
+  #grid-dialog .gd-check{display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer}
+  #grid-dialog .gd-check input{width:20px;height:20px;margin:0;flex:none;accent-color:var(--agua);cursor:pointer}
+  #grid-dialog .gd-hint{margin:-2px 0 8px;font-size:12.5px;line-height:1.4;color:var(--tinta-2)}
+  #grid-dialog .gd-side{border:2px solid var(--linha);border-radius:10px;padding:10px;margin-bottom:8px}
+  #grid-dialog .gd-side.off .gd-side-grid{opacity:.55}
+  #grid-dialog .gd-side-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:10px;align-items:center;margin-bottom:8px}
+  #grid-dialog .gd-side-head b{font-size:15px}
+  #grid-dialog .gd-side-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  #grid-dialog .gd-side-grid label{display:block;min-width:0;font-size:12px;color:var(--tinta-2)}
+  #grid-dialog .gd-side-grid select{display:block;margin-top:3px}
+  #grid-dialog .gd-footer{display:flex;flex:none;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:2px solid var(--linha)}
+  #grid-dialog .gd-btn{padding:8px 16px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--agua);background:var(--agua);color:var(--papel)}
+  #grid-dialog .gd-btn:hover{filter:brightness(1.08)}
   .grid-empty-list { min-height:56px; border:1px solid var(--panel-border); background:var(--card); border-radius:2px; margin-bottom:6px; }
   .grid-list-box { min-height:56px; max-height:150px; overflow-y:auto; border:1px solid var(--panel-border); background:var(--card); border-radius:2px; margin-bottom:6px; }
   .grid-list-row {
@@ -205,7 +240,7 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
     flex:1; font:inherit; font-size:12px; padding:1px 3px; border:1px solid var(--accent); border-radius:2px;
   }
   .map-grids-layer {
-    position:absolute; left:25%; top:25%; width:50%; height:50%;
+    position:absolute; left:0; top:0; width:100%; height:100%;
     overflow:visible; pointer-events:none; z-index:750;
   }
   .map-grid-svg-layer { position:absolute; left:0; top:0; width:100%; height:100%; overflow:visible; }
@@ -219,9 +254,6 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
   /* Legenda: tamanhos de fonte/símbolo/espaçamentos vêm TODOS inline de
 /* ---- opções do item de mapa (grades, posição, etc.) ---- */
 #grid-dialog-overlay,#grades-corpo{--panel-bg:var(--card);--panel-border:var(--linha);--accent:var(--agua);--accent-dark:var(--agua);--hover:var(--agua-claro);--selected:var(--agua-claro);--text:var(--tinta);--text-dim:var(--tinta-2);--toolbar-bg:var(--card)}
-.grid-dialog{font-size:15px!important;width:600px!important}
-.grid-dialog .prop-row input[type=number],.grid-dialog .prop-row input[type=text],.grid-dialog .prop-row select{font-size:14px;padding:5px 7px;background:var(--campo);color:var(--tinta)}
-.grid-dialog-footer button,.grid-dialog-tab{font-size:14px!important}
 .grid-list-row{font-size:15px}
 .grid-list-box,.grid-empty-list{margin-bottom:8px}
 .par{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
@@ -235,10 +267,11 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
 .mexer-btn[aria-pressed="true"] svg{stroke:var(--papel)}
 .mexer-btn[aria-pressed="true"] small{color:var(--papel)}
   /* ---------- Seletor de cor: janela modal (Fechar / Aplicar) ---------- */
-  #color-picker-overlay{display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
-  #color-picker-overlay.show{display:flex}
-  #color-picker-popover{display:flex;flex-direction:column;width:300px;max-width:100%;max-height:100%;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);font-size:14px;overflow:hidden}
-  #color-picker-popover .cp-header{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 16px;font-weight:700;font-size:16px;border-bottom:2px solid var(--linha)}
+  #color-picker-overlay{display:none;position:fixed;inset:0;z-index:9500;background:transparent;pointer-events:none}
+  #color-picker-overlay.show{display:block}
+  #color-picker-popover{position:fixed;left:0;top:0;margin:0;pointer-events:auto;display:flex;flex-direction:column;width:300px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);font-size:14px;overflow:hidden}
+  #color-picker-popover.arrastando{opacity:.92}
+  #color-picker-popover .cp-header{cursor:move;user-select:none;-webkit-user-select:none;touch-action:none;display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 16px;font-weight:700;font-size:16px;border-bottom:2px solid var(--linha)}
   #color-picker-popover .cp-close{border:0;background:none;color:var(--tinta-2);font-size:26px;line-height:1;width:36px;height:36px;border-radius:8px;cursor:pointer}
   #color-picker-popover .cp-close:hover{background:var(--agua-claro)}
   #color-picker-popover .cp-body{padding:12px 16px;overflow-y:auto;min-height:0}
@@ -253,6 +286,8 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
   #color-picker-popover .cp-sv-row{position:relative;height:22px;margin-bottom:12px;cursor:crosshair;touch-action:none;border:1px solid color-mix(in srgb,var(--tinta) 35%,transparent)}
   #color-picker-popover .cp-sv-fill{position:absolute;top:0;left:0;right:0;bottom:0}
   #color-picker-popover .cp-sv-handle{position:absolute;top:-3px;width:6px;height:28px;background:#333;border:1px solid #fff;border-radius:2px;transform:translateX(-50%);pointer-events:none}
+  #color-picker-popover .cp-alpha-row{background:repeating-conic-gradient(#bdbdbd 0% 25%,#fff 0% 50%) 0 0/12px 12px}
+  #color-picker-popover #cp-alpha-box[hidden]{display:none}
   #color-picker-popover .cp-hex-row{display:flex;align-items:center;gap:8px;margin-top:4px}
   #color-picker-popover .cp-hex-row input{flex:1;min-width:0;border:2px solid var(--linha);border-radius:8px;padding:6px 8px;font:inherit;background:var(--campo);color:var(--tinta);text-transform:uppercase}
   #color-picker-popover .cp-prev{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--tinta-2)}
@@ -281,7 +316,6 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
   
   .lin .cp-color-swatch-btn{width:56px;height:38px;flex:none;border:2px solid var(--linha);border-radius:6px}
   .pl .cp-color-swatch-btn{width:56px;height:38px;border:2px solid var(--linha);border-radius:6px}
-  .prop-row .cp-color-swatch-btn{width:56px;height:26px;flex:none}
   #color-picker-popover{font-family:inherit}
 
 /* ---------- abas da direita: Propriedades | Camadas ---------- */
@@ -422,6 +456,7 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
   <symbol id="i-lua" viewBox="0 0 24 24"><path d="M20 14A8 8 0 0110 4a8 8 0 1010 10z"/></symbol>
   <symbol id="i-lixo" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
   <symbol id="i-copia" viewBox="0 0 24 24"><path d="M8 8h12v12H8zM4 16V4h12"/></symbol>
+  <symbol id="i-colar" viewBox="0 0 24 24"><path d="M9 4h6v3H9zM15 5.5h3V21H6V5.5h3M9 12h6M9 16h6"/></symbol>
   <symbol id="i-cima" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
   <symbol id="i-baixo" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
   <symbol id="i-mais" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="M15 15l6 6M10 7v6M7 10h6"/></symbol>
@@ -437,7 +472,32 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
   <symbol id="i-mexer" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></symbol>
   <symbol id="i-lapis" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/></symbol>
   <symbol id="i-layouts" viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></symbol>
+  <symbol id="i-desfazer" viewBox="0 0 24 24"><path d="M9 6L4 11l5 5M4 11h10a5 5 0 010 10h-4"/></symbol>
+  <symbol id="i-refazer" viewBox="0 0 24 24"><path d="M15 6l5 5-5 5M20 11H10a5 5 0 000 10h4"/></symbol>
   <symbol id="i-foco" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="o-levantar" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="4" y="13" width="10" height="7"/><rect x="10" y="9" width="10" height="7" style="fill:var(--card)"/><path d="M7 9V3M4.6 5.4L7 3l2.4 2.4"/></g></symbol>
+  <symbol id="o-baixar" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="10" y="13" width="10" height="7"/><rect x="4" y="9" width="10" height="7" style="fill:var(--card)"/><path d="M17 3v6M14.6 6.6L17 9l2.4-2.4"/></g></symbol>
+  <symbol id="o-frente" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="3" y="3" width="12" height="12" stroke-dasharray="2.4 2.4"/><rect x="9" y="9" width="12" height="12" style="fill:var(--card)"/></g></symbol>
+  <symbol id="o-tras" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="9" y="9" width="12" height="12"/><rect x="3" y="3" width="12" height="12" style="fill:var(--card)" stroke-dasharray="2.4 2.4"/></g></symbol>
+  <symbol id="o-al-esq" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M3 2V22"/><rect x="4" y="5" width="12" height="5"/><rect x="4" y="14" width="8" height="5"/></g></symbol>
+  <symbol id="o-al-cen" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M12 2V22"/><rect x="5" y="5" width="14" height="5"/><rect x="8" y="14" width="8" height="5"/></g></symbol>
+  <symbol id="o-al-dir" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M21 2V22"/><rect x="8" y="5" width="12" height="5"/><rect x="12" y="14" width="8" height="5"/></g></symbol>
+  <symbol id="o-al-topo" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M2 3H22"/><rect x="5" y="4" width="5" height="12"/><rect x="14" y="4" width="5" height="8"/></g></symbol>
+  <symbol id="o-al-vcen" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M2 12H22"/><rect x="5" y="5" width="5" height="14"/><rect x="14" y="8" width="5" height="8"/></g></symbol>
+  <symbol id="o-al-base" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M2 21H22"/><rect x="5" y="8" width="5" height="12"/><rect x="14" y="12" width="5" height="8"/></g></symbol>
+  <symbol id="o-di-esq" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M4 2V22" stroke-width="1"/><path d="M10 2V22" stroke-width="1"/><path d="M16 2V22" stroke-width="1"/><rect x="4" y="4" width="5" height="6"/><rect x="10" y="9" width="5" height="11"/><rect x="16" y="6" width="5" height="6"/></g></symbol>
+  <symbol id="o-di-hcen" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M5 2V22" stroke-width="1"/><path d="M12 2V22" stroke-width="1"/><path d="M19 2V22" stroke-width="1"/><rect x="3" y="4" width="4" height="6"/><rect x="9" y="9" width="6" height="11"/><rect x="17" y="6" width="4" height="6"/></g></symbol>
+  <symbol id="o-di-hesp" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="3" y="5" width="4" height="8"/><rect x="10" y="8" width="4" height="12"/><rect x="17" y="5" width="4" height="10"/><path d="M7 11H10M14 11H17"/></g></symbol>
+  <symbol id="o-di-dir" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M8 2V22" stroke-width="1"/><path d="M14 2V22" stroke-width="1"/><path d="M20 2V22" stroke-width="1"/><rect x="3" y="4" width="5" height="6"/><rect x="9" y="9" width="5" height="11"/><rect x="15" y="6" width="5" height="6"/></g></symbol>
+  <symbol id="o-di-topo" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M2 4H22" stroke-width="1"/><path d="M2 10H22" stroke-width="1"/><path d="M2 16H22" stroke-width="1"/><rect x="4" y="4" width="6" height="5"/><rect x="9" y="10" width="11" height="5"/><rect x="6" y="16" width="6" height="5"/></g></symbol>
+  <symbol id="o-di-vcen" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M2 5H22" stroke-width="1"/><path d="M2 12H22" stroke-width="1"/><path d="M2 19H22" stroke-width="1"/><rect x="4" y="3" width="6" height="4"/><rect x="9" y="9" width="11" height="6"/><rect x="6" y="17" width="6" height="4"/></g></symbol>
+  <symbol id="o-di-vesp" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="5" y="3" width="8" height="4"/><rect x="8" y="10" width="12" height="4"/><rect x="5" y="17" width="10" height="4"/><path d="M11 7V10"/><path d="M11 14V17"/></g></symbol>
+  <symbol id="o-di-base" viewBox="0 0 24 24"><g stroke-width="1.6"><path d="M2 8H22" stroke-width="1"/><path d="M2 14H22" stroke-width="1"/><path d="M2 20H22" stroke-width="1"/><rect x="4" y="3" width="6" height="5"/><rect x="9" y="9" width="11" height="5"/><rect x="6" y="15" width="6" height="5"/></g></symbol>
+  <symbol id="o-re-estreito" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="2" y="4" width="20" height="6"/><rect x="6" y="14" width="12" height="6"/><path d="M6 2V22M18 2V22" stroke-width="1" stroke-dasharray="2 2"/></g></symbol>
+  <symbol id="o-re-amplo" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="6" y="4" width="12" height="6"/><rect x="2" y="14" width="20" height="6"/><path d="M2 2V22M22 2V22" stroke-width="1" stroke-dasharray="2 2"/></g></symbol>
+  <symbol id="o-re-curto" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="4" y="2" width="6" height="20"/><rect x="14" y="6" width="6" height="12"/><path d="M2 6H22M2 18H22" stroke-width="1" stroke-dasharray="2 2"/></g></symbol>
+  <symbol id="o-re-alto" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="4" y="6" width="6" height="12"/><rect x="14" y="2" width="6" height="20"/><path d="M2 2H22M2 22H22" stroke-width="1" stroke-dasharray="2 2"/></g></symbol>
+  <symbol id="o-re-quad" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="4" y="4" width="16" height="16" stroke-dasharray="2.4 2.4"/><rect x="4" y="8" width="16" height="8"/></g></symbol>
 </svg>
 
 <div class="barra">
@@ -447,6 +507,10 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
     <button class="b dest" id="imprimir" type="button" title="Exportar o layout (PNG ou PDF)"><svg><use href="#i-exportar"/></svg>Exportar</button>
   </div>
   <div class="grupo">
+    <button class="b" id="b-desfazer" type="button" disabled title="Desfazer (Ctrl+Z)"><svg><use href="#i-desfazer"/></svg>Desfazer</button>
+    <button class="b" id="b-refazer" type="button" disabled title="Refazer (Ctrl+Y)"><svg><use href="#i-refazer"/></svg>Refazer</button>
+  </div>
+  <div class="grupo">
     <button class="b" data-add="mapa" type="button" title="Colocar o mapa na folha"><svg><use href="#i-mapa"/></svg>Mapa</button>
     <button class="b" data-add="legenda" type="button" title="Colocar a legenda: o que cada cor quer dizer"><svg><use href="#i-legenda"/></svg>Legenda</button>
     <button class="b" data-add="escala" type="button" title="Colocar a escala: quanto mede o mapa"><svg><use href="#i-escala"/></svg>Escala</button>
@@ -454,6 +518,12 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
     <button class="b" data-add="texto" type="button" title="Escrever um texto"><svg><use href="#i-texto"/></svg>Texto</button>
     <input type="file" id="f-img" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" hidden>
     <button class="b" data-add="fig" type="button" title="Colocar uma imagem"><svg><use href="#i-imagem"/></svg>Imagem</button>
+  </div>
+  <div class="grupo" id="g-org" role="group" aria-label="Organizar itens">
+    <div class="dd" id="dd-levantar"><button class="b" id="b-levantar" type="button" title="Mudar a ordem: levantar, baixar, trazer para a frente ou enviar para trás"><svg><use href="#o-levantar"/></svg>Levantar</button><button class="dd-seta" type="button" data-menu="levantar" aria-haspopup="menu" aria-label="Mais opções de Levantar"></button></div>
+    <div class="dd" id="dd-alinhar"><button class="b" id="b-alinhar" type="button" title="Alinhar os itens escolhidos (segure Shift e clique para escolher vários)"><svg><use href="#o-al-esq"/></svg>Alinhar</button><button class="dd-seta" type="button" data-menu="alinhar" aria-haspopup="menu" aria-label="Mais opções de Alinhar"></button></div>
+    <div class="dd" id="dd-distribuir"><button class="b" id="b-distribuir" type="button" title="Espalhar os itens escolhidos em passos iguais (segure Shift e clique para escolher vários)"><svg><use href="#o-di-hcen"/></svg>Distribuir</button><button class="dd-seta" type="button" data-menu="distribuir" aria-haspopup="menu" aria-label="Mais opções de Distribuir"></button></div>
+    <div class="dd" id="dd-tamanho"><button class="b" id="b-tamanho" type="button" title="Deixar os itens escolhidos com o mesmo tamanho (segure Shift e clique para escolher vários)"><svg><use href="#o-re-estreito"/></svg>Redimensionar</button><button class="dd-seta" type="button" data-menu="tamanho" aria-haspopup="menu" aria-label="Mais opções de Redimensionar"></button></div>
   </div>
   <div class="grupo grupo-tema">
     <label class="tema-lab">Tema<select class="tema-sel" aria-label="Tema de cores"><option value="claro">Claro</option><option value="escuro">Escuro</option><option value="oceano">Oceano</option><option value="ameixa">Ameixa</option><option value="brasa">Brasa</option></select></label>
@@ -474,25 +544,25 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
   </div>
 </div>
 <div id="grid-dialog-overlay">
-  <div class="grid-dialog">
-    <div class="grid-dialog-header">
-      <span id="grid-dialog-title">Propriedades da grade</span>
-      <span class="grid-dialog-close" id="grid-dialog-close" title="Fechar">&times;</span>
+  <div id="grid-dialog" role="dialog" aria-label="Propriedades da grade">
+    <div class="gd-header" id="grid-dialog-drag" title="Arraste para mover">
+      <svg class="gd-grip" viewBox="0 0 18 22" aria-hidden="true"><g fill="currentColor"><circle cx="6" cy="5" r="1.7"/><circle cx="12" cy="5" r="1.7"/><circle cx="6" cy="11" r="1.7"/><circle cx="12" cy="11" r="1.7"/><circle cx="6" cy="17" r="1.7"/><circle cx="12" cy="17" r="1.7"/></g></svg>
+      <span class="gd-title" id="grid-dialog-title">Propriedades da grade</span>
+      <button type="button" class="gd-close" id="grid-dialog-close" aria-label="Fechar">&times;</button>
     </div>
-    <div class="grid-dialog-tabs">
-      <div class="grid-dialog-tab active" data-grid-tab="appearance">Aparência</div>
-      <div class="grid-dialog-tab" data-grid-tab="frame">Quadro de grade</div>
-      <div class="grid-dialog-tab" data-grid-tab="coords">Coordenadas</div>
+    <div class="gd-tabs" role="tablist">
+      <button type="button" role="tab" class="gd-tab" data-grid-tab="appearance" aria-selected="true">Aparência</button>
+      <button type="button" role="tab" class="gd-tab" data-grid-tab="coords" aria-selected="false">Coordenadas</button>
     </div>
-    <div class="grid-dialog-body" id="grid-dialog-body"></div>
-    <div class="grid-dialog-footer">
-      <button id="grid-dialog-done">Fechar</button>
+    <div class="gd-body" id="grid-dialog-body"></div>
+    <div class="gd-footer">
+      <button type="button" class="gd-btn" id="grid-dialog-done">Fechar</button>
     </div>
   </div>
 </div>
 <div id="lays-ov">
   <header class="ly-topo">
-    <div class="ly-logo">Gis<span>Jr</span></div>
+    <div class="ly-logo">Gis<span>Jr.</span></div>
     <select class="tema-sel tema-hall" aria-label="Tema de cores"><option value="claro">Claro</option><option value="escuro">Escuro</option><option value="oceano">Oceano</option><option value="ameixa">Ameixa</option><option value="brasa">Brasa</option></select>
   </header>
   <main class="ly-main" role="dialog" aria-modal="true" aria-label="Layouts do mapa">
@@ -528,7 +598,7 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
   </div>
 </div>
 <div id="color-picker-overlay">
-  <div id="color-picker-popover" role="dialog" aria-modal="true" aria-labelledby="cp-titulo">
+  <div id="color-picker-popover" role="dialog" aria-labelledby="cp-titulo">
     <div class="cp-header">
       <span id="cp-titulo">Selecionar cor</span>
       <button type="button" class="cp-close" id="cp-close-btn" aria-label="Fechar">&times;</button>
@@ -547,6 +617,13 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
       <div class="cp-sv-row" id="cp-sat-row">
         <div class="cp-sv-fill" id="cp-sat-fill"></div>
         <div class="cp-sv-handle" id="cp-sat-handle"></div>
+      </div>
+      <div id="cp-alpha-box" hidden>
+        <div class="cp-bar-label">Opacidade <span id="cp-alpha-val">100%</span></div>
+        <div class="cp-sv-row cp-alpha-row" id="cp-alpha-row">
+          <div class="cp-sv-fill" id="cp-alpha-fill"></div>
+          <div class="cp-sv-handle" id="cp-alpha-handle"></div>
+        </div>
       </div>
       <div class="cp-hex-row">
         <span>#</span>
@@ -579,7 +656,7 @@ var rascunho=false; // layout novo, ainda não salvo: só entra na lista quando 
 if(lid){try{if(!JSON.parse(localStorage.getItem("mapinha:layouts:"+GRUPO)||"[]").some(function(x){return x.id===lid})){if(qs.get("novo")==="1")rascunho=true;else lid=""}}catch(e){lid=""}}
 var hall=!lid,CH="mapinha:layout:"+GRUPO+":"+lid;
 document.documentElement.classList.toggle("hall",hall);
-var snap={camadas:[]},ligado=false,salvo=false,itens=[],sel=null,prox=1,k=1,T=null,nomeLay="Meu layout";
+var snap={camadas:[]},ligado=false,salvo=false,itens=[],sel=null,selExtra=[],prox=1,k=1,T=null,nomeLay="Meu layout";
 var FIG=["🌳","🌊","🏠","🏫","⭐","🐟","🦜","☀️","🌧️","🚲","⛰️","❤️"];
 var PAD={titulo:{w:560,h:70,txt:"Meu mapa",tam:44,cor:"#1e7a4c"},texto:{w:300,h:90,txt:"Escreva aqui…",tam:20,cor:"#000000"},mapa:{w:640,h:480},legenda:{w:210,h:170,tit:"Legenda"},escala:{w:400,h:70},norte:{w:70,h:90},fig:{w:90,h:90,txt:"🌳"}};
 
@@ -710,14 +787,13 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
     }
     if (fmt.align) css += `text-align:${fmt.align};`;
 
-    // ---- Buffer: contorno simulado por múltiplas sombras em anel ao redor do texto ----
+    // ---- Buffer: contorno único (traço atrás do preenchimento) ----
     if (fmt.bufferEnabled) {
       const bufferSizePx = Math.max(0.1, fmt.bufferUnit === 'pt' ? fmt.bufferSize * 96 / 72 : fmt.bufferUnit === 'px' ? fmt.bufferSize : fmt.bufferSize * 3.7795275591);
-      const bw = Math.max(0.5, bufferSizePx * 2);
       const bufAlpha = (fmt.bufferOpacity !== undefined ? fmt.bufferOpacity : 100) / 100;
       const [br, bg, bb] = hexToRgbLO ? hexToRgbLO(fmt.bufferColor) : [255, 255, 255];
       const bufferRgba = `rgba(${br},${bg},${bb},${bufAlpha})`;
-      css += `text-shadow: -${bw}px -${bw}px 0 ${bufferRgba}, ${bw}px -${bw}px 0 ${bufferRgba}, -${bw}px ${bw}px 0 ${bufferRgba}, ${bw}px ${bw}px 0 ${bufferRgba};`;
+      css += `-webkit-text-stroke:${(bufferSizePx * 2).toFixed(2)}px ${bufferRgba};paint-order:stroke fill;stroke-linejoin:round;`;
     }
 
     // ---- Sombra: desenhada via um segundo text-shadow, empilhada com o
@@ -982,15 +1058,10 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       const [r, g, b] = hexToRgbLO(labeling.buffer.color);
       const bufferAlpha = (labeling.buffer.opacity / 100).toFixed(2);
       const bufferRgba = `rgba(${r},${g},${b},${bufferAlpha})`;
-      const steps = bufferPx <= 2 ? 8 : 16;
-      for (let i = 0; i < steps; i++) {
-        const angle = (2 * Math.PI * i) / steps;
-        const dx = (bufferPx * Math.cos(angle)).toFixed(2);
-        const dy = (bufferPx * Math.sin(angle)).toFixed(2);
-        shadowLayersAll.push(`${dx}px ${dy}px 0 ${bufferRgba}`);
-      }
-      styleParts.push(`-webkit-text-stroke:${(bufferPx * 0.6).toFixed(1)}px ${bufferRgba}`);
+      // Contorno único (traço atrás do preenchimento), sem cópias deslocadas do texto.
+      styleParts.push(`-webkit-text-stroke:${(bufferPx * 2).toFixed(2)}px ${bufferRgba}`);
       styleParts.push(`paint-order:stroke fill`);
+      styleParts.push(`stroke-linejoin:round`);
     }
     if (shadowLayersAll.length) styleParts.push(`text-shadow:${shadowLayersAll.join(',')}`);
     const textSpan = `<span class="qw-label-text" style="${styleParts.join(';')}">${escaped}</span>`;
@@ -1068,6 +1139,11 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
     const pos = labeling && labeling.positioning;
     const rendering = labeling && labeling.rendering;
     const currentZoom = item.leaflet.getZoom();
+    // Os deslocamentos são em pixels de tela. O mapa do layout tem outro zoom que o do index,
+    // então multiplicamos pela razão de escala entre os dois: o rótulo fica no mesmo ponto
+    // do terreno em relação à feição, igual ao que aparece no index.
+    const vz = mapProjectState && mapProjectState.viewZ;
+    const posK = (vz === null || vz === undefined || !isFinite(vz)) ? 1 : Math.pow(2, currentZoom - vz);
     const withinZoomRange = !rendering || !rendering.scaleVisibilityEnabled ||
       (currentZoom >= rendering.zoomMin && currentZoom <= rendering.zoomMax);
     const shouldLabel = labeling && labeling.enabled && labeling.field && withinZoomRange;
@@ -1085,8 +1161,8 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       if (override && override.hidden) return;
 
       const html = buildLabelHtmlLO(rawVal, labeling);
-      const extraOffX = (override && override.offsetXPx) || 0;
-      const extraOffY = (override && override.offsetYPx) || 0;
+      const extraOffX = ((override && override.offsetXPx) || 0) * posK;
+      const extraOffY = ((override && override.offsetYPx) || 0) * posK;
 
       const geomType = feature.geometry && feature.geometry.type;
       const isPoint = geomType === 'Point' || geomType === 'MultiPoint';
@@ -1096,8 +1172,8 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       if (isPoint) {
         const p = (pos && pos.point) || { anchor: 'center', offsetX: 0, offsetY: 0 };
         const cfg = POINT_ANCHOR_TO_DIRECTION_LO[p.anchor] || POINT_ANCHOR_TO_DIRECTION_LO.center;
-        const offsetXPx = mmToPxLO(p.offsetX || 0) + cfg.dx + extraOffX;
-        const offsetYPx = mmToPxLO(p.offsetY || 0) + cfg.dy + extraOffY;
+        const offsetXPx = (mmToPxLO(p.offsetX || 0) + cfg.dx) * posK + extraOffX;
+        const offsetYPx = (mmToPxLO(p.offsetY || 0) + cfg.dy) * posK + extraOffY;
         sub.bindTooltip(html, { permanent: true, direction: cfg.direction, className: 'qw-label', opacity: 1, offset: [offsetXPx, offsetYPx] });
         sub.openTooltip();
         return;
@@ -1106,7 +1182,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
         const mid = lineMidpointLO(feature);
         if (!mid) return;
         const lineCfg = (pos && pos.line) || { offset: 0 };
-        const lineOffsetYPx = mmToPxLO(lineCfg.offset || 0) + extraOffY;
+        const lineOffsetYPx = mmToPxLO(lineCfg.offset || 0) * posK + extraOffY;
         const anchor = makeInvisibleAnchorLO(mid).addTo(item.leaflet);
         anchors.push(anchor);
         anchor.bindTooltip(html, { permanent: true, direction: 'center', className: 'qw-label', opacity: 1, offset: [extraOffX, lineOffsetYPx] });
@@ -1117,8 +1193,8 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
         const centroid = polygonCentroidLO(feature);
         if (!centroid) return;
         const polyCfg = (pos && pos.polygon) || { offsetX: 0, offsetY: 0 };
-        const polyOffsetXPx = mmToPxLO(polyCfg.offsetX || 0) + extraOffX;
-        const polyOffsetYPx = mmToPxLO(polyCfg.offsetY || 0) + extraOffY;
+        const polyOffsetXPx = mmToPxLO(polyCfg.offsetX || 0) * posK + extraOffX;
+        const polyOffsetYPx = mmToPxLO(polyCfg.offsetY || 0) * posK + extraOffY;
         const anchor = makeInvisibleAnchorLO(centroid).addTo(item.leaflet);
         anchors.push(anchor);
         anchor.bindTooltip(html, { permanent: true, direction: 'center', className: 'qw-label', opacity: 1, offset: [polyOffsetXPx, polyOffsetYPx] });
@@ -1422,7 +1498,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
   }
 
   const SCALEBAR_UNIT_LABELS = { mapunits: 'un.', m: 'm', km: 'km', ft: 'ft', yd: 'yd', mi: 'mi', nm: 'nm', cm: 'cm', mm: 'mm', in: 'in' };
-  const SCALEBAR_KNOWN_STYLES = new Set(['double-box', 'single-box', 'mid-dashed', 'top-dashed', 'bottom-dashed', 'stepped', 'hollow', 'numeric']);
+  const SCALEBAR_KNOWN_STYLES = new Set(['double-box', 'single-box', 'mid-dashed', 'top-dashed', 'bottom-dashed', 'hollow', 'numeric']);
 
   // "Nice number" ceiling/floor usados pelo QGIS (qgslayoututils.cpp):
   // nextNiceNumber(4573, d=1) = 5000, prevNiceNumber(4573, d=1) = 4000, e
@@ -1472,7 +1548,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
     }
     if (mapItem.zoom !== undefined && mapItem.zoom !== null) {
       const lat = (mapItem.center && mapItem.center[0]) || 0;
-      const mapDivWidthPx = (mapItem.w || 0) * 2; // container Leaflet real = 200% do item (ver ensureMapLeaflet)
+      const mapDivWidthPx = mapItem._areaW || mapItem.w || 0; // largura real da área do Leaflet (ver ajustarAreaMapa)
       const metersPerPx = (156543.03392 * Math.cos(lat * Math.PI / 180)) / Math.pow(2, mapItem.zoom);
       return mapDivWidthPx * metersPerPx;
     }
@@ -1604,7 +1680,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
     const distancePerLeftSegment = segLeft > 0 ? (distancePerSegment / 2) / segLeft : distancePerSegment / 2;
 
     if (isNumeric) {
-      el.innerHTML = '' + RESIZE_HANDLES_HTML + '<div style="' + fontCss + ' font-size:12px;">1 : ' + (linkedMap ? Math.round(591657550 / Math.pow(2, linkedMap.zoom || 1)) : 25000) + '</div>';
+      el.innerHTML = '' + RESIZE_HANDLES_HTML + '<div style="' + fontCss + '">1 : ' + (linkedMap ? Math.round(591657550 / Math.pow(2, linkedMap.zoom || 1)) : 25000) + '</div>';
       return;
     }
 
@@ -1622,7 +1698,9 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
     function buildMarksWithWidths() {
       const marks = [];
       for (let i = segLeft; i >= 1; i--) marks.push({ dist: -i * distancePerLeftSegment, w: segLeftWidthPx });
-      marks.push({ dist: 0, w: 0 });
+      // w = largura do segmento À DIREITA da marca (withPositions soma as larguras anteriores).
+      // Com w:0 aqui o 1º segmento da direita caía em cima do zero.
+      marks.push({ dist: 0, w: segWidthPx });
       for (let i = 1; i <= segRight; i++) marks.push({ dist: i * distancePerSegment, w: segWidthPx });
       return marks;
     }
@@ -1647,7 +1725,11 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       // Espaço entre os números e a barra: fica embaixo dos números quando
       // eles estão acima da barra, e em cima deles quando estão abaixo.
       let html = '<div style="position:relative; width:' + totalWidthPx + 'px; height:' + labelRowHeightPx + 'px; ' + (labelsAbove ? 'margin-bottom:' : 'margin-top:') + gapPx + 'px;">';
+      // Segmentos à ESQUERDA do zero: o número aparece alternado (sim, não, sim…),
+      // contando a partir do zero — o 0 aparece, o 1º à esquerda some, o 2º aparece etc.
+      const zeroIdx = marks.findIndex(m => m.dist === 0);
       marks.forEach((m, idx) => {
+        if (zeroIdx > 1 && idx < zeroIdx && (zeroIdx - idx) % 2 === 1) return; // só 1 segmento à esquerda: o número sempre aparece
         const isLast = idx === marks.length - 1;
         if (isLast) {
           html += '<div style="position:absolute; left:' + m.x + 'px; ' + labelVertCss + ' display:inline-flex; align-items:baseline; gap:4px; white-space:nowrap; ' + fontCss + ' font-size:' + labelFontPx + 'px;">' +
@@ -1696,40 +1778,6 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       const dashedBarHtml = '<div style="position:relative; width:' + totalWidthPx + 'px; height:' + Math.max(segHeightPx, 10) + 'px; margin-top:' + dashedTopPad + 'px;">' + html + '</div>';
       const dashedLabelsHtml = buildLabelsRow(marks, totalWidthPx, labelsAbove ? 1 : 4);
       el.innerHTML = '' + RESIZE_HANDLES_HTML + (labelsAbove ? dashedLabelsHtml + dashedBarHtml : dashedBarHtml + dashedLabelsHtml);
-      return;
-    }
-
-    if (style === 'stepped') {
-      // "Linha escalonada": degraus subindo da esquerda para a direita —
-      // cada segmento direito sobe um degrau (altura = segHeightPx),
-      // ligados por linhas verticais, sem preenchimento.
-      const totalWidthPx = (segLeft * segLeftWidthPx) + (segRight * segWidthPx);
-      const baseH = segHeightPx;
-      let x = 0, html = '';
-      // Segmentos esquerdos: ficam na base (degrau 0), sem subir.
-      for (let i = 0; i < segLeft; i++) {
-        html += '<div style="position:absolute; left:' + x + 'px; bottom:0; width:' + segLeftWidthPx + 'px; height:1px; background:' + primary + ';"></div>';
-        x += segLeftWidthPx;
-      }
-      const zeroX = x;
-      // Segmentos direitos: cada um sobe um degrau.
-      for (let i = 0; i < segRight; i++) {
-        const stepTop = (i + 1) * (baseH / segRight);
-        html += '<div style="position:absolute; left:' + x + 'px; bottom:0; width:1px; height:' + stepTop + 'px; background:' + primary + ';"></div>';
-        html += '<div style="position:absolute; left:' + x + 'px; bottom:' + stepTop + 'px; width:' + segWidthPx + 'px; height:1px; background:' + primary + ';"></div>';
-        x += segWidthPx;
-        html += '<div style="position:absolute; left:' + x + 'px; bottom:0; width:1px; height:' + stepTop + 'px; background:' + primary + ';"></div>';
-      }
-      html += '<div style="position:absolute; left:0; width:' + zeroX + 'px; bottom:0; height:1px; background:' + primary + ';"></div>';
-      // Rótulos nas mesmas posições das marcas (esquerda1…esquerdaN, 0, direita1, direita2…)
-      const marks = [];
-      for (let i = segLeft; i >= 1; i--) marks.push({ dist: -i * distancePerLeftSegment, x: zeroX - i * segLeftWidthPx });
-      marks.push({ dist: 0, x: zeroX });
-      for (let i = 1; i <= segRight; i++) marks.push({ dist: i * distancePerSegment, x: zeroX + i * segWidthPx });
-
-      const steppedBarHtml = '<div style="position:relative; width:' + totalWidthPx + 'px; height:' + baseH + 'px; margin-top:2px;">' + html + '</div>';
-      const steppedLabelsHtml = buildLabelsRow(marks, totalWidthPx, labelsAbove ? 1 : 4);
-      el.innerHTML = '' + RESIZE_HANDLES_HTML + (labelsAbove ? steppedLabelsHtml + steppedBarHtml : steppedBarHtml + steppedLabelsHtml);
       return;
     }
 
@@ -1803,6 +1851,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
 /* padrões da barra de escala: os mesmos do layout.html, exceto 'Ajustar espessura' ligado
    (com 'Espessura fixa' de 250 km a barra sairia maior que a folha na maioria dos mapas) */
 function padroesEscala(it){
+  if(it.scalebarStyle==="stepped")it.scalebarStyle="double-box";
   var d={scalebarStyle:"double-box",scalebarMap:"",scalebarUnits:"km",unitMultiplier:1,unitLabel:"km",scalebarMethod:"middle",segmentsLeft:0,segmentsRight:2,fixedWidthMode:false,fixedSegmentWidth:250,segmentHeight:3,subdivisionsPerSegment:1,subdivisionHeight:1.5,boxMargin:1,labelMargin:1,labelPlacement:"above",primaryFill:"#000000",secondaryFill:"#ffffff",lineStyleDash:""};
   for(var k in d)if(it[k]===undefined)it[k]=d[k];
   if(it.segmentWidthAdjust===undefined)it.segmentWidthAdjust={min:50,max:150};
@@ -1827,7 +1876,7 @@ function falta(){if(!ligado&&!salvo)aviso("Não achei o mapa. Volte à aba do ma
 function recebeu(s){
   snap=s&&s.camadas?s:{camadas:[]};
   snap.camadas.forEach(function(c){if(!c.isRaster)return;if(c.originalFileBase64)b64Raster[c.id]=c.originalFileBase64;else if(b64Raster[c.id])c.originalFileBase64=b64Raster[c.id]});
-  mapProjectState={projectCrs:"EPSG:4326",selectedLayerId:snap.ativaId,layers:snap.camadas,fundo:snap.fundo||null};
+  mapProjectState={projectCrs:"EPSG:4326",selectedLayerId:snap.ativaId,layers:snap.camadas,fundo:snap.fundo||null,viewZ:(snap.view&&isFinite(snap.view.z))?snap.view.z:null};
   hasReceivedSnapshot=true;
   itens.forEach(function(it){
     if(it.t!=="mapa"||!it.leaflet)return;
@@ -1930,17 +1979,25 @@ function carregar(){
 /* ---------- itens ---------- */
 /* Propriedades comuns: fundo, borda e giro. Sem valor salvo, mapa e legenda começam com fundo branco e borda. */
 function ver(it,k){if(it[k]!==undefined)return it[k];return(k==="fundo"||k==="moldura")?(it.t==="mapa"||it.t==="legenda"):false}
+function corAlfa(c,p){ /* cor #rrggbb + opacidade 0–100 → rgba() (sem opacidade ou 100 = a própria cor) */
+  if(p==null||p>=100)return c;
+  var m=/^#([0-9a-f]{6})$/i.exec(c);if(!m)return c;
+  var n=parseInt(m[1],16);return"rgba("+(n>>16&255)+","+(n>>8&255)+","+(n&255)+","+(Math.max(0,p)/100)+")";
+}
 function estilo(it){
   var c=it._el&&it._el.querySelector(".cont");if(!c)return;
-  c.style.background=ver(it,"fundo")?(it.fundoCor||"#ffffff"):"transparent";
-  c.style.border=ver(it,"moldura")?(it.molduraEsp===undefined?3:Math.max(1,Math.round(it.molduraEsp*3.7795)))+"px solid "+(it.molduraCor||"#000000"):"0";
-  c.style.borderRadius="6px";
+  c.style.background=ver(it,"fundo")?corAlfa(it.fundoCor||"#ffffff",it.fundoAlfa):"transparent";
+  var bw=it.molduraEsp===undefined?3:(it.molduraEsp<=0?0:Math.max(1,Math.round(it.molduraEsp*3.7795)));
+  var zebra=it.t==="mapa"&&ver(it,"moldura")&&(it.molduraEstilo==="zebra"||it.molduraEstilo==="zebra-nautical"); /* zebra desenha a própria borda: sem borda CSS nem cantos arredondados */
+  c.style.border=(!zebra&&ver(it,"moldura")&&bw)?bw+"px solid "+corAlfa(it.molduraCor||"#000000",it.molduraAlfa):"0";
+  c.style.borderRadius=zebra?"0":(it.molduraRaio===undefined?6:Math.round(Math.max(0,it.molduraRaio)*37.795)/10)+"px";
   var gi=it.giro?"rotate("+it.giro+"deg)":"";
   if(it.t==="mapa"){c.style.transform="";it._el.style.transform=gi}else c.style.transform=gi; /* mapa: gira o item inteiro, como no layout completo */
   it._el.style.opacity=it.opac===undefined?"":it.opac/100;
   it._el.style.mixBlendMode=(it.mistura&&it.mistura!=="normal")?it.mistura:"";
   c.style.overflow=(it.t==="escala"||(it.giro&&it.t!=="mapa"))?"visible":"hidden";
-  if(it._m)it._m.invalidateSize();
+  invalidarMapa(it);
+  if(it.t==="mapa"&&it.leaflet&&typeof renderGridOverlayForItem==="function")renderGridOverlayForItem(it);
 }
 function getIt(id){return itens.filter(function(i){return i.id===id})[0]}
 function adicionar(t){
@@ -1957,7 +2014,13 @@ function montar(it){
   el.addEventListener("pointerdown",function(e){if(e.target.classList.contains("al"))pegar(e,it,"r",e.target.dataset.h);else pegar(e,it,"m")});
 }
 function pos(it){var s=it._el.style;s.left=it.x+"px";s.top=it.y+"px";s.width=it.w+"px";s.height=it.h+"px"}
-function marcar(){itens.forEach(function(i){if(i._el)i._el.classList.toggle("sel",i.id===sel)})}
+function marcar(){
+  if(sel===null||sel===undefined)selExtra=[];
+  selExtra=selExtra.filter(function(id,i,a){var x=getIt(id);return id!==sel&&a.indexOf(id)===i&&x&&!x.locked}); /* escolhidos além do principal (Shift + clique) */
+  itens.forEach(function(i){if(i._el){i._el.classList.toggle("sel",i.id===sel);i._el.classList.toggle("multi",selExtra.indexOf(i.id)>=0)}});
+  if(window.moldSelMudou)window.moldSelMudou();
+  if(typeof atualizaOrg==="function")atualizaOrg();
+}
 /* ---------- guias inteligentes (ímã): bordas e centros dos outros itens e da folha ---------- */
 var SNAP_PX=6; /* distância em pixels de TELA, igual em qualquer zoom */
 function limpaGuias(){[].slice.call($("pagina").querySelectorAll(".smart-guide,.smart-guide-point")).forEach(function(e){e.remove()})}
@@ -1985,7 +2048,8 @@ function desenhaGuias(vx,hy,L,T,R,B){
 function pegar(e,it,modo,dir){
   if(it.locked)return;
   var ae=document.activeElement;if(ae&&ae!==document.body&&ae.blur)ae.blur();
-  sel=it.id;marcar();props();
+  if(e.shiftKey&&modo==="m"){e.preventDefault();e.stopPropagation();alternaMulti(it.id);return} /* Shift + clique: escolhe vários itens */
+  sel=it.id;selExtra=[];marcar();props();
   if(modo==="m"&&it.t==="mapa"&&it.mexer)return; // mexendo dentro do mapa: o Leaflet cuida do arrasto
   e.preventDefault();e.stopPropagation();
   var el=it._el,x0=e.clientX,y0=e.clientY,o={x:it.x,y:it.y,w:it.w,h:it.h},MW=40,MH=30;
@@ -2029,7 +2093,7 @@ function pegar(e,it,modo,dir){
       it.x=Math.round(L);it.y=Math.round(T);it.w=Math.round(R)-it.x;it.h=Math.round(B)-it.y;
       if(vx2.length||hy2.length)desenhaGuias(uniq(vx2),uniq(hy2),it.x,it.y,it.x+it.w,it.y+it.h);else limpaGuias();
     }
-    pos(it);if(it._m)it._m.invalidateSize();if(modo==="r")desenhaConteudo(it);if(it.t==="mapa"){renderGridOverlayForItem(it);syncPos(it)}atualizaEscalas()}
+    pos(it);invalidarMapa(it);if(modo==="r")desenhaConteudo(it);if(it.t==="mapa"){renderGridOverlayForItem(it);syncPos(it)}atualizaEscalas()}
   function up(){el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up);el.removeEventListener("pointercancel",up);limpaGuias();agendar()}
   el.addEventListener("pointermove",mv);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up);
 }
@@ -2041,6 +2105,54 @@ function atualizaCampoEscala(it){
   var el=$("p-esc");if(!el||document.activeElement===el)return;
   el.value=scaleTextForZoom(it.zoom);
 }
+/* Zoom fino: com Ctrl apertado, a roda do mouse muda o zoom só uma FRAÇÃO do passo normal.
+   ZOOM_FINO = 1/3 (um terço); troque por 0.5 para metade. Só vale com "Mexer dentro do mapa" ligado. */
+var ZOOM_FINO=1/3;
+var ctrlSegurado=false; /* Ctrl de verdade: a pinça do touchpad também chega como roda com ctrlKey, mas sem tecla apertada */
+document.addEventListener("keydown",function(e){if(e.key==="Control")ctrlSegurado=true});
+document.addEventListener("keyup",function(e){if(e.key==="Control")ctrlSegurado=false});
+window.addEventListener("blur",function(){ctrlSegurado=false});
+function zoomFinoRoda(it,c){
+  var acc=0,pos=null,timer=null,ini=0;
+  c.addEventListener("wheel",function(e){
+    var m=it._m;
+    if(!it.mexer||!m||!e.ctrlKey||!ctrlSegurado)return; /* sem Ctrl (ou pinça): segue o zoom normal do Leaflet */
+    e.preventDefault();e.stopPropagation(); /* o navegador não dá zoom na página e o Leaflet não faz o passo normal */
+    acc+=L.DomEvent.getWheelDelta(e); /* mesmo delta que o Leaflet usaria (já normaliza pixel/linha/plataforma) */
+    pos=m.mouseEventToContainerPoint(e);
+    if(!ini)ini=Date.now();
+    clearTimeout(timer); /* junta as voltas da roda numa só, como o Leaflet (wheelDebounceTime) */
+    timer=setTimeout(function(){
+      var d2=acc/(m.options.wheelPxPerZoomLevel*4),
+          d3=4*Math.log(2/(1+Math.exp(-Math.abs(d2))))/Math.LN2, /* mesma curva do Leaflet = passo normal */
+          z=m.getZoom()+(acc>0?1:-1)*d3*ZOOM_FINO;
+      acc=0;ini=0;
+      z=Math.max(m.getMinZoom(),Math.min(m.getMaxZoom(),z));
+      if(z!==m.getZoom()){m.stop();m.setZoomAround(pos,z)}
+    },Math.max(m.options.wheelDebounceTime-(Date.now()-ini),0));
+  },{passive:false,capture:true});
+}
+/* Área do Leaflet = o menor retângulo que ainda cobre o quadro quando o mapa gira (it.mapRotation).
+   Sem giro é 1x (igual ao quadro); girado cresce só o necessário (no máximo ~2x em 45° para um quadro 4:3). */
+function areaMapa(W,H,graus){
+  var a=(graus||0)*Math.PI/180,c=Math.abs(Math.cos(a)),n=Math.abs(Math.sin(a));
+  if(n<1e-9)return{w:W,h:H}; /* sem giro (ou 180°): exatamente o quadro */
+  if(c<1e-9)return{w:H,h:W}; /* 90°/270°: troca largura e altura */
+  var w=Math.ceil(W*c+H*n)+2,h=Math.ceil(W*n+H*c)+2;
+  if((w-W)%2)w++;if((h-H)%2)h++; /* folga igual dos dois lados: o centro do mapa não anda meio pixel */
+  return{w:w,h:h};
+}
+function ajustarAreaMapa(it){
+  var m=it._m;if(!m||!it._el)return;
+  var c=it._el.querySelector(".cont");if(!c)return;
+  var W=c.clientWidth,H=c.clientHeight;if(!W||!H)return; /* item oculto: mantém o que já está */
+  var d=m.getContainer(),a=areaMapa(W,H,it.mapRotation),
+      gl=d.querySelector(".map-grids-layer"),ox=(a.w-W)/2,oy=(a.h-H)/2;
+  d.style.width=a.w+"px";d.style.height=a.h+"px";d.style.left=(-ox)+"px";d.style.top=(-oy)+"px";
+  if(gl){gl.style.left=ox+"px";gl.style.top=oy+"px";gl.style.width=W+"px";gl.style.height=H+"px"} /* a grade desenha só sobre o quadro */
+  it._areaW=a.w;it._areaH=a.h;
+}
+function invalidarMapa(it){if(!it||!it._m)return;ajustarAreaMapa(it);it._m.invalidateSize()}
 function criarMapa(it){
   var c=it._el.querySelector(".cont");
   var mapDiv=document.createElement("div");mapDiv.className="map-leaflet-div";c.appendChild(mapDiv);
@@ -2051,7 +2163,7 @@ function criarMapa(it){
     zoomSnap:0,zoomDelta:0.25, // zoom fracionário livre: a escala digitada (1:N) bate exatamente
     dragging:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false
   });
-  it._m=map;
+  it._m=map;zoomFinoRoda(it,c);
   var gl=document.createElement("div");gl.className="map-grids-layer";mapDiv.appendChild(gl);
   Object.defineProperty(it,"leaflet",{value:map,writable:true,configurable:true,enumerable:false}); // fora do que é salvo
   map.on("moveend",function(){
@@ -2059,8 +2171,12 @@ function criarMapa(it){
     atualizaCampoEscala(it);renderGridOverlayForItem(it);refreshLinkedScalebars(it.id);agendar();
   });
   map.on("zoom",function(){renderGridOverlayForItem(it);refreshLinkedScalebars(it.id)});
+  map.on("zoomend",function(){ // o deslocamento dos rótulos depende do zoom do item
+    if(!it._layerGroups||!mapProjectState||!mapProjectState.layers)return;
+    mapProjectState.layers.forEach(function(l){var lg=it._layerGroups.get(l.id);if(lg&&!l.isRaster&&!l.isBasemap&&l.labeling&&l.labeling.enabled)applyLabelingToItemLayer(it,l.id,lg,l)});
+  });
   setTimeout(function(){
-    map.invalidateSize();
+    invalidarMapa(it);
     if(it._needsAutoFit){var bb=findLargestVisibleLayerBounds();if(bb){it._needsAutoFit=false;fitVisivel(it,bb)}}
     applyMapRotation(it);
     refreshLinkedScalebars(it.id);
@@ -2071,9 +2187,48 @@ function mexer(it){var m=it._m,f=it.mexer?"enable":"disable";["dragging","scroll
 /* O container do Leaflet tem 200% do item (como no layout.html); para enquadrar na área VISÍVEL
    (a metade central) o afastamento das bordas soma metade do quadro visível. */
 function fitVisivel(it,b){
-  var m=it.leaflet;m.invalidateSize();var s=m.getSize();
-  m.fitBounds([[b.minLat,b.minLng],[b.maxLat,b.maxLng]],{padding:[s.x/4+10,s.y/4+10],animate:false});
+  var m=it.leaflet;invalidarMapa(it);var s=m.getSize(),c=it._el.querySelector(".cont"),W=c.clientWidth||it.w,H=c.clientHeight||it.h;
+  m.fitBounds([[b.minLat,b.minLng],[b.maxLat,b.maxLng]],{padding:[(s.x-W)/2+10,(s.y-H)/2+10],animate:false}); /* folga entre a área do Leaflet e o quadro + 10px de respiro */
   it.center=[m.getCenter().lat,m.getCenter().lng];it.zoom=m.getZoom();
+}
+/* ---------- ordem das camadas na legenda (it.lgOrdem = ids na ordem escolhida; as novas vão para o fim) ---------- */
+function lgOrdenadas(it,lista){
+  var o=it.lgOrdem||[];
+  return lista.map(function(x,i){var k=o.indexOf(x.id);return{x:x,k:k<0?1e6+i:k}}).sort(function(a,b){return a.k-b.k}).map(function(r){return r.x});
+}
+function lgNovaOrdem(ids,id,tid,depois){ /* devolve a lista de ids com `id` movido para antes/depois de `tid` */
+  var a=ids.filter(function(x){return x!==id}),i=a.indexOf(tid);
+  if(i<0||id===tid)return ids.slice();
+  a.splice(depois?i+1:i,0,id);return a;
+}
+/* ---------- classes da simbologia (Categorizado / Graduado) na legenda, como no QGIS ---------- */
+function lgClasses(l){
+  var sy=l&&!l.isRaster&&l.symbology;if(!sy)return null;
+  var r=[];
+  if(sy.renderer==="categorized"&&sy.categorized){
+    (sy.categorized.categories||[]).forEach(function(c){
+      if(c.enabled===false)return;
+      var t=(c.label!=null&&c.label!=="")?String(c.label):(c.isOther?"Todos os outros valores":((c.value===""||c.value==null)?"(vazio)":String(c.value)));
+      r.push({cor:c.color,rot:t});
+    });
+  }else if(sy.renderer==="graduated"&&sy.graduated){
+    var g=sy.graduated,p=isFinite(g.legendPrecision)?g.legendPrecision:4;
+    var f=function(v){return Number(Number(v).toFixed(p)).toLocaleString("pt-BR",{maximumFractionDigits:p})};
+    (g.breaks||[]).forEach(function(b){
+      if(b.enabled===false)return;
+      r.push({cor:b.color,rot:(b.label!=null&&b.label!=="")?String(b.label):f(b.min)+" - "+f(b.max)});
+    });
+  }
+  return r.length?r:null;
+}
+function lgHtmlCamada(it,x){
+  var ov=(it.lgOv||{})[x.id]||{},lb=ov.label!==undefined&&ov.label!==""?ov.label:x.name,tam=ov.tam>0?ov.tam:(it.lgTam||15),
+      w=ov.w>0?ov.w*3.78:16,h=ov.h>0?ov.h*3.78:16,cl=lgClasses(x),sy=lgSym(x,ov);
+  if(!cl)return'<div style="white-space:pre-line;font-size:'+tam+'px"><i style="width:'+w+'px;height:'+h+'px;background:'+lgFill(sy)+';border:'+lgBord(sy)+'"></i>'+esc(lb)+'</div>';
+  return'<div class="lgg" style="font-size:'+tam+'px"><div style="white-space:pre-line;font-weight:400">'+esc(lb)+'</div>'+cl.map(function(c){
+    var s2=Object.assign({},sy,{fc:c.cor});
+    return'<div class="lgc" style="white-space:pre-line"><i style="width:'+w+'px;height:'+h+'px;background:'+lgFill(s2)+';border:'+lgBord(s2)+'"></i>'+esc(c.rot)+'</div>';
+  }).join("")+'</div>';
 }
 /* ---------- legenda, escala, norte, textos ---------- */
 function desenhaConteudo(it){
@@ -2095,8 +2250,9 @@ function desenhaConteudo(it){
   }
   else if(it.t==="norte"){var cn=it.cor||"#000000",e0=it.estiloN||"n0";c.innerHTML=norteSvg(e0,cn,it.cor2||(NORTES[e0]?"#ffffff":cn))}
   else if(it.t==="legenda"){
-    var oc=it.lgOcultas||[],l=snap.camadas.filter(function(x){return x.visible&&oc.indexOf(x.id)<0});
-    c.innerHTML='<div class="lg" style="font-size:'+(it.lgTam||15)+'px"><b style="font-size:'+(it.lgTitTam||it.lgTam||15)+'px">'+esc(it.tit||"Legenda")+'</b>'+(l.length?l.map(function(x){var ov=(it.lgOv||{})[x.id]||{},sy=lgSym(x,ov),lb=ov.label!==undefined&&ov.label!==""?ov.label:x.name;return'<div style="white-space:pre-line;font-size:'+(ov.tam>0?ov.tam:(it.lgTam||15))+'px"><i style="width:'+(ov.w>0?ov.w*3.78:16)+'px;height:'+(ov.h>0?ov.h*3.78:16)+'px;background:'+lgFill(sy)+';border:'+lgBord(sy)+'"></i>'+esc(lb)+'</div>'}).join(""):'<div>Nenhuma camada ainda</div>')+'</div>';
+    var oc=it.lgOcultas||[],l=lgOrdenadas(it,snap.camadas.filter(function(x){return x.visible&&oc.indexOf(x.id)<0}));
+    var lgT=it.tit===undefined?"Legenda":String(it.tit);/* título vazio = sem título e sem espaço reservado */
+    c.innerHTML='<div class="lg" style="font-size:'+(it.lgTam||15)+'px">'+(lgT.trim()?'<b style="font-size:'+(it.lgTitTam||it.lgTam||15)+'px">'+esc(lgT)+'</b>':'')+(l.length?l.map(function(x){return lgHtmlCamada(it,x)}).join(""):'<div>Nenhuma camada ainda</div>')+'</div>';
   }else if(it.t==="escala")atualizaEscalas();
   estilo(it);
 }
@@ -2207,13 +2363,18 @@ function tfS(l,k,v,pr){return'<div class="pl tf"><label>'+l+'</label><select dat
 function tfC(l,k,v){return'<div class="lin"><label>'+l+'</label><input type="color" data-tf="'+k+'" data-ty="s" value="'+lgHex(v)+'"></div>'}
 function tfK(l,k,v){return'<label class="ck"><input type="checkbox" data-tf="'+k+'" data-ty="b"'+(v?" checked":"")+'> '+l+'</label>'}
 function tfR(l,k,v){return'<div class="pl"><label>'+l+': '+v+'%</label><input type="range" data-tf="'+k+'" data-ty="n" min="0" max="100" value="'+v+'"></div>'}
-function painelTexto(it){
-  var f=fmtTxt(it),es=f.bold&&f.italic?"Negrito Itálico":f.bold?"Negrito":f.italic?"Itálico":(f.style||"Normal");
-  var h='<div class="pl"><label for="p-txt">Texto</label><textarea id="p-txt" rows="3">'+esc(it.txt)+'</textarea></div>';
+function blocoFonte(f,es){
+  var h="";
   h+='<h3>Fonte</h3>'+tfS("Família","family",f.family,FONTES.map(function(x){return[x,x]}));
   h+=tfS("Estilo","style",es,[["Normal","Normal"],["Negrito","Negrito"],["Itálico","Itálico"],["Negrito Itálico","Negrito Itálico"]]);
   h+='<div class="par">'+tfN("Tamanho","size",f.size,0.5,1)+tfS("Unidade","sizeUnit",f.sizeUnit,[["pt","Pontos"],["mm","Milímetros"],["px","Pixels"]])+'</div>';
   h+=tfC("Cor","color",f.color)+tfR("Opacidade","opacity",f.opacity)+tfK("Sublinhado","underline",f.underline)+tfK("Tachado","strikeout",f.strikeout);
+  return h;
+}
+function painelTexto(it){
+  var f=fmtTxt(it),es=f.bold&&f.italic?"Negrito Itálico":f.bold?"Negrito":f.italic?"Itálico":(f.style||"Normal");
+  var h='<div class="pl"><label for="p-txt">Texto</label><textarea id="p-txt" rows="3">'+esc(it.txt)+'</textarea></div>';
+  h+=blocoFonte(f,es);
   h+='<h3>Formatação</h3>'+tfS("Caixa","textCase",f.textCase,[["none","Normal"],["upper","MAIÚSCULAS"],["lower","minúsculas"],["capitalize","Capitalizar"]]);
   h+='<div class="par">'+tfN("Letras (mm)","letterSpacing",f.letterSpacing,0.1)+tfN("Palavras (mm)","wordSpacing",f.wordSpacing,0.1)+'</div>'+tfN("Altura da linha (%)","lineHeight",f.lineHeight,5,50);
   h+='<div class="acoes" style="margin-bottom:6px">'+[["left","Esquerda"],["center","Centro"],["right","Direita"],["justify","Justif."]].map(function(x){return'<button class="mini'+(f.align===x[0]?" on":"")+'" data-tfal="'+x[0]+'" type="button">'+x[1]+'</button>'}).join("")+'</div>';
@@ -2223,8 +2384,8 @@ function painelTexto(it){
   return h;
 }
 function aplicaTF(e){
-  var t=e.target,k=t.dataset&&t.dataset.tf;if(!k)return;var it=getIt(sel);if(!it||(it.t!=="texto"&&it.t!=="titulo"))return;
-  var f=fmtTxt(it),ty=t.dataset.ty;f[k]=ty==="b"?t.checked:ty==="n"?(t.value===""?0:+t.value):t.value;
+  var t=e.target,k=t.dataset&&t.dataset.tf;if(!k)return;var it=getIt(sel);if(!it||(it.t!=="texto"&&it.t!=="titulo"&&it.t!=="escala"))return;
+  var f=it.t==="escala"?it.scalebarFont:fmtTxt(it),ty=t.dataset.ty;f[k]=ty==="b"?t.checked:ty==="n"?(t.value===""?0:+t.value):t.value;
   if(k==="style"){f.bold=false;f.italic=false}
   if(k==="opacity"&&t.previousElementSibling)t.previousElementSibling.textContent="Opacidade: "+f.opacity+"%";
   desenhaConteudo(it);agendar();
@@ -2238,7 +2399,8 @@ function painelEscala(it){
   padroesEscala(it);
   var mapas=itens.filter(function(i){return i.t==="mapa"});
   var h='<div class="pl"><label for="e-map">Mapa</label><select id="e-map">'+(mapas.length?mapas.map(function(m,i){return opt(m.id,"Mapa "+(i+1),it.scalebarMap)}).join(""):'<option value="">(nenhum mapa)</option>')+'</select></div>';
-  h+='<div class="pl"><label for="e-est">Estilo</label><select id="e-est">'+[["single-box","Caixa simples"],["double-box","Caixa dupla"],["mid-dashed","Linhas tracejadas do meio"],["bottom-dashed","Linhas tracejadas embaixo"],["top-dashed","Linhas tracejadas em cima"],["stepped","Linha escalonada"],["hollow","Oco"],["numeric","Numérico"]].map(function(x){return opt(x[0],x[1],it.scalebarStyle)}).join("")+'</select></div>';
+  h+='<div class="pl"><label for="e-est">Estilo</label><select id="e-est">'+[["single-box","Caixa simples"],["double-box","Caixa dupla"],["mid-dashed","Linhas tracejadas do meio"],["bottom-dashed","Linhas tracejadas embaixo"],["top-dashed","Linhas tracejadas em cima"],["hollow","Oco"],["numeric","Numérico"]].map(function(x){return opt(x[0],x[1],it.scalebarStyle)}).join("")+'</select></div>';
+  if(it.scalebarStyle==="numeric"){var fe=it.scalebarFont;h+=blocoFonte(fe,fe.bold&&fe.italic?"Negrito Itálico":fe.bold?"Negrito":fe.italic?"Itálico":(fe.style||"Normal"))}
   h+='<div class="pl"><label for="e-uni">Unidades</label><select id="e-uni">'+[["mapunits","Unidades do mapa"],["m","Metros"],["km","Quilômetros"],["ft","Pés"],["yd","Jardas"],["mi","Milhas"],["nm","Milhas náuticas"],["cm","Centímetros"],["mm","Milímetros"],["in","Polegadas"]].map(function(x){return opt(x[0],x[1],it.scalebarUnits)}).join("")+'</select></div>';
   h+='<div class="pl"><label for="e-sl">Segmentos à esquerda</label><input type="number" id="e-sl" min="0" step="1" value="'+it.segmentsLeft+'"></div>';
   h+='<div class="pl"><label for="e-sr">Segmentos à direita</label><input type="number" id="e-sr" min="1" step="1" value="'+it.segmentsRight+'"></div>';
@@ -2249,19 +2411,20 @@ function painelEscala(it){
   h+='<div class="pl"><label for="e-max">Máximo no papel (mm)</label><input type="number" id="e-max" min="0" step="5" value="'+it.segmentWidthAdjust.max+'"'+(it.fixedWidthMode?" disabled":"")+'></div>';
   h+='<div class="pl"><label for="e-alt">Altura (mm)</label><input type="number" id="e-alt" min="0" step="0.5" value="'+it.segmentHeight+'"></div>';
   h+='<div class="pl"><label for="e-pos">Posição dos números</label><select id="e-pos">'+opt("above","Acima da barra",it.labelPlacement)+opt("below","Abaixo da barra",it.labelPlacement)+'</select></div>';
-  h+='<div class="pl"><label for="e-tam">Tamanho da letra (pt)</label><input type="number" id="e-tam" min="4" step="1" value="'+it.scalebarFont.size+'"></div>';
+  if(it.scalebarStyle!=="numeric")h+='<div class="pl"><label for="e-tam">Tamanho da letra (pt)</label><input type="number" id="e-tam" min="4" step="1" value="'+it.scalebarFont.size+'"></div>';
   h+='<div class="lin"><label for="e-c1">Cor primária</label><input type="color" id="e-c1" value="'+it.primaryFill+'"></div><div class="lin"><label for="e-c2">Cor secundária</label><input type="color" id="e-c2" value="'+it.secondaryFill+'"></div>';
   return h;
 }
 function props(){
   var it=getIt(sel),p=$("prop");
-  if(!it){p.innerHTML='<h2>Escolha um item</h2><p class="vazio">Clique em um item da folha para mudar as cores, o texto e o tamanho.</p><p class="vazio" style="margin-top:10px">Arraste para mover. Puxe a bolinha laranja para mudar o tamanho.</p>';return}
+  if(!it){p.innerHTML='<h2>Escolha um item</h2><p class="vazio">Clique em um item da folha para mudar as cores, o texto e o tamanho.</p><p class="vazio" style="margin-top:10px">Arraste para mover. Puxe a bolinha laranja para mudar o tamanho.</p><p class="vazio" style="margin-top:10px">Para escolher vários itens, segure Shift e clique neles. Depois use Levantar, Alinhar, Distribuir e Redimensionar na barra.</p>'+(areaTransf?'<div class="acoes" style="margin-top:12px"><button class="mini" data-a="colar" type="button" title="Colar o item copiado (Ctrl+V)">'+ic("colar")+'Colar item copiado</button></div>':'');return}
   if(it.t==="legenda"&&it._lgEdit!=null){var lc=snap.camadas.filter(function(x){return x.id===it._lgEdit})[0];if(lc){p.innerHTML=painelLegItem(it,lc);decorateColorInputs(p);return}it._lgEdit=null}
   var nomes={mapa:"Mapa",titulo:"Título",legenda:"Legenda",escala:"Escala",norte:"Seta do Norte",texto:"Texto",fig:"Imagem"},h="<h2>"+nomes[it.t]+"</h2>";
+  if(selExtra.length)h+='<p class="vazio" style="margin:0 0 10px"><b>+'+selExtra.length+(selExtra.length>1?' itens também escolhidos':' item também escolhido')+'.</b> Use Levantar, Alinhar, Distribuir e Redimensionar na barra.</p>';
   if(it.t==="titulo"||it.t==="texto")h+=painelTexto(it);
   if(it.t==="legenda"){
-    var oc=it.lgOcultas||[],vis=snap.camadas.filter(function(x){return x.visible});
-    h+='<div class="pl"><label for="p-tit">Título da legenda</label><input type="text" id="p-tit" value="'+esc(it.tit||"")+'"></div><div class="par"><div class="pl"><label for="p-lgtit">Fonte do título (px)</label><input type="number" id="p-lgtit" min="6" max="120" step="1" value="'+(it.lgTitTam||it.lgTam||15)+'"></div><div class="pl"><label for="p-lgtam">Fonte das camadas (px)</label><input type="number" id="p-lgtam" min="6" max="120" step="1" value="'+(it.lgTam||15)+'"></div></div><div class="pl"><label>Camadas na legenda</label>'+(vis.length?vis.map(function(x){return'<div class="lin"><label class="ck"><input type="checkbox" data-lg="'+x.id+'"'+(oc.indexOf(x.id)<0?" checked":"")+'> '+esc(x.name)+'</label><button type="button" class="mini" data-lged="'+x.id+'">Editar</button></div>'}).join(""):'<p class="vazio">Nenhuma camada visível ainda.</p>')+'</div>';
+    var oc=it.lgOcultas||[],vis=lgOrdenadas(it,snap.camadas.filter(function(x){return x.visible}));
+    h+='<div class="pl"><label for="p-tit">Título da legenda</label><input type="text" id="p-tit" value="'+esc(it.tit||"")+'"></div><div class="par"><div class="pl"><label for="p-lgtit">Fonte do título (px)</label><input type="number" id="p-lgtit" min="6" max="120" step="1" value="'+(it.lgTitTam||it.lgTam||15)+'"></div><div class="pl"><label for="p-lgtam">Fonte das camadas (px)</label><input type="number" id="p-lgtam" min="6" max="120" step="1" value="'+(it.lgTam||15)+'"></div></div><div class="pl"><label>Camadas na legenda</label>'+(vis.length?'<div id="lg-lista">'+vis.map(function(x,i){return'<div class="lin lgrow" draggable="true" data-lgrow="'+x.id+'"><span class="lg-alca" title="Arraste para mudar a ordem" aria-hidden="true">⠿</span><label class="ck" title="'+esc(x.name)+'"><input type="checkbox" data-lg="'+x.id+'"'+(oc.indexOf(x.id)<0?" checked":"")+'><span class="lg-nome">'+esc(x.name)+'</span></label><button type="button" class="mini" data-lged="'+x.id+'">Editar</button></div>'}).join("")+'</div>':'<p class="vazio">Nenhuma camada visível ainda.</p>')+'</div>';
   }
   if(it.t==="norte")h+=painelNorte(it);
   if(it.t==="escala")h+=painelEscala(it);
@@ -2270,13 +2433,13 @@ function props(){
     if(it.img)h+='<div class="pl"><label for="p-ajuste">Encaixe</label><select id="p-ajuste">'+opt("contain","Inteira (sem cortar)",it.ajuste||"contain")+opt("cover","Preencher (pode cortar)",it.ajuste||"contain")+opt("fill","Esticar",it.ajuste||"contain")+'</select></div>';
     h+='<div class="pl"><label>Ou escolha um desenho</label><div class="figs">'+FIG.map(function(f){return'<button type="button" data-fig="'+f+'" aria-label="Imagem '+f+'">'+f+'</button>'}).join("")+'</div></div>';
   }
-  if(it.t==="mapa")h+=painelMexer(it)+painelCamadas(it)+'<h3>Escala</h3><div class="pl"><label for="p-esc">Escala do mapa</label><input type="text" id="p-esc" value="'+scaleTextForZoom(it.zoom)+'"></div>';
+  if(it.t==="mapa")h+=painelMexer(it)+painelCamadas(it)+'<h3>Escala</h3><div class="pl"><label for="p-esc">Escala do mapa</label><span class="esc-wrap"><input type="text" id="p-esc" value="'+scaleTextForZoom(it.zoom)+'" autocomplete="off"><span class="esc-setas"><button type="button" class="esc-seta" data-esc="1" tabindex="-1" aria-label="Aumentar a escala (afastar)">▲</button><button type="button" class="esc-seta" data-esc="-1" tabindex="-1" aria-label="Diminuir a escala (aproximar)">▼</button></span></span></div>';
   if(it.t==="mapa")h+=painelMapa(it);
   h+='<h3>Aparência</h3><div class="lin"><label><input type="checkbox" id="p-fun"'+(ver(it,"fundo")?" checked":"")+'> Fundo</label><input type="color" id="p-func" aria-label="Cor do fundo" value="'+(it.fundoCor||"#ffffff")+'"></div><div class="lin"><label><input type="checkbox" id="p-bor"'+(ver(it,"moldura")?" checked":"")+'> Borda</label><input type="color" id="p-borc" aria-label="Cor da borda" value="'+(it.molduraCor||"#000000")+'"></div>';
   h+='<div class="pl"><label for="p-giro">Girar: '+(it.giro||0)+'°</label><input type="range" id="p-giro" min="-180" max="180" step="5" value="'+(it.giro||0)+'"></div>';
   if(it.t==="mapa")h+=painelMapaComum(it);
   h+='<hr class="sep">';
-  h+='<div class="acoes"><button class="mini" data-a="dup" type="button">'+ic("copia")+'Duplicar</button><button class="mini" data-a="cima" type="button">'+ic("cima")+'Para frente</button><button class="mini" data-a="baixo" type="button">'+ic("baixo")+'Para trás</button><button class="mini perigo" data-a="del" type="button">'+ic("lixo")+'Apagar</button></div>';
+  h+='<div class="acoes"><button class="mini" data-a="copiar" type="button" title="Copiar o item (Ctrl+C)">'+ic("copia")+'Copiar</button><button class="mini" data-a="colar" type="button" title="Colar o item copiado (Ctrl+V)"'+(areaTransf?'':' disabled')+'>'+ic("colar")+'Colar</button><button class="mini" data-a="dup" type="button">'+ic("copia")+'Duplicar</button><button class="mini" data-a="cima" type="button">'+ic("cima")+'Para frente</button><button class="mini" data-a="baixo" type="button">'+ic("baixo")+'Para trás</button><button class="mini perigo" data-a="del" type="button">'+ic("lixo")+'Apagar</button></div>';
   p.innerHTML=h;decorateColorInputs(p);
   if(it.t==="mapa")wireGridListEvents(it);
 }
@@ -2308,7 +2471,7 @@ $("prop").addEventListener("click",function(e){
   if(b.dataset.mex){it.mexer=!it.mexer;mexer(it);props();agendar();return}
   var a=b.dataset.a,ix=itens.indexOf(it);
   if(a==="del"){apagarItem(it);return}
-  else if(a==="dup"){var c=Object.assign({},it);c.lgOcultas=(it.lgOcultas||[]).slice();c.id="i"+prox++;c.x=Math.min(W-it.w,it.x+24);c.y=Math.min(H-it.h,it.y+24);Object.keys(c).forEach(function(p){if(p[0]==="_")delete c[p]});["scalebarFont","segmentWidthAdjust","center","grids","lgOv","fmt"].forEach(function(p){if(c[p])c[p]=JSON.parse(JSON.stringify(c[p]))});itens.push(c);montar(c);sel=c.id;marcar();props()}
+  else if(a==="dup"){var c=Object.assign({},it);c.lgOcultas=(it.lgOcultas||[]).slice();if(it.lgOrdem)c.lgOrdem=it.lgOrdem.slice();c.id="i"+prox++;c.x=Math.min(W-it.w,it.x+24);c.y=Math.min(H-it.h,it.y+24);Object.keys(c).forEach(function(p){if(p[0]==="_")delete c[p]});["scalebarFont","segmentWidthAdjust","center","grids","lgOv","fmt"].forEach(function(p){if(c[p])c[p]=JSON.parse(JSON.stringify(c[p]))});itens.push(c);montar(c);sel=c.id;marcar();props()}
   else if(a==="cima"&&ix<itens.length-1){itens.splice(ix,1);itens.push(it);$("pagina").appendChild(it._el)}
   else if(a==="baixo"&&ix>0){itens.splice(ix,1);itens.unshift(it);$("pagina").insertBefore(it._el,$("pagina").firstChild)}
   atualizaEscalas();listaItens();agendar();
@@ -2407,6 +2570,236 @@ document.addEventListener("keydown",function(e){
   e.preventDefault();apagarItem(it);
 });
 
+/* ---------- copiar e colar item (botões do painel, Ctrl+C / Ctrl+V ou ⌘C / ⌘V) ---------- */
+var areaTransf=null,colagens=0; /* cópia guardada só na memória: vale também ao abrir outro layout na mesma sessão */
+function copiarItem(it){
+  it=it||getIt(sel);if(!it){aviso("Escolha um item para copiar.");return}
+  var o={};for(var p in it)if(p[0]!=="_")o[p]=it[p]; /* sem as propriedades internas (_el, _m...) */
+  areaTransf=JSON.parse(JSON.stringify(o));colagens=0;
+  props();aviso("Item copiado. Use Ctrl+V ou o botão Colar.");
+}
+function colarItem(){
+  if(!areaTransf){aviso("Ainda não há nada copiado.");return}
+  colagens++;
+  var c=JSON.parse(JSON.stringify(areaTransf));
+  c.id="i"+prox++;
+  c.x=Math.max(0,Math.min(W-c.w,areaTransf.x+24*colagens)); /* cada colagem desce um pouco, para não ficar em cima da anterior */
+  c.y=Math.max(0,Math.min(H-c.h,areaTransf.y+24*colagens));
+  delete c._lgEdit;
+  itens.push(c);montar(c);sel=c.id;marcar();props();atualizaEscalas();listaItens();agendar();
+  aviso("Item colado.");
+}
+$("prop").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.a==="copiar")copiarItem(getIt(sel));
+  else if(b.dataset.a==="colar")colarItem();
+});
+document.addEventListener("keydown",function(e){
+  if(!(e.ctrlKey||e.metaKey)||e.altKey||e.shiftKey||e.defaultPrevented)return;
+  var k=(e.key||"").toLowerCase();if(k!=="c"&&k!=="v")return;
+  if(emDigitacao(e.target)||document.documentElement.classList.contains("hall"))return;
+  if(document.querySelector("#export-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
+  if(k==="c"){
+    if(String(window.getSelection&&window.getSelection()||"").length)return; /* há texto selecionado: deixa o copiar normal do navegador */
+    var it=getIt(sel);if(!it||it._lgEdit!=null)return;
+    e.preventDefault();copiarItem(it);
+  }else{
+    if(!areaTransf)return;
+    e.preventDefault();colarItem();
+  }
+});
+
+/* ---------- Organizar itens: Levantar / Alinhar / Distribuir / Redimensionar ----------
+   Mesmos algoritmos do QGIS (QgsLayoutAligner), como no layout.html:
+   - Alinhar: referência = caixa que envolve todos os escolhidos (precisa de 2 ou mais).
+   - Distribuir: espalha o ponto de referência (borda, centro) em passos iguais entre o menor e o maior;
+     "espaçamento igual" mantém o primeiro e o último e divide o vazio restante.
+   - Redimensionar: usa o menor/maior valor de largura ou altura; "quadrado" vale também para 1 item.
+   Itens travados não são alterados. Vários itens = Shift + clique (na folha ou na lista de camadas). */
+function selecionados(){return [sel].concat(selExtra).map(function(id){return id?getIt(id):null}).filter(Boolean)}
+function alvosOrg(){return selecionados().filter(function(i){return !i.locked})}
+function alternaMulti(id){
+  if(!sel||!getIt(sel)){sel=id;selExtra=[]}
+  else if(id===sel){sel=selExtra.length?selExtra.shift():null}
+  else{var p=selExtra.indexOf(id);if(p>=0)selExtra.splice(p,1);else selExtra.push(id)}
+  marcar();props();
+  var cam=$("camadas");if(cam&&!cam.hidden)listaItens();
+}
+var ORG_MIN_W=40,ORG_MIN_H=30;
+function cabeNaFolha(it){it.w=Math.min(it.w,W);it.h=Math.min(it.h,H);it.x=Math.max(0,Math.min(W-it.w,it.x));it.y=Math.max(0,Math.min(H-it.h,it.y))}
+/* aplica o que mudou na tela (igual ao que o arrasto faz) */
+function orgAplica(lista,tamanho,msg,mudou){
+  if(!mudou){aviso("Nada mudou: os itens já estão assim.",2200);return}
+  lista.forEach(function(it){
+    it.x=Math.round(it.x);it.y=Math.round(it.y);it.w=Math.round(it.w);it.h=Math.round(it.h);
+    pos(it);invalidarMapa(it);
+    if(tamanho)desenhaConteudo(it);
+    if(it.t==="mapa"){renderGridOverlayForItem(it);syncPos(it)}
+  });
+  atualizaEscalas();props();agendar();aviso(msg,1800);
+}
+function orgOrdem(tipo){
+  var s=selecionados();if(!s.length){aviso("Escolha um ou mais itens para mudar a ordem.",2600);return}
+  var ids={};s.forEach(function(i){ids[i.id]=1});
+  var arr=itens.slice(),antes=arr.map(function(i){return i.id}).join("|"),novo,msg;
+  if(tipo==="top"){novo=arr.filter(function(i){return !ids[i.id]}).concat(arr.filter(function(i){return ids[i.id]}));msg="Levado para a frente."}
+  else if(tipo==="bottom"){novo=arr.filter(function(i){return ids[i.id]}).concat(arr.filter(function(i){return !ids[i.id]}));msg="Enviado para trás."}
+  else if(tipo==="raise"){novo=arr;for(var i=novo.length-2;i>=0;i--)if(ids[novo[i].id]&&!ids[novo[i+1].id]){var t=novo[i];novo[i]=novo[i+1];novo[i+1]=t}msg="Levantado um nível."}
+  else{novo=arr;for(var j=1;j<novo.length;j++)if(ids[novo[j].id]&&!ids[novo[j-1].id]){var u=novo[j];novo[j]=novo[j-1];novo[j-1]=u}msg="Baixado um nível."}
+  if(novo.map(function(i){return i.id}).join("|")===antes){aviso("Os itens já estão nessa posição da ordem.",2200);return}
+  itens.length=0;novo.forEach(function(i){itens.push(i)});
+  itens.forEach(function(i){if(i._el)$("pagina").appendChild(i._el)});
+  listaItens();atualizaEscalas();agendar();aviso(msg,1800);
+}
+function orgAlinhar(modo){
+  var a=alvosOrg();if(a.length<2){aviso("Escolha 2 ou mais itens (segure Shift e clique) para alinhar.",3200);return}
+  var x0=Math.min.apply(null,a.map(function(i){return i.x})),x1=Math.max.apply(null,a.map(function(i){return i.x+i.w}));
+  var y0=Math.min.apply(null,a.map(function(i){return i.y})),y1=Math.max.apply(null,a.map(function(i){return i.y+i.h}));
+  var mudou=false;
+  a.forEach(function(it){
+    var ox=it.x,oy=it.y;
+    if(modo==="left")it.x=x0;else if(modo==="hcenter")it.x=(x0+x1)/2-it.w/2;else if(modo==="right")it.x=x1-it.w;
+    else if(modo==="top")it.y=y0;else if(modo==="vcenter")it.y=(y0+y1)/2-it.h/2;else if(modo==="bottom")it.y=y1-it.h;
+    if(Math.abs(it.x-ox)>.5||Math.abs(it.y-oy)>.5)mudou=true;
+  });
+  orgAplica(a,false,"Itens alinhados.",mudou);
+}
+function orgDistribuir(modo){
+  var a=alvosOrg();if(a.length<2){aviso("Escolha 2 ou mais itens (segure Shift e clique) para distribuir.",3200);return}
+  var mudou=false;
+  function poe(it,nx,ny){if(Math.abs(it.x-nx)>.5||Math.abs(it.y-ny)>.5)mudou=true;it.x=nx;it.y=ny}
+  if(modo==="hspace"||modo==="vspace"){
+    var h=modo==="hspace",lo=function(i){return h?i.x:i.y},ln=function(i){return h?i.w:i.h};
+    var ord=a.slice().sort(function(p,q){return lo(p)-lo(q)});
+    var mn=Math.min.apply(null,a.map(lo)),mx=Math.max.apply(null,a.map(function(i){return lo(i)+ln(i)}));
+    var tot=a.reduce(function(s,i){return s+ln(i)},0),passo=(mx-mn-tot)/(a.length-1),cur=mn;
+    ord.forEach(function(it){if(h)poe(it,cur,it.y);else poe(it,it.x,cur);cur+=ln(it)+passo});
+  }else{
+    var ref=function(i){return modo==="left"?i.x:modo==="hcenter"?i.x+i.w/2:modo==="right"?i.x+i.w:modo==="top"?i.y:modo==="vcenter"?i.y+i.h/2:i.y+i.h};
+    var o2=a.slice().sort(function(p,q){return ref(p)-ref(q)}),m0=ref(o2[0]),m1=ref(o2[o2.length-1]),st=(m1-m0)/(a.length-1);
+    o2.forEach(function(it,n){
+      var alvo=m0+st*n;
+      if(modo==="left")poe(it,alvo,it.y);else if(modo==="hcenter")poe(it,alvo-it.w/2,it.y);else if(modo==="right")poe(it,alvo-it.w,it.y);
+      else if(modo==="top")poe(it,it.x,alvo);else if(modo==="vcenter")poe(it,it.x,alvo-it.h/2);else poe(it,it.x,alvo-it.h);
+    });
+  }
+  a.forEach(cabeNaFolha);
+  orgAplica(a,false,"Itens distribuídos.",mudou);
+}
+function orgTamanho(modo){
+  var a=alvosOrg(),quad=modo==="square";
+  if(a.length<(quad?1:2)){aviso(quad?"Escolha ao menos um item para deixar quadrado.":"Escolha 2 ou mais itens (segure Shift e clique) para igualar o tamanho.",3200);return}
+  var mudou=false;
+  function tam(it,nw,nh){nw=Math.max(ORG_MIN_W,nw);nh=Math.max(ORG_MIN_H,nh);if(Math.abs(it.w-nw)>.5||Math.abs(it.h-nh)>.5)mudou=true;it.w=nw;it.h=nh;cabeNaFolha(it)}
+  if(quad)a.forEach(function(it){var l=Math.max(it.w,it.h);tam(it,l,l)});
+  else{
+    var ws=a.map(function(i){return i.w}),hs=a.map(function(i){return i.h});
+    var alvo={narrowest:Math.min.apply(null,ws),widest:Math.max.apply(null,ws),shortest:Math.min.apply(null,hs),tallest:Math.max.apply(null,hs)}[modo];
+    a.forEach(function(it){if(modo==="narrowest"||modo==="widest")tam(it,alvo,it.h);else tam(it,it.w,alvo)});
+  }
+  orgAplica(a,true,"Tamanho dos itens ajustado.",mudou);
+}
+/* itens de cada menu: texto, ícone, atalho, quantos itens escolhidos são necessários */
+var ORG_MENUS={
+  levantar:[
+    {id:"raise",t:"Levantar",ic:"o-levantar",a:"Ctrl+]",n:1,f:function(){orgOrdem("raise")}},
+    {id:"lower",t:"Baixar",ic:"o-baixar",a:"Ctrl+[",n:1,f:function(){orgOrdem("lower")}},
+    {id:"top",t:"Trazer para a frente",ic:"o-frente",a:"Ctrl+Shift+]",n:1,f:function(){orgOrdem("top")}},
+    {id:"bottom",t:"Enviar para trás",ic:"o-tras",a:"Ctrl+Shift+[",n:1,f:function(){orgOrdem("bottom")}}],
+  alinhar:[
+    {id:"left",t:"Alinhar à esquerda",ic:"o-al-esq",n:2,f:function(){orgAlinhar("left")}},
+    {id:"hcenter",t:"Alinhar ao centro",ic:"o-al-cen",n:2,f:function(){orgAlinhar("hcenter")}},
+    {id:"right",t:"Alinhar à direita",ic:"o-al-dir",n:2,f:function(){orgAlinhar("right")}},
+    {id:"top",t:"Alinhar ao topo",ic:"o-al-topo",n:2,f:function(){orgAlinhar("top")}},
+    {id:"vcenter",t:"Alinhar ao centro vertical",ic:"o-al-vcen",n:2,f:function(){orgAlinhar("vcenter")}},
+    {id:"bottom",t:"Alinhar à base",ic:"o-al-base",n:2,f:function(){orgAlinhar("bottom")}}],
+  distribuir:[
+    {id:"left",t:"Distribuir pela borda esquerda",ic:"o-di-esq",n:2,f:function(){orgDistribuir("left")}},
+    {id:"hcenter",t:"Distribuir pelo centro horizontal",ic:"o-di-hcen",n:2,f:function(){orgDistribuir("hcenter")}},
+    {id:"hspace",t:"Espaçamento horizontal igual",ic:"o-di-hesp",n:2,f:function(){orgDistribuir("hspace")}},
+    {id:"right",t:"Distribuir pela borda direita",ic:"o-di-dir",n:2,f:function(){orgDistribuir("right")}},
+    {id:"top",t:"Distribuir pela borda do topo",ic:"o-di-topo",n:2,f:function(){orgDistribuir("top")}},
+    {id:"vcenter",t:"Distribuir pelo centro vertical",ic:"o-di-vcen",n:2,f:function(){orgDistribuir("vcenter")}},
+    {id:"vspace",t:"Espaçamento vertical igual",ic:"o-di-vesp",n:2,f:function(){orgDistribuir("vspace")}},
+    {id:"bottom",t:"Distribuir pela borda da base",ic:"o-di-base",n:2,f:function(){orgDistribuir("bottom")}}],
+  tamanho:[
+    {id:"narrowest",t:"Redimensionar ao mais estreito",ic:"o-re-estreito",n:2,f:function(){orgTamanho("narrowest")}},
+    {id:"widest",t:"Redimensionar ao mais amplo",ic:"o-re-amplo",n:2,f:function(){orgTamanho("widest")}},
+    {id:"shortest",t:"Redimensionar ao mais curto",ic:"o-re-curto",n:2,f:function(){orgTamanho("shortest")}},
+    {id:"tallest",t:"Redimensionar ao mais alto",ic:"o-re-alto",n:2,f:function(){orgTamanho("tallest")}},
+    {id:"square",t:"Redimensionar ao quadrado",ic:"o-re-quad",n:1,f:function(){orgTamanho("square")}}]
+};
+var ORG_IDS={levantar:["dd-levantar","b-levantar"],alinhar:["dd-alinhar","b-alinhar"],distribuir:["dd-distribuir","b-distribuir"],tamanho:["dd-tamanho","b-tamanho"]};
+var orgUltima={levantar:"raise",alinhar:"left",distribuir:"hcenter",tamanho:"narrowest"}; /* o botão repete a última opção usada */
+var orgAberto=null,orgMenuEl=null;
+function orgAchou(m,id){return ORG_MENUS[m].filter(function(e){return e.id===id})[0]}
+function orgTem(m){var s=selecionados();return m==="levantar"?s.length:s.filter(function(i){return !i.locked}).length}
+function atualizaOrg(){
+  var s=selecionados().length,n=orgTem("alinhar");
+  var reg={levantar:s>=1,alinhar:n>=2,distribuir:n>=2,tamanho:n>=1};
+  Object.keys(ORG_IDS).forEach(function(m){
+    var dd=$(ORG_IDS[m][0]),b=$(ORG_IDS[m][1]);if(!dd||!b)return;
+    dd.classList.toggle("off",!reg[m]);b.setAttribute("aria-disabled",String(!reg[m]));
+  });
+}
+function orgFecha(){
+  if(orgMenuEl)orgMenuEl.classList.remove("show");
+  if(orgAberto){var dd=$(ORG_IDS[orgAberto][0]);if(dd)dd.classList.remove("open")}
+  orgAberto=null;
+}
+function orgDica(m){aviso(m==="levantar"?"Escolha um item na folha primeiro.":m==="tamanho"?"Escolha um item na folha. Para igualar tamanhos, segure Shift e clique em 2 ou mais.":"Escolha 2 ou mais itens: segure Shift e clique neles.",3200)}
+function orgAbre(m){
+  var dd=$(ORG_IDS[m][0]);if(!dd)return;
+  if(dd.classList.contains("off")){orgDica(m);return}
+  if(orgAberto===m){orgFecha();return}
+  orgFecha();
+  if(!orgMenuEl){orgMenuEl=document.createElement("div");orgMenuEl.id="menu-org";orgMenuEl.setAttribute("role","menu");document.body.appendChild(orgMenuEl)}
+  var tem=orgTem(m);orgMenuEl.innerHTML="";
+  ORG_MENUS[m].forEach(function(en){
+    var ok=tem>=en.n,r=document.createElement("div");
+    r.className="mo-i"+(ok?"":" off");r.setAttribute("role","menuitem");
+    r.innerHTML='<svg aria-hidden="true"><use href="#'+en.ic+'"/></svg><span class="mo-t">'+en.t+'</span>'+(en.a?'<span class="mo-a">'+en.a+'</span>':'');
+    if(ok)r.addEventListener("click",function(){orgFecha();orgRoda(m,en)});
+    orgMenuEl.appendChild(r);
+  });
+  var rc=dd.getBoundingClientRect();
+  orgMenuEl.style.left=Math.round(rc.left)+"px";orgMenuEl.style.top=Math.round(rc.bottom+2)+"px";
+  orgMenuEl.classList.add("show");
+  var mr=orgMenuEl.getBoundingClientRect();
+  if(mr.right>window.innerWidth-6)orgMenuEl.style.left=Math.max(6,Math.round(window.innerWidth-mr.width-6))+"px";
+  dd.classList.add("open");orgAberto=m;
+}
+function orgRoda(m,en){ /* roda a opção e passa a ser a "última usada" (muda o ícone do botão) */
+  orgUltima[m]=en.id;
+  var b=$(ORG_IDS[m][1]),u=b&&b.querySelector("use");if(u)u.setAttribute("href","#"+en.ic);
+  en.f();
+}
+Object.keys(ORG_IDS).forEach(function(m){
+  var b=$(ORG_IDS[m][1]),seta=document.querySelector("#"+ORG_IDS[m][0]+" .dd-seta");if(!b||!seta)return;
+  b.addEventListener("click",function(){orgFecha();if($(ORG_IDS[m][0]).classList.contains("off")){orgDica(m);return}var en=orgAchou(m,orgUltima[m]);if(en)orgRoda(m,en)});
+  seta.addEventListener("click",function(e){e.stopPropagation();orgAbre(m)});
+});
+document.addEventListener("pointerdown",function(e){
+  if(!orgAberto)return;
+  if(orgMenuEl&&orgMenuEl.contains(e.target))return;
+  if(e.target.closest&&e.target.closest(".dd-seta"))return; /* a própria seta alterna */
+  orgFecha();
+},true);
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&orgAberto)orgFecha()});
+window.addEventListener("resize",orgFecha);
+(function(){var br=document.querySelector(".barra");if(br)br.addEventListener("scroll",orgFecha)})();
+/* atalhos de ordem (os mesmos do QGIS): Ctrl+] levantar · Ctrl+[ baixar · com Shift: frente / trás */
+document.addEventListener("keydown",function(e){
+  if(!(e.ctrlKey||e.metaKey)||e.altKey||e.defaultPrevented)return;
+  var dir=e.code==="BracketRight"||e.key==="]"||e.key==="}",esq=e.code==="BracketLeft"||e.key==="["||e.key==="{";
+  if(!dir&&!esq)return;
+  if(emDigitacao(e.target)||document.documentElement.classList.contains("hall"))return;
+  if(document.querySelector("#export-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
+  if(!selecionados().length)return;
+  e.preventDefault();orgOrdem(dir?(e.shiftKey?"top":"raise"):(e.shiftKey?"bottom":"lower"));
+});
+atualizaOrg();
+
 /* ---------- escala do mapa (1:N) e propriedades da barra de escala ---------- */
 function aplicarEscala(it,el){
   var raw=el.value.trim();
@@ -2416,6 +2809,35 @@ function aplicarEscala(it,el){
   if(!Number.isFinite(denominator)||denominator<=0){aviso("Escala inválida. Use o formato 1:25000, por exemplo.",2200);el.value=scaleTextForZoom(it.zoom);return}
   it.leaflet.setZoom(Math.log2(591657550/denominator)); // dispara 'moveend', que atualiza o campo e as barras
 }
+/* setas da escala: mudam o denominador (1 : N) em passos "redondos" de 1/10 da potência de 10 do valor atual */
+function passoEscala(it,dir){
+  var el=$("p-esc");if(!el||!it||!it.leaflet)return;
+  var raw=el.value.trim(),t=raw.includes(":")?raw.split(":").pop():(raw.includes("/")?raw.split("/").pop():raw);
+  var d=parseFloat(t.replace(/[.\s]/g,"").replace(",","."));
+  if(!Number.isFinite(d)||d<=0)d=Math.round(591657550/Math.pow(2,it.leaflet.getZoom()));
+  var st=Math.pow(10,Math.max(0,Math.floor(Math.log10(d))-1));
+  var n=dir>0?(Math.floor(d/st+1e-9)+1)*st:(Math.ceil(d/st-1e-9)-1)*st;
+  if(n<1)n=1;
+  el.value="1 : "+Math.round(n);
+  aplicarEscala(it,el);
+}
+/* roda do mouse sobre o campo da escala: para cima aproxima (escala menor), para baixo afasta */
+var escRodaT=0;
+$("prop").addEventListener("wheel",function(e){
+  var w=e.target.closest&&e.target.closest(".esc-wrap");if(!w)return;
+  e.preventDefault();
+  var agora=Date.now();if(agora-escRodaT<60)return;escRodaT=agora;
+  if(!e.deltaY)return;
+  passoEscala(getIt(sel),e.deltaY<0?-1:1);
+},{passive:false});
+$("prop").addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest(".esc-seta");if(!b)return;
+  e.preventDefault();passoEscala(getIt(sel),Number(b.dataset.esc));
+});
+$("prop").addEventListener("keydown",function(e){
+  if(e.target.id!=="p-esc"||(e.key!=="ArrowUp"&&e.key!=="ArrowDown"))return;
+  e.preventDefault();passoEscala(getIt(sel),e.key==="ArrowUp"?1:-1);
+});
 $("prop").addEventListener("keydown",function(e){
   if(e.target.id!=="p-esc"||e.key!=="Enter")return;
   var it=getIt(sel);if(!it||!it.leaflet)return;
@@ -2427,7 +2849,7 @@ function aplicaE(e){
   if(id.indexOf("e-")!==0||it.t!=="escala")return;
   var v=e.target.value,n=Number(v);
   if(id==="e-map")it.scalebarMap=v;
-  else if(id==="e-est")it.scalebarStyle=v;
+  else if(id==="e-est"){it.scalebarStyle=v;props()}
   else if(id==="e-uni"){it.scalebarUnits=v;it.unitLabel=SCALEBAR_UNIT_LABELS[v]||"km"}
   else if(id==="e-sl")it.segmentsLeft=Math.max(0,Math.round(n)||0);
   else if(id==="e-sr")it.segmentsRight=Math.max(1,Math.round(n)||1);
@@ -2461,7 +2883,7 @@ function painelLegItem(it,l){
   var h='<div class="acoes" style="margin-bottom:8px"><button class="mini" data-lgback="1" type="button">← Voltar</button></div><h2>Item da legenda</h2>';
   h+='<h3>Rótulo</h3><div class="pl"><label for="lg-rot">Texto que aparece na legenda</label><textarea id="lg-rot" rows="3">'+esc(lb)+'</textarea></div>';
   h+='<div class="pl"><label for="lg-tam">Tamanho da letra deste item (px)</label><input type="number" id="lg-tam" min="6" max="120" step="1" placeholder="igual ao da legenda" value="'+(ov.tam||"")+'"></div>';
-  h+='<h3>Personalizar o símbolo</h3><div class="lin"><label for="lg-fc">Cor de dentro</label><input type="color" id="lg-fc" value="'+lgHex(y.fc)+'"></div>';
+  h+='<h3>Personalizar o símbolo</h3>'+(lgClasses(l)?'<p class="vazio" style="margin:0 0 8px">As cores e os textos das classes vêm da simbologia do mapa.</p>':'<div class="lin"><label for="lg-fc">Cor de dentro</label><input type="color" id="lg-fc" value="'+lgHex(y.fc)+'"></div>');
   h+='<div class="pl"><label for="lg-fs">Jeito de pintar</label><select id="lg-fs">'+[["solid","Cheio"],["none","Sem pintura"],["horizontal","Listras deitadas"],["vertical","Listras em pé"],["cross","Quadriculado"],["bdiag","Diagonal /"],["fdiag","Diagonal \\"]].map(function(x){return opt(x[0],x[1],y.fs)}).join("")+'</select></div>';
   h+='<div class="lin"><label for="lg-sc">Cor do contorno</label><input type="color" id="lg-sc" value="'+lgHex(y.sc)+'"></div>';
   h+='<div class="pl"><label for="lg-sw">Espessura do contorno (mm)</label><input type="number" id="lg-sw" min="0" step="0.1" value="'+y.sw+'"></div>';
@@ -2487,10 +2909,39 @@ $("prop").addEventListener("click",function(e){
   else if(b.dataset.lgreset){if(it.lgOv)delete it.lgOv[it._lgEdit];desenhaConteudo(it);agendar();props()}
 });
 
+/* arrastar as caixas das camadas da legenda para mudar a ordem */
+(function(){
+  var p=$("prop"),dragId=null;
+  function linha(t){var e=t&&t.nodeType===1?t:(t&&t.parentElement);return e&&e.closest?e.closest("[data-lgrow]"):null}
+  function limpa(){var l=p.querySelectorAll(".lgrow");for(var i=0;i<l.length;i++)l[i].classList.remove("sobre-cima","sobre-baixo","arrastando")}
+  p.addEventListener("dragstart",function(e){
+    var r=linha(e.target);if(!r)return;
+    dragId=+r.dataset.lgrow;r.classList.add("arrastando");
+    e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain","legenda")}catch(x){}
+  });
+  p.addEventListener("dragend",function(){limpa();dragId=null});
+  p.addEventListener("dragover",function(e){
+    if(dragId==null)return;var r=linha(e.target);if(!r||+r.dataset.lgrow===dragId)return;
+    e.preventDefault();e.dataTransfer.dropEffect="move";
+    var b=r.getBoundingClientRect(),antes=(e.clientY-b.top)<b.height/2,l=p.querySelectorAll(".lgrow");
+    for(var i=0;i<l.length;i++)l[i].classList.remove("sobre-cima","sobre-baixo");
+    r.classList.add(antes?"sobre-cima":"sobre-baixo");
+  });
+  p.addEventListener("drop",function(e){
+    if(dragId==null)return;var r=linha(e.target),it=getIt(sel);
+    if(!r||!it||it.t!=="legenda"){limpa();dragId=null;return}
+    e.preventDefault();
+    var b=r.getBoundingClientRect(),antes=(e.clientY-b.top)<b.height/2,tid=+r.dataset.lgrow,id=dragId;
+    limpa();dragId=null;if(tid===id)return;
+    var ids=lgOrdenadas(it,snap.camadas.filter(function(x){return x.visible})).map(function(x){return x.id});
+    it.lgOrdem=lgNovaOrdem(ids,id,tid,!antes);desenhaConteudo(it);agendar();props();
+  });
+})();
+
 /* ---------- opções do item de mapa (vindas do layout completo) ---------- */
 function painelMexer(it){
   var on=!!it.mexer;
-  return '<button type="button" class="mexer-btn" data-mex="1" aria-pressed="'+on+'">'+ic("mexer")+'<span><b>Mexer dentro do mapa</b><small>'+(on?"Ligado: arraste para deslocar o mapa e use a roda do mouse para o zoom.":"Desligado: arraste para mover a moldura. Toque para ligar.")+'</small></span></button>';
+  return '<button type="button" class="mexer-btn" data-mex="1" aria-pressed="'+on+'">'+ic("mexer")+'<span><b>Mexer dentro do mapa</b><small>'+(on?"Ligado: arraste para deslocar o mapa e use a roda do mouse para o zoom. Com Ctrl apertado o zoom fica mais fino.":"Desligado: arraste para mover a moldura. Toque para ligar.")+'</small></span></button>';
 }
 function painelCamadas(it){
   return '<h3>Camadas</h3><label class="ck"><input type="checkbox" id="m-lockl"'+(it.lockLayers?" checked":"")+'> Travar camadas</label><label class="ck"><input type="checkbox" id="m-locks"'+(it.lockStyles?" checked":"")+'> Travar as cores das camadas</label><p class="vazio" style="font-size:14px">Destravado, este mapa acompanha o que você liga, desliga e pinta no mapa principal.</p>';
@@ -2521,7 +2972,7 @@ function mapaProps(e){
     if(v==="")return;
     var c=id.charAt(2);it[c]=Math.round(c==="w"?Math.max(40,n):c==="h"?Math.max(30,n):n);
     it.x=Math.max(0,Math.min(W-it.w,it.x));it.y=Math.max(0,Math.min(H-it.h,it.y));
-    pos(it);it._m.invalidateSize();renderGridOverlayForItem(it);atualizaEscalas();
+    pos(it);invalidarMapa(it);renderGridOverlayForItem(it);atualizaEscalas();
   }
   else if(id==="m-bw"){it.molduraEsp=Math.max(0,n||0);estilo(it)}
   else if(id==="m-op"){it.opac=n;estilo(it);e.target.previousElementSibling.textContent="Opacidade: "+n+"%"}
@@ -2541,7 +2992,7 @@ function mapaProps(e){
       enabled: true,
 
       // Aparência
-      gridType: 'solid',        // 'solid'(Sólida)|'cross'(Cruz)|'markers'(Marcadores)|'frame-only'(Apenas molduras e anotações)
+      gridType: 'solid',        // 'solid'(Sólida)|'cross'(Cruz)|'markers'(Marcadores)|'frame-only'(Apenas coordenadas)
       crs: null,                // null = usa o SRC do item de mapa
       intervalType: 'map-units',// 'map-units'(Unidades do Mapa)|'fit-segment'(Ajustar espessura do segmento)|'mm'(Milímetros)|'cm'(Centímetros)
       intervalX: 0.05,
@@ -2557,20 +3008,6 @@ function mapaProps(e){
       markerSymbol: 'circle',   // 'circle'(Círculo)|'square'(Quadrado)|'cross'(Cruz)|'x'(X) — só para gridType === 'markers'
       blendMode: 'normal',
 
-      // Quadro de grade
-      frameStyle: 'line-border',
-      frameSize: 2,
-      frameMargin: 0,
-      frameLineWidth: 0.3,
-      frameLineColor: '#000000',
-      frameFillColor: null,
-      divisions: { left: 'all', right: 'all', top: 'all', bottom: 'all' },
-      frameSides: { left: true, right: true, top: true, bottom: true },
-      followGridRotationFrame: false,
-      ticksAlignment: 'orthogonal',
-      skipBelowAngleFrame: 0,
-      marginFromCornerFrame: 0,
-
       // Coordenadas / anotações
       annotationsEnabled: true, // toggle mestre: desliga/liga a seção inteira de coordenadas de uma vez,
                                  // sem precisar zerar o "Modo" de cada lado manualmente (equivalente ao
@@ -2581,10 +3018,10 @@ function mapaProps(e){
         top:    { mode: 'all',      position: 'outside', orientation: 'horizontal' },
         bottom: { mode: 'disabled', position: 'outside', orientation: 'horizontal' },
       },
-      coordFormat: 'decimal',
-      coordPrecision: 3,
-      font: { family: 'Arial', size: 8, color: '#000000' },
-      distanceToFrame: 1,
+      coordFormat: 'dm-suffix', // Grau, Minuto com Sufixo (ex.: 36°30' W)
+      coordPrecision: 0,
+      font: { family: 'Arial', size: 10, color: '#000000' },
+      distanceToFrame: 2,        // mm entre a borda do mapa e o texto
       followGridRotationAnnotations: false,
       annotationsAlignment: 'orthogonal',
       skipBelowAngleAnnotations: 0,
@@ -2600,12 +3037,12 @@ function mapaProps(e){
   function itemLabel(it) { return 'Mapa'; }
   function pushUndoSnapshot() { agendar(); }
   function checkboxRow(id, label, checked) {
-    return '<div class="prop-row prop-row-checkbox"><input type="checkbox" id="' + id + '" ' + (checked ? 'checked' : '') + '><label for="' + id + '">' + label + '</label></div>';
+    return '<label class="gd-check"><input type="checkbox" id="' + id + '" ' + (checked ? 'checked' : '') + '><span>' + label + '</span></label>';
   }
   function applyMapRotation(it) {
     if (!it.leaflet) return;
     it.leaflet.getContainer().style.transform = it.mapRotation ? 'rotate(' + it.mapRotation + 'deg)' : '';
-    it.leaflet.invalidateSize();
+    invalidarMapa(it);
     renderGridOverlayForItem(it);
   }
   function gridGroupInner(item) {
@@ -2643,12 +3080,12 @@ function mapaProps(e){
   }
 
   // =====================================================================
-  // Diálogo "Modificar grade…" — 3 abas (Aparência / Quadro de grade /
-  // Coordenadas), reproduzindo a seção 0 do documento de implementação.
-  // Ainda sem desenho real da grade sobre o mapa (passos 3-4 do documento);
-  // aqui só a modelagem de dados (passo 1) + a UI de edição (passo 2).
+  // Janela "Modificar grade…" — flutuante e arrastável, com 2 abas
+  // (Aparência / Coordenadas). A grade não tem moldura própria: a borda do
+  // mapa (Propriedades › Aparência › Borda) faz esse papel.
   // =====================================================================
   let gridDialogState = { itemId: null, gridId: null, activeTab: 'appearance' };
+  let gridDialogPos = null; // última posição {x, y}: a janela reabre onde foi deixada
 
   function optionsHtml(pairs, current) {
     return pairs.map(([val, label]) =>
@@ -2666,7 +3103,7 @@ function mapaProps(e){
     return html;
   }
 
-  const GRID_TYPE_OPTS = [['solid', 'Sólida'], ['cross', 'Cruz'], ['markers', 'Marcadores'], ['frame-only', 'Apenas molduras e anotações']];
+  const GRID_TYPE_OPTS = [['solid', 'Sólida'], ['cross', 'Cruz'], ['markers', 'Marcadores'], ['frame-only', 'Apenas coordenadas']];
   const INTERVAL_TYPE_OPTS = [['map-units', 'Unidades do Mapa'], ['fit-segment', 'Ajustar espessura do segmento'], ['mm', 'Milímetros'], ['cm', 'Centímetros']];
   const BLEND_MODE_OPTS = [
     ['normal', 'Normal'], ['lighten', 'Clarear'], ['screen', 'Tela'], ['color-dodge', 'Escape'],
@@ -2674,24 +3111,15 @@ function mapaProps(e){
     ['overlay', 'Sobrepor'], ['soft-light', 'Luz Suave'], ['hard-light', 'Luz Forte'],
     ['difference', 'Diferença'], ['subtract', 'Subtrair'],
   ];
-  const FRAME_STYLE_OPTS = [
-    ['none', 'Sem moldura'], ['zebra', 'Zebra'], ['zebra-nautical', 'Zebra (Nautica)'],
-    ['ticks-in', 'Linhas interiores'], ['ticks-out', 'Linhas exteriores'], ['ticks-both', 'Linhas interiores e exteriores'],
-    ['line-border', 'Linha da borda'], ['line-border-nautical', 'Linha da borda (Náutica)'],
-  ];
-  const DIVISION_OPTS = [['all', 'Tudo'], ['lat-only', 'Somente Latitude/Y'], ['lon-only', 'Apenas Longitude/X']];
-  const TICKS_ALIGNMENT_OPTS = [['orthogonal', 'Ortogonal'], ['fixed-length', 'Comprimento fixo']];
   // Tracejado da linha da grade — valor é a própria string stroke-dasharray
-  // (vazio = sólido, sem tracejado). Conjunto pequeno e direto, cobrindo os
-  // padrões mais comuns em cartas (contínua, tracejada, pontilhada, traço-ponto).
+  // (vazio = sólido, sem tracejado).
   const LINE_DASH_OPTS = [['', 'Contínua'], ['4,3', 'Tracejada'], ['1,2', 'Pontilhada'], ['6,2,1,2', 'Traço-ponto']];
   // Símbolos disponíveis para gridType === 'markers' — ver drawMarkerSymbol.
   const MARKER_SYMBOL_OPTS = [['circle', 'Círculo'], ['square', 'Quadrado'], ['cross', 'Cruz'], ['x', 'X']];
   const ANNOT_MODE_OPTS = [['all', 'Mostre tudo'], ['lat-only', 'Mostrar apenas latitude/Y'], ['lon-only', 'Mostrar apenas longitude/X'], ['disabled', 'Desabilitado']];
-  const ANNOT_POSITION_OPTS = [['outside', 'Fora do Quadro'], ['inside', 'Dentro do Quadro']];
+  const ANNOT_POSITION_OPTS = [['outside', 'Fora do mapa'], ['inside', 'Dentro do mapa']];
   const ANNOT_ORIENTATION_OPTS = [
-    ['horizontal', 'Horizontal'], ['vertical-ascending', 'Vertical Ascendente'], ['vertical-descending', 'Vertical Descendente'],
-    ['boundary-direction', 'Direção Limite'], ['above-tick', 'Acima da marcação'], ['on-tick', 'Em cima da marcação'], ['under-tick', 'Abaixo da marcação'],
+    ['horizontal', 'Horizontal'], ['vertical-ascending', 'Vertical ↑'], ['vertical-descending', 'Vertical ↓'],
   ];
   const COORD_FORMAT_OPTS = [
     ['decimal', 'Decimal'], ['decimal-suffix', 'Decimal com Sufixo'],
@@ -2699,12 +3127,33 @@ function mapaProps(e){
     ['dms', 'Grau, Minuto, Segundo'], ['dms-suffix', 'Grau, minuto, segundo com sufixo'], ['dms-aligned', 'Grau, Minuto Segundo Alinhado'],
     ['custom', 'Padronizado'],
   ];
+  const FRAME_STYLE_OPTS = [
+    ['none', 'Sem moldura'], ['zebra', 'Zebra'], ['zebra-nautical', 'Zebra (Nautica)'],
+    ['ticks-in', 'Linhas interiores'], ['ticks-out', 'Linhas exteriores'], ['ticks-both', 'Linhas interiores e exteriores'],
+    ['line-border', 'Linha da borda'], ['line-border-nautical', 'Linha da borda (Náutica)'],
+  ];
   const SIDE_LABELS = { left: 'Esquerda', right: 'Direita', top: 'Topo', bottom: 'Base' };
+
+  // ---- Janela flutuante: posição, abrir, fechar ----
+  // Fica dentro da tela (margem de 8 px) e sem fundo escurecido, para você
+  // ver o mapa mudando enquanto edita. O topo da janela serve de alça de arrasto.
+  function placeGridDialog(x, y) {
+    const dlg = document.getElementById('grid-dialog');
+    const m = 8;
+    x = Math.max(m, Math.min(x, window.innerWidth - dlg.offsetWidth - m));
+    y = Math.max(m, Math.min(y, window.innerHeight - dlg.offsetHeight - m));
+    dlg.style.left = x + 'px';
+    dlg.style.top = y + 'px';
+    gridDialogPos = { x, y };
+  }
 
   function openGridDialog(itemId, gridId) {
     gridDialogState = { itemId, gridId, activeTab: 'appearance' };
     document.getElementById('grid-dialog-overlay').classList.add('show');
     renderGridDialog();
+    const dlg = document.getElementById('grid-dialog');
+    if (gridDialogPos) placeGridDialog(gridDialogPos.x, gridDialogPos.y);
+    else placeGridDialog(window.innerWidth - dlg.offsetWidth - 16, 76); // canto direito, abaixo da barra
   }
 
   function closeGridDialog() {
@@ -2712,122 +3161,186 @@ function mapaProps(e){
     gridDialogState = { itemId: null, gridId: null, activeTab: 'appearance' };
   }
 
+  // ---- Janela "Moldura": abre ao clicar na amostra de cor da Borda (Propriedades › Aparência) ----
+  function openMoldDialog(itemId) {
+    gridDialogState = { itemId, gridId: null, activeTab: 'appearance', mold: true };
+    document.getElementById('grid-dialog-overlay').classList.add('show');
+    renderGridDialog();
+    const dlg = document.getElementById('grid-dialog');
+    if (gridDialogPos) placeGridDialog(gridDialogPos.x, gridDialogPos.y);
+    else placeGridDialog(window.innerWidth - dlg.offsetWidth - 16, 76);
+  }
+  window.moldSelMudou = function () {
+    if (gridDialogState.mold && gridDialogState.itemId !== sel) closeGridDialog();
+  };
+  function moldBody(it) {
+    // Os estilos usam as divisões da grade, por isso só existem no item de mapa.
+    return (it.t === 'mapa' ? gdSelect('mold-estilo', 'Estilo da moldura', FRAME_STYLE_OPTS, it.molduraEstilo || 'none') : '') +
+      gdNum('mold-esp', 'Espessura da linha', it.molduraEsp === undefined ? 0.8 : it.molduraEsp, { step: 0.1, min: 0, unit: 'mm' }) +
+      gdNum('mold-raio', 'Arredondamento', it.molduraRaio === undefined ? 1.6 : it.molduraRaio, { step: 0.1, min: 0, unit: 'mm' }) +
+      gdColor('mold-cor', 'Cor da linha', it.molduraCor || '#000000');
+  }
+  function wireMoldDialog(it) {
+    const b = document.getElementById('grid-dialog-body');
+    const liga = () => { it.moldura = true; const c = document.getElementById('p-bor'); if (c) c.checked = true; };
+    const est = b.querySelector('#mold-estilo');
+    if (est) est.addEventListener('change', (e) => { it.molduraEstilo = e.target.value; liga(); estilo(it); agendar(); });
+    b.querySelector('#mold-esp').addEventListener('input', (e) => {
+      const n = parseFloat(e.target.value); it.molduraEsp = isNaN(n) ? 0 : Math.max(0, n); liga(); estilo(it);
+      const mb = document.getElementById('m-bw'); if (mb) mb.value = it.molduraEsp;
+      agendar();
+    });
+    b.querySelector('#mold-raio').addEventListener('input', (e) => {
+      const n = parseFloat(e.target.value); it.molduraRaio = isNaN(n) ? 0 : Math.max(0, n); liga(); estilo(it); agendar();
+    });
+    b.querySelector('#mold-cor').addEventListener('input', (e) => {
+      it.molduraCor = e.target.value; liga(); estilo(it);
+      const pc = document.getElementById('p-borc');
+      if (pc) { pc.value = e.target.value; pc.dispatchEvent(new Event('change', { bubbles: true })); }
+      agendar();
+    });
+  }
+
   function renderGridDialog() {
+    const dlgEl = document.getElementById('grid-dialog');
+    const tabsEl = dlgEl.querySelector('.gd-tabs');
+    if (gridDialogState.mold) {
+      const it = getItem(gridDialogState.itemId);
+      if (!it) { closeGridDialog(); return; }
+      document.getElementById('grid-dialog-title').textContent = 'Moldura';
+      tabsEl.style.display = 'none';
+      dlgEl.style.height = 'auto';
+      const body = document.getElementById('grid-dialog-body');
+      body.innerHTML = moldBody(it);
+      decorateColorInputs(body);
+      wireMoldDialog(it);
+      if (gridDialogPos) placeGridDialog(gridDialogPos.x, gridDialogPos.y);
+      return;
+    }
+    tabsEl.style.display = '';
+    dlgEl.style.height = '';
     const item = getItem(gridDialogState.itemId);
     const grid = item && item.grids.find(g => g.id === gridDialogState.gridId);
     if (!item || !grid) { closeGridDialog(); return; }
 
-    document.getElementById('grid-dialog-title').textContent = 'Propriedades da grade — ' + grid.name;
-    document.querySelectorAll('.grid-dialog-tab').forEach(t =>
-      t.classList.toggle('active', t.dataset.gridTab === gridDialogState.activeTab));
+    document.getElementById('grid-dialog-title').textContent = grid.name;
+    document.querySelectorAll('.gd-tab').forEach(t =>
+      t.setAttribute('aria-selected', t.dataset.gridTab === gridDialogState.activeTab ? 'true' : 'false'));
 
     const body = document.getElementById('grid-dialog-body');
-    if (gridDialogState.activeTab === 'appearance') body.innerHTML = renderGridAppearanceTab(grid);
-    else if (gridDialogState.activeTab === 'frame') body.innerHTML = renderGridFrameTab(grid);
-    else body.innerHTML = renderGridCoordsTab(grid);
+    body.innerHTML = gridDialogState.activeTab === 'appearance'
+      ? renderGridAppearanceTab(grid)
+      : renderGridCoordsTab(grid);
     decorateColorInputs(body);
 
     wireGridDialogBody(item, grid);
+    if (gridDialogPos) placeGridDialog(gridDialogPos.x, gridDialogPos.y); // a altura muda de uma aba para a outra
   }
 
+  // ---- Peças do formulário (mesmo visual da janela de cores) ----
+  function gdField(label, control, forId) {
+    return `<div class="gd-row"><label${forId ? ` for="${forId}"` : ''}>${label}</label>${control}</div>`;
+  }
+  function gdNum(id, label, value, o = {}) {
+    const attrs = `type="number" id="${id}" value="${value}"` +
+      (o.step ? ` step="${o.step}"` : '') +
+      (o.min !== undefined ? ` min="${o.min}"` : '') +
+      (o.max !== undefined ? ` max="${o.max}"` : '');
+    return gdField(label, `<span class="gd-unit${o.unit ? ' has-unit' : ''}"><input ${attrs}>${o.unit ? `<em>${o.unit}</em>` : ''}</span>`, id);
+  }
+  function gdSelect(id, label, opts, current) {
+    return gdField(label, `<select id="${id}">${optionsHtml(opts, current)}</select>`, id);
+  }
+  function gdColor(id, label, value) {
+    // O <input type="color"> é trocado por uma amostra que abre a janela de cores (decorateColorInputs).
+    return gdField(label, `<span class="gd-color"><input type="color" id="${id}" value="${value}"></span>`);
+  }
+  const gdSection = (title) => `<h4 class="gd-sec">${title}</h4>`;
+
   function renderGridAppearanceTab(g) {
-    const isMapUnits = g.intervalType === 'map-units' || g.intervalType === 'mm' || g.intervalType === 'cm';
+    const projected = !!(g.crs && g.crs !== '4326');
+    const mapUnit = projected ? 'm' : ''; // em graus não se mostra o símbolo ° (o "círculo")
+    const intervalUnit = g.intervalType === 'mm' ? 'mm' : g.intervalType === 'cm' ? 'cm' : mapUnit;
     return `
-      <div class="prop-row"><label>Tipo de grade</label><select id="gd-type">${optionsHtml(GRID_TYPE_OPTS, g.gridType)}</select></div>
-      <div class="prop-row"><label>SRC da grade</label><select id="gd-crs">
-        <option value="" ${!g.crs ? 'selected' : ''}>Usar SRC do item de mapa</option>
+      ${gdSection('Grade')}
+      ${gdSelect('gd-type', 'Tipo de grade', GRID_TYPE_OPTS, g.gridType)}
+      ${gdField('SRC da grade', `<select id="gd-crs">
+        <option value="" ${!g.crs ? 'selected' : ''}>Igual ao mapa</option>
         <option value="4326" ${g.crs === '4326' ? 'selected' : ''}>EPSG:4326 - WGS 84</option>
         <option value="3857" ${g.crs === '3857' ? 'selected' : ''}>EPSG:3857 - Web Mercator</option>
         <optgroup label="UTM (WGS 84) — Norte">${utmOptionsHtml('n', g.crs)}</optgroup>
         <optgroup label="UTM (WGS 84) — Sul">${utmOptionsHtml('s', g.crs)}</optgroup>
-      </select></div>
-      ${g.crs && g.crs !== '4326' ? `<div class="prop-row"><label></label><div style="font-size:11px; color:var(--text-dim);" id="gd-crs-proj-status">${window.proj4 ? 'Reprojeção ativa (proj4 carregado).' : 'Carregando suporte a reprojeção…'}</div></div>` : ''}
-      <div class="prop-row"><label>Intervalo (tipo)</label><select id="gd-interval-type">${optionsHtml(INTERVAL_TYPE_OPTS, g.intervalType)}</select></div>
-      ${g.intervalType === 'fit-segment' ? `
-        <div class="prop-row"><label>Segmento mín.</label><input type="number" id="gd-fit-min" value="${g.fitSegmentMin}" step="1"></div>
-        <div class="prop-row"><label>Segmento máx.</label><input type="number" id="gd-fit-max" value="${g.fitSegmentMax}" step="1"></div>
-      ` : `
-        <div class="prop-row"><label>Intervalo X</label><input type="number" id="gd-interval-x" value="${g.intervalX}" step="0.01"></div>
-        <div class="prop-row"><label>Intervalo Y</label><input type="number" id="gd-interval-y" value="${g.intervalY}" step="0.01"></div>
-      `}
-      <div class="prop-row"><label>Offset X</label><input type="number" id="gd-offset-x" value="${g.offsetX}" step="0.01"></div>
-      <div class="prop-row"><label>Offset Y</label><input type="number" id="gd-offset-y" value="${g.offsetY}" step="0.01"></div>
-      <div class="grid-subsection-title">Linha estilo</div>
-      <div class="prop-row"><label>Cor da linha</label><input type="color" id="gd-line-color" value="${g.lineColor}"></div>
-      <div class="prop-row"><label>Espessura</label><input type="number" id="gd-line-width" value="${g.lineWidth}" step="0.1" min="0"> mm</div>
-      ${g.gridType !== 'markers' ? `<div class="prop-row"><label>Tracejado</label><select id="gd-line-dash">${optionsHtml(LINE_DASH_OPTS, g.lineDashArray || '')}</select></div>` : ''}
-      ${g.gridType === 'cross' ? `<div class="prop-row"><label>Largura da cruz</label><input type="number" id="gd-cross-width" value="${g.crossWidth}" step="0.5" min="0"> mm</div>` : ''}
-      ${g.gridType === 'markers' ? `<div class="prop-row"><label>Símbolo</label><select id="gd-marker-symbol">${optionsHtml(MARKER_SYMBOL_OPTS, g.markerSymbol || 'circle')}</select></div>` : ''}
-      <div class="prop-row"><label>Modo de mesclagem</label><select id="gd-blend-mode">${optionsHtml(BLEND_MODE_OPTS, g.blendMode)}</select></div>
-    `;
-  }
+      </select>`, 'gd-crs')}
+      ${projected ? `<p class="gd-hint" id="gd-crs-proj-status">${window.proj4 ? 'Reprojeção ativa (proj4 carregado).' : 'Carregando suporte a reprojeção…'}</p>` : ''}
 
-  function renderGridFrameTab(g) {
-    const sideRows = ['left', 'right', 'top', 'bottom'].map(side => `
-      <div class="prop-row"><label>${SIDE_LABELS[side]}</label><select data-gd-division="${side}">${optionsHtml(DIVISION_OPTS, g.divisions[side])}</select></div>
-    `).join('');
-    return `
-      <div class="prop-row"><label>Estilo da moldura</label><select id="gd-frame-style">${optionsHtml(FRAME_STYLE_OPTS, g.frameStyle)}</select></div>
-      <div class="prop-row"><label>Tamanho</label><input type="number" id="gd-frame-size" value="${g.frameSize}" step="0.1" min="0"> mm</div>
-      <div class="prop-row"><label>Margem</label><input type="number" id="gd-frame-margin" value="${g.frameMargin}" step="0.1"> mm</div>
-      <div class="prop-row"><label>Espessura da linha</label><input type="number" id="gd-frame-line-width" value="${g.frameLineWidth}" step="0.1" min="0"> mm</div>
-      <div class="prop-row"><label>Cor da linha</label><input type="color" id="gd-frame-line-color" value="${g.frameLineColor}"></div>
-      <div class="prop-row"><label>Cor de preenchimento</label><input type="color" id="gd-frame-fill-color" value="${g.frameFillColor || '#ffffff'}"></div>
-      <div class="grid-subsection-title">Divisões por lado</div>
-      ${sideRows}
-      <div class="grid-subsection-title">Ticks e rotação</div>
-      <div class="prop-row"><label>Alinhamento dos ticks</label><select id="gd-ticks-alignment">${optionsHtml(TICKS_ALIGNMENT_OPTS, g.ticksAlignment)}</select></div>
-      <div class="prop-row"><label>Pular ângulo abaixo de</label><input type="number" id="gd-skip-angle-frame" value="${g.skipBelowAngleFrame}" step="1" min="0" max="90"> °</div>
-      <div class="prop-row"><label>Margem do canto</label><input type="number" id="gd-corner-margin-frame" value="${g.marginFromCornerFrame}" step="0.1"> mm</div>
-      ${checkboxRow('gd-follow-rotation-frame', 'Seguir a rotação da grade', g.followGridRotationFrame)}
+      ${gdSection('Intervalo')}
+      ${gdSelect('gd-interval-type', 'Tipo', INTERVAL_TYPE_OPTS, g.intervalType)}
+      ${g.intervalType === 'fit-segment'
+        ? gdNum('gd-fit-min', 'Segmento mín.', g.fitSegmentMin, { step: 1 }) +
+          gdNum('gd-fit-max', 'Segmento máx.', g.fitSegmentMax, { step: 1 })
+        : gdNum('gd-interval-x', 'Intervalo X', g.intervalX, { step: 0.01, unit: intervalUnit }) +
+          gdNum('gd-interval-y', 'Intervalo Y', g.intervalY, { step: 0.01, unit: intervalUnit })}
+      ${gdNum('gd-offset-x', 'Deslocamento X', g.offsetX, { step: 0.01, unit: mapUnit })}
+      ${gdNum('gd-offset-y', 'Deslocamento Y', g.offsetY, { step: 0.01, unit: mapUnit })}
+
+      ${gdSection('Linha')}
+      ${gdColor('gd-line-color', 'Cor', g.lineColor)}
+      ${gdNum('gd-line-width', 'Espessura', g.lineWidth, { step: 0.1, min: 0, unit: 'mm' })}
+      ${g.gridType !== 'markers' ? gdSelect('gd-line-dash', 'Tracejado', LINE_DASH_OPTS, g.lineDashArray || '') : ''}
+      ${g.gridType === 'cross' ? gdNum('gd-cross-width', 'Largura da cruz', g.crossWidth, { step: 0.5, min: 0, unit: 'mm' }) : ''}
+      ${g.gridType === 'markers' ? gdSelect('gd-marker-symbol', 'Símbolo', MARKER_SYMBOL_OPTS, g.markerSymbol || 'circle') : ''}
+      ${gdSelect('gd-blend-mode', 'Modo de mesclagem', BLEND_MODE_OPTS, g.blendMode)}
     `;
   }
 
   function renderGridCoordsTab(g) {
     if (g.annotationsEnabled === undefined) g.annotationsEnabled = true; // compat.: grades salvas antes deste campo existir
     const masterOff = !g.annotationsEnabled;
-    const sideBlocks = ['left', 'right', 'top', 'bottom'].map(side => {
+    const sideCards = ['left', 'right', 'top', 'bottom'].map(side => {
       const a = g.annotations[side];
-      const disabled = masterOff || a.mode === 'disabled';
+      const off = masterOff || a.mode === 'disabled';
       return `
-        <div class="grid-side-block">
-          <div class="grid-side-block-title">${SIDE_LABELS[side]}</div>
-          <div class="prop-row"><label>Modo</label><select data-gd-annot="${side}:mode" ${masterOff ? 'disabled' : ''}>${optionsHtml(ANNOT_MODE_OPTS, a.mode)}</select></div>
-          <div class="prop-row"><label>Posição</label><select data-gd-annot="${side}:position" ${disabled ? 'disabled' : ''}>${optionsHtml(ANNOT_POSITION_OPTS, a.position)}</select></div>
-          <div class="prop-row"><label>Orientação</label><select data-gd-annot="${side}:orientation" ${disabled ? 'disabled' : ''}>${optionsHtml(ANNOT_ORIENTATION_OPTS, a.orientation)}</select></div>
+        <div class="gd-side${off ? ' off' : ''}">
+          <div class="gd-side-head">
+            <b>${SIDE_LABELS[side]}</b>
+            <select aria-label="Modo — ${SIDE_LABELS[side]}" data-gd-annot="${side}:mode" ${masterOff ? 'disabled' : ''}>${optionsHtml(ANNOT_MODE_OPTS, a.mode)}</select>
+          </div>
+          <div class="gd-side-grid">
+            <label>Posição<select data-gd-annot="${side}:position" ${off ? 'disabled' : ''}>${optionsHtml(ANNOT_POSITION_OPTS, a.position)}</select></label>
+            <label>Orientação<select data-gd-annot="${side}:orientation" ${off ? 'disabled' : ''}>${optionsHtml(ANNOT_ORIENTATION_OPTS, a.orientation)}</select></label>
+          </div>
         </div>`;
     }).join('');
     return `
       ${checkboxRow('gd-annotations-enabled', 'Desenhar coordenadas', g.annotationsEnabled)}
-      <div class="grid-subsection-title" style="${masterOff ? 'opacity:0.5;' : ''}">Por lado</div>
-      <div style="${masterOff ? 'opacity:0.5; pointer-events:none;' : ''}">
-        ${sideBlocks}
-      </div>
-      <div class="grid-subsection-title">Formato</div>
-      <div class="prop-row"><label>Formato</label><select id="gd-coord-format">${optionsHtml(COORD_FORMAT_OPTS, g.coordFormat)}</select></div>
+
+      ${gdSection('Por lado')}
+      ${sideCards}
+
+      ${gdSection('Formato')}
+      ${gdSelect('gd-coord-format', 'Formato', COORD_FORMAT_OPTS, g.coordFormat)}
       ${g.coordFormat === 'custom' ? `
-        <div class="prop-row"><label>Expressão</label><input type="text" id="gd-custom-expr" value="${escapeHtml(g.customFormatExpression || '')}" placeholder="format_number(@coordinate_value, 2) || '°' || @coordinate_axis"></div>
-        <div class="prop-row"><label></label><div style="font-size:11px; color:var(--text-dim); line-height:1.4;">Suporta operadores (+ - * / ^ ||), comparações e funções: format_number, round, abs, to_string, upper, lower, concat, if, coalesce.</div></div>
+        ${gdField('Expressão', `<input type="text" id="gd-custom-expr" value="${escapeHtml(g.customFormatExpression || '')}" placeholder="format_number(@coordinate_value, 2) || '°' || @coordinate_axis">`, 'gd-custom-expr')}
+        <p class="gd-hint">Suporta operadores (+ - * / ^ ||), comparações e funções: format_number, round, abs, to_string, upper, lower, concat, if, coalesce.</p>
       ` : ''}
-      <div class="prop-row"><label>Precisão (casas)</label><input type="number" id="gd-coord-precision" value="${g.coordPrecision}" step="1" min="0" max="10"></div>
-      <div class="grid-subsection-title">Fonte e distância</div>
-      <div class="prop-row"><label>Família</label><input type="text" id="gd-font-family" value="${escapeHtml(g.font.family)}"></div>
-      <div class="prop-row"><label>Tamanho</label><input type="number" id="gd-font-size" value="${g.font.size}" step="0.5" min="1"> pt</div>
-      <div class="prop-row"><label>Cor</label><input type="color" id="gd-font-color" value="${g.font.color}"></div>
-      <div class="prop-row"><label>Distância ao quadro</label><input type="number" id="gd-distance-frame" value="${g.distanceToFrame}" step="0.1"> mm</div>
-      <div class="grid-subsection-title">Rotação das anotações</div>
-      <div class="prop-row"><label>Alinhamento</label><select id="gd-annot-alignment">${optionsHtml(TICKS_ALIGNMENT_OPTS, g.annotationsAlignment)}</select></div>
-      <div class="prop-row"><label>Pular ângulo abaixo de</label><input type="number" id="gd-skip-angle-annot" value="${g.skipBelowAngleAnnotations}" step="1" min="0" max="90"> °</div>
-      <div class="prop-row"><label>Margem do canto</label><input type="number" id="gd-corner-margin-annot" value="${g.marginFromCornerAnnotations}" step="0.1"> mm</div>
-      ${checkboxRow('gd-follow-rotation-annot', 'Seguir a rotação da grade', g.followGridRotationAnnotations)}
+      ${gdNum('gd-coord-precision', 'Precisão (casas)', g.coordPrecision, { step: 1, min: 0, max: 10 })}
+
+      ${gdSection('Texto')}
+      ${gdField('Família', `<input type="text" id="gd-font-family" value="${escapeHtml(g.font.family)}">`, 'gd-font-family')}
+      ${gdNum('gd-font-size', 'Tamanho', g.font.size, { step: 0.5, min: 1, unit: 'pt' })}
+      ${gdColor('gd-font-color', 'Cor', g.font.color)}
+      ${gdNum('gd-distance-frame', 'Distância da borda', g.distanceToFrame, { step: 0.1, unit: 'mm' })}
     `;
   }
 
   function wireGridDialogBody(item, grid) {
     const body = document.getElementById('grid-dialog-body');
+    const redraw = () => { renderGridOverlayForItem(item); markGridListDirty(item); };
+    // Campos que mudam a forma do formulário (ex.: tipo de grade muda quais campos aparecem).
+    const REBUILD = ['gd-type', 'gd-interval-type', 'gd-coord-format', 'gd-crs'];
 
-    // Helper: liga um campo simples (input/select) a uma propriedade da grade.
-    // parse: String (default) | Number | (v => bool) para checkboxes.
+    // Liga um campo simples (input/select) a uma propriedade da grade.
+    // parse: String (padrão) | Number | função.
     const bindField = (id, prop, parse) => {
       const el = body.querySelector('#' + id);
       if (!el) return;
@@ -2835,11 +3348,8 @@ function mapaProps(e){
       el.addEventListener(evt, () => {
         const raw = el.type === 'checkbox' ? el.checked : el.value;
         grid[prop] = parse ? parse(raw) : raw;
-        renderGridOverlayForItem(item);
-        // Re-render completo só quando o campo alterado muda a forma do
-        // formulário (ex.: trocar tipo de grade muda quais campos aparecem).
-        if (id === 'gd-type' || id === 'gd-interval-type' || id === 'gd-coord-format' || id === 'gd-crs') renderGridDialog();
-        markGridListDirty(item);
+        redraw();
+        if (REBUILD.indexOf(id) >= 0) renderGridDialog();
       });
     };
 
@@ -2854,62 +3364,40 @@ function mapaProps(e){
     bindField('gd-offset-y', 'offsetY', Number);
     bindField('gd-line-color', 'lineColor');
     bindField('gd-line-width', 'lineWidth', Number);
+    bindField('gd-line-dash', 'lineDashArray');
     bindField('gd-cross-width', 'crossWidth', Number);
+    bindField('gd-marker-symbol', 'markerSymbol');
     bindField('gd-blend-mode', 'blendMode');
-
-    bindField('gd-frame-style', 'frameStyle');
-    bindField('gd-frame-size', 'frameSize', Number);
-    bindField('gd-frame-margin', 'frameMargin', Number);
-    bindField('gd-frame-line-width', 'frameLineWidth', Number);
-    bindField('gd-frame-line-color', 'frameLineColor');
-    bindField('gd-frame-fill-color', 'frameFillColor');
-    bindField('gd-ticks-alignment', 'ticksAlignment');
-    bindField('gd-skip-angle-frame', 'skipBelowAngleFrame', Number);
-    bindField('gd-corner-margin-frame', 'marginFromCornerFrame', Number);
-    const followFrameEl = body.querySelector('#gd-follow-rotation-frame');
-    if (followFrameEl) followFrameEl.addEventListener('change', () => { grid.followGridRotationFrame = followFrameEl.checked; renderGridOverlayForItem(item); });
-
-    body.querySelectorAll('[data-gd-division]').forEach(sel => {
-      sel.addEventListener('change', () => { grid.divisions[sel.dataset.gdDivision] = sel.value; renderGridOverlayForItem(item); });
-    });
 
     bindField('gd-coord-format', 'coordFormat');
     bindField('gd-custom-expr', 'customFormatExpression');
     bindField('gd-coord-precision', 'coordPrecision', Number);
     bindField('gd-distance-frame', 'distanceToFrame', Number);
-    bindField('gd-annot-alignment', 'annotationsAlignment');
-    bindField('gd-skip-angle-annot', 'skipBelowAngleAnnotations', Number);
-    bindField('gd-corner-margin-annot', 'marginFromCornerAnnotations', Number);
-    const followAnnotEl = body.querySelector('#gd-follow-rotation-annot');
-    if (followAnnotEl) followAnnotEl.addEventListener('change', () => { grid.followGridRotationAnnotations = followAnnotEl.checked; renderGridOverlayForItem(item); });
 
-    // Campos de fonte gravam em grid.font.* (objeto aninhado) — tratados à
-    // parte porque bindField grava direto em grid[prop].
-    ['gd-font-family', 'gd-font-size', 'gd-font-color'].forEach(id => {
+    // Campos de fonte gravam em grid.font.* (objeto aninhado).
+    [
+      ['gd-font-family', v => { grid.font.family = v; }],
+      ['gd-font-size', v => { if (Number(v) > 0) grid.font.size = Number(v); }],
+      ['gd-font-color', v => { grid.font.color = v; }],
+    ].forEach(([id, set]) => {
       const el = body.querySelector('#' + id);
       if (!el) return;
-      const evt = (el.tagName === 'SELECT' || el.type === 'color') ? 'change' : 'input';
-      el.addEventListener(evt, () => {
-        if (id === 'gd-font-family') grid.font.family = el.value;
-        if (id === 'gd-font-size') grid.font.size = Number(el.value);
-        if (id === 'gd-font-color') grid.font.color = el.value;
-      });
+      el.addEventListener(el.type === 'color' ? 'change' : 'input', () => { set(el.value); redraw(); });
     });
 
     const annotEnabledEl = body.querySelector('#gd-annotations-enabled');
     if (annotEnabledEl) annotEnabledEl.addEventListener('change', () => {
       grid.annotationsEnabled = annotEnabledEl.checked;
       renderGridDialog(); // habilita/desabilita os campos "por lado" na hora
-      renderGridOverlayForItem(item);
-      markGridListDirty(item);
+      redraw();
     });
 
     body.querySelectorAll('[data-gd-annot]').forEach(sel => {
       sel.addEventListener('change', () => {
         const [side, field] = sel.dataset.gdAnnot.split(':');
         grid.annotations[side][field] = sel.value;
-        if (field === 'mode') renderGridDialog(); // habilita/desabilita posição+orientação
-        renderGridOverlayForItem(item);
+        if (field === 'mode') renderGridDialog(); // habilita/desabilita posição e orientação
+        redraw();
       });
     });
   }
@@ -2917,7 +3405,7 @@ function mapaProps(e){
   // =====================================================================
   // Grades de mapa — passos 1 (CRS da grade via proj4, ver PROJ_DEFS/
   // gridPointToLatLng/latLngToGridPoint mais abaixo), 2 (cálculo das
-  // linhas), 3 (desenho: linhas, cruzes, markers e quadro), 4 (conexão
+  // linhas), 3 (desenho: linhas, cruzes e markers), 4 (conexão
   // automática com a exportação, por já desenhar dentro do
   // .map-leaflet-div — ver comentário do CSS .map-grids-layer) e 9
   // (rotação: followGridRotationFrame/Annotations, skipBelowAngle*,
@@ -3301,7 +3789,6 @@ function mapaProps(e){
       }
     }
 
-    renderGridFrame(svg, gridDef, pxW, pxH, xs, ys, toPoint, map, item.mapRotation || 0, gridBounds);
     return { svg, xs, ys, toPoint, gridBounds };
   }
 
@@ -3317,10 +3804,6 @@ function mapaProps(e){
   // ao redor do centro do item. As LINHAS da grade em si nunca recebem essa
   // contra-rotação — elas devem continuar girando com o mapa, é isso que as
   // faz aparecer em ângulo dentro de um quadro reto.
-  function gridFrameTransform(gridDef, pxW, pxH, mapRotationDeg) {
-    if (gridDef.followGridRotationFrame || !mapRotationDeg) return '';
-    return `rotate(${-mapRotationDeg} ${pxW / 2} ${pxH / 2})`;
-  }
   function gridAnnotationsCounterRotation(gridDef, mapRotationDeg) {
     return (gridDef.followGridRotationAnnotations || !mapRotationDeg) ? 0 : -mapRotationDeg;
   }
@@ -3344,6 +3827,12 @@ function mapaProps(e){
     const isHorizontalSide = side === 'top' || side === 'bottom';
     const lineIsParallel = (lineAxis === 'x' && isHorizontalSide) || (lineAxis === 'y' && !isHorizontalSide);
     return lineIsParallel ? 90 - thetaAcute : thetaAcute;
+  }
+
+  // ===== Moldura: código copiado do layout.html original (renderGridFrame / renderZebraFrame) =====
+  function gridFrameTransform(gridDef, pxW, pxH, mapRotationDeg) {
+    if (gridDef.followGridRotationFrame || !mapRotationDeg) return '';
+    return `rotate(${-mapRotationDeg} ${pxW / 2} ${pxH / 2})`;
   }
 
   // ---- Passo 3/5: quadro de grade (moldura, 8 estilos) ----
@@ -3541,20 +4030,51 @@ function mapaProps(e){
     }
   }
 
+  // Definição de moldura de um item: mesmos campos do quadro de grade original; tamanho 2 mm, margem 0 e preenchimento branco = padrões do original.
+  function moldFrameDef(it) {
+    const w = it.molduraEsp === undefined ? 0.8 : it.molduraEsp;
+    return {
+      frameStyle: it.molduraEstilo || 'none', frameSize: 2, frameMargin: 0,
+      frameLineWidth: w, frameLineColor: corAlfa(it.molduraCor || '#000000', it.molduraAlfa), frameFillColor: '#ffffff',
+      divisions: { left: 'all', right: 'all', top: 'all', bottom: 'all' },
+      frameSides: { left: true, right: true, top: true, bottom: true },
+      followGridRotationFrame: false, ticksAlignment: 'orthogonal', skipBelowAngleFrame: 0, marginFromCornerFrame: 0,
+    };
+  }
+  // Desenha a moldura do item de mapa. As divisões (zebra / linhas) seguem a primeira grade ativa do mapa;
+  // sem grade, usa uma grade padrão só para calcular as divisões (nada dela é desenhado).
+  function renderMoldura(item, gridsLayer, pxSize, first) {
+    const fd = moldFrameDef(item);
+    if (fd.frameStyle === 'none' || !ver(item, 'moldura') || !item.leaflet) return;
+    let r = first;
+    if (!r) {
+      const dg = createDefaultGrid('_moldura'); dg.gridType = 'frame-only'; dg.intervalType = 'fit-segment'; dg.fitSegmentMin = 20; dg.fitSegmentMax = 60;
+      r = renderGridOverlay(item, dg, document.createElement('div'), pxSize);
+    }
+    if (!r || !r.toPoint) return;
+    const svg = svgEl('svg', { class: 'map-grid-svg-layer', 'data-moldura': '1', viewBox: `0 0 ${pxSize.w} ${pxSize.h}`, preserveAspectRatio: 'none' });
+    gridsLayer.appendChild(svg);
+    renderGridFrame(svg, fd, pxSize.w, pxSize.h, r.xs, r.ys, r.toPoint, item.leaflet, item.mapRotation || 0, r.gridBounds);
+  }
+
   // ---- Passo 6: coordenadas / anotações por lado ----
+  // Arredonda ANTES de separar grau/minuto/segundo: assim nunca sai "36°60'"
+  // (o que aconteceria com 35,99999999° e 0 casas).
   function toDM(absVal, precision, aligned, suffix) {
-    const deg = Math.floor(absVal);
-    const minFloat = (absVal - deg) * 60;
-    const min = minFloat.toFixed(precision);
+    const f = Math.pow(10, precision);
+    const totalMin = Math.round(absVal * 60 * f) / f;
+    const deg = Math.floor(totalMin / 60);
+    const min = (totalMin - deg * 60).toFixed(precision);
     const degStr = aligned ? String(deg).padStart(3, '0') : String(deg);
     return `${degStr}°${min}'${suffix ? ' ' + suffix : ''}`;
   }
   function toDMS(absVal, precision, aligned, suffix) {
-    const deg = Math.floor(absVal);
-    const minFloat = (absVal - deg) * 60;
-    const min = Math.floor(minFloat);
-    const secFloat = (minFloat - min) * 60;
-    const sec = secFloat.toFixed(precision);
+    const f = Math.pow(10, precision);
+    const totalSec = Math.round(absVal * 3600 * f) / f;
+    const deg = Math.floor(totalSec / 3600);
+    const rem = totalSec - deg * 3600;
+    const min = Math.floor(rem / 60);
+    const sec = (rem - min * 60).toFixed(precision);
     const degStr = aligned ? String(deg).padStart(3, '0') : String(deg);
     const minStr = aligned ? String(min).padStart(2, '0') : String(min);
     return `${degStr}°${minStr}'${sec}"${suffix ? ' ' + suffix : ''}`;
@@ -3774,6 +4294,7 @@ function mapaProps(e){
   })();
 
   function formatCoordinate(value, format, precision, axis, customExpr, isProjected) {
+    precision = Math.min(10, Math.max(0, Math.round(Number(precision) || 0))); // toFixed lança erro fora de 0-100
     // Grades num CRS projetado (UTM, Web Mercator) têm coordenadas em
     // metros, não em graus — formatos de grau/DM/DMS não fazem sentido
     // nesse caso (o QGIS também ignora esses formatos e mostra o valor
@@ -3974,16 +4495,18 @@ function mapaProps(e){
     if (!gridsLayer) return;
     gridsLayer.innerHTML = '';
     item._el.querySelectorAll(':scope > .map-grid-annotations-layer').forEach(e => e.remove());
-    if (!Array.isArray(item.grids) || !item.grids.length) return;
+    if (!Array.isArray(item.grids)) item.grids = [];
 
     const rect = gridsLayer.getBoundingClientRect();
     // Fallback para quando o item ainda não tem layout (display:none, etc.)
     // offsetWidth/Height = tamanho de layout (sem a escala da página nem a rotação do mapa)
     const pxSize = { w: gridsLayer.offsetWidth || item.w || 1, h: gridsLayer.offsetHeight || item.h || 1 };
 
+    let primeira = null;
     item.grids.forEach(gridDef => {
       const { xs, ys, toPoint, gridBounds } = renderGridOverlay(item, gridDef, gridsLayer, pxSize);
       if (!toPoint) return; // grade desativada: só o <svg> vazio foi criado
+      if (!primeira) primeira = { xs, ys, toPoint, gridBounds };
       const annotLayer = document.createElement('div');
       annotLayer.className = 'map-grid-annotations-layer';
       // Rótulos ficam em it._el (fora do .cont, que corta com overflow:hidden) e em
@@ -3994,6 +4517,7 @@ function mapaProps(e){
       cont.parentNode.appendChild(annotLayer);
       renderGridAnnotations(item, gridDef, annotLayer, xs, ys, toPoint, pxSize.w, pxSize.h, item.leaflet, item.mapRotation || 0, gridBounds);
     });
+    renderMoldura(item, gridsLayer, pxSize, primeira);
   }
 
   function markGridListDirty(item) {
@@ -4090,8 +4614,8 @@ function mapaProps(e){
     });
   }
 
-  // ---- Eventos globais do diálogo de grade (ligados uma única vez) ----
-  document.querySelectorAll('.grid-dialog-tab').forEach(tab => {
+  // ---- Eventos globais da janela de grade (ligados uma única vez) ----
+  document.querySelectorAll('.gd-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       gridDialogState.activeTab = tab.dataset.gridTab;
       renderGridDialog();
@@ -4099,17 +4623,45 @@ function mapaProps(e){
   });
   document.getElementById('grid-dialog-close').addEventListener('click', closeGridDialog);
   document.getElementById('grid-dialog-done').addEventListener('click', closeGridDialog);
-  document.getElementById('grid-dialog-overlay').addEventListener('click', (e) => {
-    if (e.target.id === 'grid-dialog-overlay') closeGridDialog();
-  });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && document.getElementById('grid-dialog-overlay').classList.contains('show')) closeGridDialog();
+    // Se a janela de cores está aberta, o Esc é dela (fecha só ela).
+    if (e.key !== 'Escape' || document.getElementById('color-picker-overlay').classList.contains('show')) return;
+    if (document.getElementById('grid-dialog-overlay').classList.contains('show')) closeGridDialog();
   });
+
+  // Arrastar pelo topo (mouse, toque e caneta).
+  (function initGridDialogDrag() {
+    const dlg = document.getElementById('grid-dialog');
+    const head = document.getElementById('grid-dialog-drag');
+    let drag = null;
+    head.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button') || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      const r = dlg.getBoundingClientRect();
+      drag = { dx: e.clientX - r.left, dy: e.clientY - r.top, id: e.pointerId };
+      head.setPointerCapture(e.pointerId);
+      dlg.classList.add('arrastando');
+      e.preventDefault();
+    });
+    head.addEventListener('pointermove', (e) => {
+      if (drag && e.pointerId === drag.id) placeGridDialog(e.clientX - drag.dx, e.clientY - drag.dy);
+    });
+    const stop = (e) => {
+      if (!drag) return;
+      drag = null;
+      dlg.classList.remove('arrastando');
+      try { head.releasePointerCapture(e.pointerId); } catch (_) {}
+    };
+    head.addEventListener('pointerup', stop);
+    head.addEventListener('pointercancel', stop);
+    window.addEventListener('resize', () => {
+      if (gridDialogPos && document.getElementById('grid-dialog-overlay').classList.contains('show')) placeGridDialog(gridDialogPos.x, gridDialogPos.y);
+    });
+  })();
 
 /* ---------- barra de cima ---------- */
 $("salvar").onclick=function(){if(!itens.length){aviso("Coloque pelo menos um item na folha antes de salvar.",3500);return}aviso(gravar()?"Layout \""+nomeLay+"\" salvo.":"Não deu para salvar (espaço do navegador cheio?).")};
 /* ---------- exportar: PNG ou PDF ---------- */
-function prepararExport(){sel=null;marcar();props();atualizaEscalas();itens.forEach(function(i){if(i._m)i._m.invalidateSize()})}
+function prepararExport(){sel=null;marcar();props();atualizaEscalas();itens.forEach(function(i){if(i._m)invalidarMapa(i)})}
 function abrirExport(){$("export-overlay").classList.add("show")}
 function fecharExport(){$("export-overlay").classList.remove("show")}
 function carregarHtmlToImage(){
@@ -4170,6 +4722,8 @@ window.addEventListener("resize",ajustar);
 
 let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
   let cpValRow, cpValFill, cpValHandle, cpSatRow, cpSatFill, cpSatHandle, cpPrevOld, cpPrevNew;
+  let cpAlphaBox, cpAlphaRow, cpAlphaFill, cpAlphaHandle, cpAlphaVal;
+  let cpAlpha = 1, cpAlphaOrig = 1, cpAlphaOn = false;
   let cpTarget = null; // { get(), set(hex) } | null
   let cpOriginal = '#000000', cpDraft = '#000000';
   let cpHue = 120, cpSat = 1, cpVal = 1;
@@ -4235,16 +4789,32 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
     cpSatHandle.style.left = (cpSat * cpSatRow.offsetWidth) + 'px';
   }
 
+  function cpRgba(hex, a) {
+    return 'rgba(' + parseInt(hex.substr(1,2),16) + ',' + parseInt(hex.substr(3,2),16) + ',' + parseInt(hex.substr(5,2),16) + ',' + a + ')';
+  }
+  // amostra com xadrez por trás, para a transparência aparecer
+  function cpPaintSwatch(el, hex, a) {
+    const c = cpRgba(hex, a);
+    el.style.background = 'linear-gradient(' + c + ',' + c + '), repeating-conic-gradient(#bdbdbd 0% 25%, #fff 0% 50%) 0 0/10px 10px';
+  }
+  function cpUpdateAlphaBar() {
+    const hex = cpHsvToHex(cpHue, cpSat, cpVal);
+    cpAlphaFill.style.background = `linear-gradient(to right, ${cpRgba(hex, 0)}, ${hex})`;
+    cpAlphaHandle.style.left = (cpAlpha * cpAlphaRow.offsetWidth) + 'px';
+    cpAlphaVal.textContent = Math.round(cpAlpha * 100) + '%';
+  }
+
   function cpRefreshBars() {
     cpUpdateWheelHandlePosition();
     cpUpdateValBar();
     cpUpdateSatBar();
+    cpUpdateAlphaBar();
   }
   // A cor escolhida fica só no modal (rascunho); só vai para o campo quando clicar em Aplicar.
   function cpShowDraft(hex) {
     cpDraft = hex;
     cpHex.value = hex.replace('#', '').toUpperCase();
-    cpPrevNew.style.background = hex;
+    cpPaintSwatch(cpPrevNew, hex, cpAlpha);
   }
   function cpSetColorFromHex(hex) {
     const hsv = cpHexToHsv(hex);
@@ -4263,8 +4833,14 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
   function cpOpenPopover(anchorEl, target) {
     cpTarget = target;
     cpOriginal = /^#[0-9a-f]{6}$/i.test(target.get()) ? target.get() : '#000000';
-    cpPrevOld.style.background = cpOriginal;
+    // a barra de opacidade só aparece quando o campo tem uma opacidade ligada a ele
+    cpAlphaOn = !!(target.setAlpha && target.getAlpha);
+    cpAlpha = cpAlphaOn ? Math.max(0, Math.min(1, (parseFloat(target.getAlpha()) || 0) / 100)) : 1;
+    cpAlphaOrig = cpAlpha;
+    cpAlphaBox.hidden = !cpAlphaOn;
+    cpPaintSwatch(cpPrevOld, cpOriginal, cpAlpha);
     cpOverlay.classList.add('show'); // precisa estar visível para medir as barras
+    if (window.posicionarColorPicker) window.posicionarColorPicker();
     cpSetColorFromHex(cpOriginal);
   }
   function cpClosePopover() {
@@ -4274,8 +4850,11 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
   function cpApplyAndClose() {
     const t = cpTarget, hex = cpDraft;
     const mudou = hex.toLowerCase() !== cpOriginal.toLowerCase();
+    const pct = Math.round(cpAlpha * 100);
+    const mudouA = !!(t && cpAlphaOn && pct !== Math.round(cpAlphaOrig * 100));
     cpClosePopover();
     if (t && mudou) t.set(hex);
+    if (t && mudouA) t.setAlpha(pct);
   }
 
   // Substitui visualmente um <input type="color"> existente por um botão
@@ -4284,6 +4863,21 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
   // existente (que faz getElementById(id) e escuta 'input'/'change')
   // continua funcionando sem qualquer alteração. Idempotente: chamar de
   // novo sobre um input já decorado não duplica nada.
+  // Cores do item que têm opacidade própria: fundo e borda (guardadas em fundoAlfa / molduraAlfa, 0–100)
+  const CP_ALFA = { 'p-func': ['fundoAlfa', 'fundo', 'p-fun'], 'p-borc': ['molduraAlfa', 'moldura', 'p-bor'], 'mold-cor': ['molduraAlfa', 'moldura', 'p-bor'] };
+  function cpAlphaFns(input) {
+    const m = CP_ALFA[input.id];
+    if (!m) return {};
+    return {
+      getAlpha: () => { const it = getIt(sel); return it && it[m[0]] != null ? it[m[0]] : 100; },
+      setAlpha: (p) => {
+        const it = getIt(sel); if (!it) return;
+        it[m[0]] = p; it[m[1]] = true;
+        const cb = $(m[2]); if (cb) cb.checked = true;
+        estilo(it); agendar();
+      },
+    };
+  }
   function decorateColorInputs(root) {
     const scope = root || document;
     const inputs = scope.querySelectorAll('input[type="color"]:not([data-cp-decorated])');
@@ -4317,7 +4911,8 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (input.disabled) return;
-        cpOpenPopover(btn, {
+        if (input.id === 'p-borc') { openMoldDialog(sel); return; }
+        cpOpenPopover(btn, Object.assign({
           get: () => input.value || '#000000',
           set: (hex) => {
             input.value = hex;
@@ -4325,7 +4920,7 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
             input.dispatchEvent(new Event('input', { bubbles: true }));
             input.dispatchEvent(new Event('change', { bubbles: true }));
           },
-        });
+        }, cpAlphaFns(input)));
       });
     });
   }
@@ -4345,6 +4940,11 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
     cpSatHandle = document.getElementById('cp-sat-handle');
     cpPrevOld = document.getElementById('cp-prev-old');
     cpPrevNew = document.getElementById('cp-prev-new');
+    cpAlphaBox = document.getElementById('cp-alpha-box');
+    cpAlphaRow = document.getElementById('cp-alpha-row');
+    cpAlphaFill = document.getElementById('cp-alpha-fill');
+    cpAlphaHandle = document.getElementById('cp-alpha-handle');
+    cpAlphaVal = document.getElementById('cp-alpha-val');
 
     // Arrastar com mouse, caneta ou dedo
     function arrastar(el, fn) {
@@ -4373,6 +4973,13 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
       const rect = cpSatRow.getBoundingClientRect();
       cpSat = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       cpSetColorFromHsv();
+    });
+
+    arrastar(cpAlphaRow, (e) => {
+      const rect = cpAlphaRow.getBoundingClientRect();
+      cpAlpha = Math.round(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * 100) / 100;
+      cpUpdateAlphaBar();
+      cpShowDraft(cpDraft);
     });
 
     cpHex.addEventListener('change', () => {
@@ -4422,8 +5029,48 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
     document.getElementById('cp-ok-btn').addEventListener('click', cpApplyAndClose);
     document.getElementById('cp-cancel-btn').addEventListener('click', cpClosePopover);
     document.getElementById('cp-close-btn').addEventListener('click', cpClosePopover);
-    // Toque no fundo escurecido fecha (só se o toque COMEÇOU no fundo, não ao soltar um arraste ali).
-    cpOverlay.addEventListener('pointerdown', (e) => { if (e.target === cpOverlay) cpClosePopover(); });
+    // Janela flutuante: sem fundo bloqueante e arrastável pelo cabeçalho.
+    (function () {
+      const dlg = document.getElementById('color-picker-popover');
+      const head = dlg.querySelector('.cp-header');
+      let pos = null; // última posição: reabre no mesmo lugar
+      function clamp(x, y) {
+        const mx = Math.max(0, window.innerWidth - dlg.offsetWidth);
+        const my = Math.max(0, window.innerHeight - dlg.offsetHeight);
+        return { x: Math.min(Math.max(0, x), mx), y: Math.min(Math.max(0, y), my) };
+      }
+      function place(x, y) {
+        const c = clamp(x, y); pos = c;
+        dlg.style.left = c.x + 'px'; dlg.style.top = c.y + 'px';
+      }
+      window.posicionarColorPicker = function () {
+        if (pos) place(pos.x, pos.y);
+        else place((window.innerWidth - dlg.offsetWidth) / 2, Math.max(8, (window.innerHeight - dlg.offsetHeight) / 3));
+      };
+      head.addEventListener('pointerdown', (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        if (e.target.closest('.cp-close')) return;
+        const r = dlg.getBoundingClientRect();
+        const dx = e.clientX - r.left, dy = e.clientY - r.top;
+        dlg.classList.add('arrastando');
+        try { head.setPointerCapture(e.pointerId); } catch (_) {}
+        const mover = (ev) => place(ev.clientX - dx, ev.clientY - dy);
+        const soltar = (ev) => {
+          dlg.classList.remove('arrastando');
+          head.removeEventListener('pointermove', mover);
+          head.removeEventListener('pointerup', soltar);
+          head.removeEventListener('pointercancel', soltar);
+          try { head.releasePointerCapture(ev.pointerId); } catch (_) {}
+        };
+        head.addEventListener('pointermove', mover);
+        head.addEventListener('pointerup', soltar);
+        head.addEventListener('pointercancel', soltar);
+        e.preventDefault();
+      });
+      window.addEventListener('resize', () => {
+        if (cpOverlay.classList.contains('show') && pos) place(pos.x, pos.y);
+      });
+    })();
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && cpOverlay.classList.contains('show')) cpClosePopover(); });
   }
 
@@ -4433,7 +5080,7 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
 /* ---------- aba Camadas: lista dos itens da folha (igual ao painel Itens do layout.html) ---------- */
 function nomeItem(it){var n={mapa:"Mapa",titulo:"Título",legenda:"Legenda",escala:"Escala",norte:"Seta do Norte",texto:"Texto",fig:"Imagem"};return(n[it.t]||it.t)+" "+String(it.id).replace(/\D/g,"")}
 function iconeItem(it){var m={mapa:"mapa",titulo:"texto",texto:"texto",legenda:"legenda",escala:"escala",norte:"norte",fig:"imagem"};return ic(m[it.t]||"mapa")}
-function aplicaVis(it){if(!it._el)return;it._el.style.display=it.visible===false?"none":"";if(it.visible!==false&&it._m)it._m.invalidateSize()}
+function aplicaVis(it){if(!it._el)return;it._el.style.display=it.visible===false?"none":"";if(it.visible!==false&&it._m)invalidarMapa(it)}
 function aplicaTrava(it){
   if(!it._el)return;
   it._el.style.pointerEvents=it.locked?"none":"";it._el.classList.toggle("travado",!!it.locked);
@@ -4449,7 +5096,7 @@ function listaItens(){
   ul.innerHTML="";
   itens.slice().reverse().forEach(function(it){
     var li=document.createElement("li");
-    li.className=(sel===it.id?"sel":"")+(it.visible===false?" oculto":"");
+    li.className=(sel===it.id?"sel":(selExtra.indexOf(it.id)>=0?"multi":""))+(it.visible===false?" oculto":"");
     li.draggable=true;li.dataset.id=it.id;
     li.innerHTML='<span class="c-olho"><input type="checkbox" data-v="1" title="Mostrar ou esconder o item"'+(it.visible===false?"":" checked")+'></span><span class="c-trava"><input type="checkbox" data-l="1" title="Travar o item"'+(it.locked?" checked":"")+'></span><span class="c-nome"><span class="c-ic">'+iconeItem(it)+'</span>'+esc(nomeItem(it))+'</span>';
     ul.appendChild(li);
@@ -4503,7 +5150,8 @@ function moverNaPilha(mid,tid,depois){
   });
   ul.addEventListener("click",function(e){
     var r=linhaDe(e.target);if(!r||e.target.tagName==="INPUT")return;
-    sel=r.dataset.id;marcar();props();
+    if(e.shiftKey){alternaMulti(r.dataset.id);listaItens();return}
+    sel=r.dataset.id;selExtra=[];marcar();props();
   });
   ul.addEventListener("dblclick",function(e){var r=linhaDe(e.target);if(!r||e.target.tagName==="INPUT")return;sel=r.dataset.id;marcar();props();aba("prop")});
   ul.addEventListener("change",function(e){
@@ -4627,6 +5275,72 @@ $("sd-cancela").onclick=fecharSair;
 $("sd-sai").onclick=function(){fecharSair();irHall()};
 $("sair-overlay").addEventListener("pointerdown",function(e){if(e.target===this)fecharSair()});
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&$("sair-overlay").classList.contains("show"))fecharSair()});
+
+
+/* ---------- Histórico: Desfazer / Refazer (fotos do layout) ----------
+   Cada foto guarda os itens (sem as propriedades internas "_") + nome + contador de ids.
+   A foto inicial é tirada na 1ª ação do usuário (como a base do "Salvar"); depois, cada ação
+   (soltar o mouse, mudar um campo, tecla, roda do mouse) agenda uma comparação com a foto atual. */
+var hist={pilha:[],i:-1,max:100,t:null,pausa:0};
+function fotoLay(){
+  return{k:serLay(),n:nomeLay,p:prox,d:JSON.stringify(itens.map(function(i){var o={};for(var p in i)if(p[0]!=="_")o[p]=i[p];return o}))};
+}
+function botoesHist(){
+  var d=$("b-desfazer"),r=$("b-refazer");
+  if(d)d.disabled=hall||hist.i<=0;
+  if(r)r.disabled=hall||hist.i<0||hist.i>=hist.pilha.length-1;
+}
+function iniciaHist(){if(hall||hist.i>=0)return;hist.pilha=[fotoLay()];hist.i=0;botoesHist()}
+function commitHist(){
+  if(hall||hist.i<0)return;
+  if(Date.now()<hist.pausa){agendaHist();return}
+  var f=fotoLay();
+  if(f.k===hist.pilha[hist.i].k)return;
+  hist.pilha=hist.pilha.slice(0,hist.i+1);hist.pilha.push(f);
+  if(hist.pilha.length>hist.max)hist.pilha.shift();
+  hist.i=hist.pilha.length-1;botoesHist();
+}
+function agendaHist(){clearTimeout(hist.t);hist.t=setTimeout(commitHist,450)}
+function restauraHist(f){
+  clearTimeout(hist.t);
+  itens.forEach(function(it){try{if(it._m)it._m.remove()}catch(e){}if(it._el)it._el.remove()});
+  var novos=JSON.parse(f.d);
+  itens=novos;prox=Math.max(prox,f.p||1);
+  if(f.n&&f.n!==nomeLay){nomeLay=f.n;document.title=nomeLay+" — Layout"}
+  if(sel&&!getIt(sel))sel=null;
+  itens.forEach(montar);
+  marcar();props();atualizaEscalas();try{listaItens()}catch(e){}
+  hist.pausa=Date.now()+900; // os mapas recém-criados ainda se ajustam; não conta como ação do usuário
+  setTimeout(function(){if(hist.pilha[hist.i]){hist.pilha[hist.i].k=serLay()}},700); // adota o estado final dos mapas antes de a pausa acabar
+  botoesHist();
+}
+function desfazerLay(){
+  if(hall)return;
+  commitHist(); // registra o que ainda estava pendente antes de voltar
+  if(hist.i<=0)return;
+  hist.i--;restauraHist(hist.pilha[hist.i]);
+}
+function refazerLay(){
+  if(hall||hist.i<0||hist.i>=hist.pilha.length-1)return;
+  hist.i++;restauraHist(hist.pilha[hist.i]);
+}
+(function(){
+  ["pointerdown","keydown","input","change","wheel"].forEach(function(ev){document.addEventListener(ev,iniciaHist,true)});
+  ["pointerup","change","input","keyup","wheel"].forEach(function(ev){document.addEventListener(ev,agendaHist,true)});
+  var bd=$("b-desfazer"),br=$("b-refazer");
+  if(bd)bd.addEventListener("click",desfazerLay);
+  if(br)br.addEventListener("click",refazerLay);
+  document.addEventListener("keydown",function(e){
+    if(!(e.ctrlKey||e.metaKey)||e.altKey||e.defaultPrevented)return;
+    var k=(e.key||"").toLowerCase();
+    if(k!=="z"&&k!=="y")return;
+    if(emDigitacao(e.target)||hall)return; // dentro de caixas de texto vale o desfazer do próprio navegador
+    if(document.querySelector("#export-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
+    e.preventDefault();
+    if(k==="y"||e.shiftKey)refazerLay();else desfazerLay();
+  });
+  botoesHist();
+})();
 
 if(hall){
   migrarAntigo();
