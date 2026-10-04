@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Layout — GisJr.</title>
+<title>Layout — GisJr</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -465,6 +465,9 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
   <symbol id="i-legenda" viewBox="0 0 24 24"><path d="M4 6h3M10 6h10M4 12h3M10 12h10M4 18h3M10 18h10"/></symbol>
   <symbol id="i-escala" viewBox="0 0 24 24"><path d="M2 8h20v8H2zM6 8v3M10 8v4M14 8v3M18 8v4"/></symbol>
   <symbol id="i-norte" viewBox="0 0 24 24"><path d="M12 2l6 18-6-4-6 4zM12 2v14"/></symbol>
+  <symbol id="i-ret" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1"/></symbol>
+  <symbol id="i-circ" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></symbol>
+  <symbol id="i-tri" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/></symbol>
   <symbol id="i-olho" viewBox="0 0 24 24"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3.2"/></symbol>
   <symbol id="i-trava" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
   <symbol id="i-texto" viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></symbol>
@@ -518,6 +521,7 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
     <button class="b" data-add="texto" type="button" title="Escrever um texto"><svg><use href="#i-texto"/></svg>Texto</button>
     <input type="file" id="f-img" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" hidden>
     <button class="b" data-add="fig" type="button" title="Colocar uma imagem"><svg><use href="#i-imagem"/></svg>Imagem</button>
+    <div class="dd" id="dd-formas"><button class="b" id="b-formas" type="button" title="Formas simples: desenha de novo a última escolhida. Use a seta para trocar entre retângulo, círculo e triângulo"><svg><use href="#i-ret"/></svg>Formas</button><button class="dd-seta" type="button" data-menu="formas" aria-haspopup="menu" aria-label="Escolher a forma: retângulo, círculo ou triângulo"></button></div>
   </div>
   <div class="grupo" id="g-org" role="group" aria-label="Organizar itens">
     <div class="dd" id="dd-levantar"><button class="b" id="b-levantar" type="button" title="Mudar a ordem: levantar, baixar, trazer para a frente ou enviar para trás"><svg><use href="#o-levantar"/></svg>Levantar</button><button class="dd-seta" type="button" data-menu="levantar" aria-haspopup="menu" aria-label="Mais opções de Levantar"></button></div>
@@ -562,7 +566,7 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
 </div>
 <div id="lays-ov">
   <header class="ly-topo">
-    <div class="ly-logo">Gis<span>Jr.</span></div>
+    <div class="ly-logo">Gis<span>Jr</span></div>
     <select class="tema-sel tema-hall" aria-label="Tema de cores"><option value="claro">Claro</option><option value="escuro">Escuro</option><option value="oceano">Oceano</option><option value="ameixa">Ameixa</option><option value="brasa">Brasa</option></select>
   </header>
   <main class="ly-main" role="dialog" aria-modal="true" aria-label="Layouts do mapa">
@@ -658,7 +662,8 @@ var hall=!lid,CH="mapinha:layout:"+GRUPO+":"+lid;
 document.documentElement.classList.toggle("hall",hall);
 var snap={camadas:[]},ligado=false,salvo=false,itens=[],sel=null,selExtra=[],prox=1,k=1,T=null,nomeLay="Meu layout";
 var FIG=["🌳","🌊","🏠","🏫","⭐","🐟","🦜","☀️","🌧️","🚲","⛰️","❤️"];
-var PAD={titulo:{w:560,h:70,txt:"Meu mapa",tam:44,cor:"#1e7a4c"},texto:{w:300,h:90,txt:"Escreva aqui…",tam:20,cor:"#000000"},mapa:{w:640,h:480},legenda:{w:210,h:170,tit:"Legenda"},escala:{w:400,h:70},norte:{w:70,h:90},fig:{w:90,h:90,txt:"🌳"}};
+var PAD={titulo:{w:560,h:70,txt:"Meu mapa",tam:44,cor:"#1e7a4c"},texto:{w:300,h:90,txt:"Escreva aqui…",tam:20,cor:"#000000"},mapa:{w:640,h:480},legenda:{w:210,h:170,tit:"Legenda"},escala:{w:400,h:70},norte:{w:70,h:90},fig:{w:90,h:90,txt:"🌳"},forma:{w:140,h:110}};
+var FORMAS={ret:"Retângulo",circ:"Círculo",tri:"Triângulo"};
 
 function aviso(m,ms){var e=$("aviso-t");e.textContent=m;e.classList.add("on");clearTimeout(aviso.t);aviso.t=setTimeout(function(){e.classList.remove("on")},ms||2600)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -2000,8 +2005,8 @@ function estilo(it){
   if(it.t==="mapa"&&it.leaflet&&typeof renderGridOverlayForItem==="function")renderGridOverlayForItem(it);
 }
 function getIt(id){return itens.filter(function(i){return i.id===id})[0]}
-function adicionar(t){
-  var it=Object.assign({id:"i"+prox++,t:t,x:60+(itens.length%6)*26,y:60+(itens.length%6)*26},JSON.parse(JSON.stringify(PAD[t])));
+function adicionar(t,extra){
+  var it=Object.assign({id:"i"+prox++,t:t,x:60+(itens.length%6)*26,y:60+(itens.length%6)*26},JSON.parse(JSON.stringify(PAD[t])),extra||{});
   if(t==="escala")padroesEscala(it);
   itens.push(it);montar(it);sel=it.id;marcar();props();agendar();
   if(t==="mapa"&&!snap.camadas.length)aviso("Ainda não recebi camadas. Volte à aba do mapa e adicione uma camada.");
@@ -2248,6 +2253,16 @@ function desenhaConteudo(it){
       im.style.cssText="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;object-fit:"+(it.ajuste||"contain");
     }else c.textContent=it.txt;
   }
+  else if(it.t==="forma"){
+    if(it.molduraRaio===undefined)it.molduraRaio=0; /* sem cantos arredondados do contêiner: a forma desenha o próprio contorno */
+    var fw=Math.max(1,it.w),fh=Math.max(1,it.h),fOn=it.contorno!==false,fsw=fOn?Math.max(0.5,(it.contornoEsp===undefined?0.5:it.contornoEsp)*3.7795):0,fho=fsw/2;
+    var fFill=it.preenche!==false?(it.preencheCor||"#d7ecdf"):"none",fAl=(it.preencheAlfa===undefined?100:it.preencheAlfa)/100;
+    var fAt=' fill="'+fFill+'" fill-opacity="'+fAl+'" '+(fOn?'stroke="'+(it.contornoCor||"#1e7a4c")+'" stroke-width="'+fsw+'" stroke-linejoin="round"':'stroke="none"');
+    var fSh=it.forma==="circ"?'<ellipse cx="'+fw/2+'" cy="'+fh/2+'" rx="'+Math.max(0,fw/2-fho)+'" ry="'+Math.max(0,fh/2-fho)+'"'+fAt+'/>'
+      :it.forma==="tri"?'<polygon points="'+fw/2+','+fho+' '+(fw-fho)+','+(fh-fho)+' '+fho+','+(fh-fho)+'"'+fAt+'/>'
+      :'<rect x="'+fho+'" y="'+fho+'" width="'+Math.max(0,fw-fsw)+'" height="'+Math.max(0,fh-fsw)+'"'+fAt+'/>';
+    c.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 '+fw+' '+fh+'" preserveAspectRatio="none" style="display:block;overflow:visible" aria-hidden="true">'+fSh+'</svg>';
+  }
   else if(it.t==="norte"){var cn=it.cor||"#000000",e0=it.estiloN||"n0";c.innerHTML=norteSvg(e0,cn,it.cor2||(NORTES[e0]?"#ffffff":cn))}
   else if(it.t==="legenda"){
     var oc=it.lgOcultas||[],l=lgOrdenadas(it,snap.camadas.filter(function(x){return x.visible&&oc.indexOf(x.id)<0}));
@@ -2363,9 +2378,9 @@ function tfS(l,k,v,pr){return'<div class="pl tf"><label>'+l+'</label><select dat
 function tfC(l,k,v){return'<div class="lin"><label>'+l+'</label><input type="color" data-tf="'+k+'" data-ty="s" value="'+lgHex(v)+'"></div>'}
 function tfK(l,k,v){return'<label class="ck"><input type="checkbox" data-tf="'+k+'" data-ty="b"'+(v?" checked":"")+'> '+l+'</label>'}
 function tfR(l,k,v){return'<div class="pl"><label>'+l+': '+v+'%</label><input type="range" data-tf="'+k+'" data-ty="n" min="0" max="100" value="'+v+'"></div>'}
-function blocoFonte(f,es){
-  var h="";
-  h+='<h3>Fonte</h3>'+tfS("Família","family",f.family,FONTES.map(function(x){return[x,x]}));
+function blocoFonte(f,es,titulo){
+  var h="",lf=FONTES.indexOf(f.family)<0?[f.family].concat(FONTES):FONTES;
+  h+='<h3>'+(titulo||"Fonte")+'</h3>'+tfS("Família","family",f.family,lf.map(function(x){return[x,x]}));
   h+=tfS("Estilo","style",es,[["Normal","Normal"],["Negrito","Negrito"],["Itálico","Itálico"],["Negrito Itálico","Negrito Itálico"]]);
   h+='<div class="par">'+tfN("Tamanho","size",f.size,0.5,1)+tfS("Unidade","sizeUnit",f.sizeUnit,[["pt","Pontos"],["mm","Milímetros"],["px","Pixels"]])+'</div>';
   h+=tfC("Cor","color",f.color)+tfR("Opacidade","opacity",f.opacity)+tfK("Sublinhado","underline",f.underline)+tfK("Tachado","strikeout",f.strikeout);
@@ -2400,7 +2415,6 @@ function painelEscala(it){
   var mapas=itens.filter(function(i){return i.t==="mapa"});
   var h='<div class="pl"><label for="e-map">Mapa</label><select id="e-map">'+(mapas.length?mapas.map(function(m,i){return opt(m.id,"Mapa "+(i+1),it.scalebarMap)}).join(""):'<option value="">(nenhum mapa)</option>')+'</select></div>';
   h+='<div class="pl"><label for="e-est">Estilo</label><select id="e-est">'+[["single-box","Caixa simples"],["double-box","Caixa dupla"],["mid-dashed","Linhas tracejadas do meio"],["bottom-dashed","Linhas tracejadas embaixo"],["top-dashed","Linhas tracejadas em cima"],["hollow","Oco"],["numeric","Numérico"]].map(function(x){return opt(x[0],x[1],it.scalebarStyle)}).join("")+'</select></div>';
-  if(it.scalebarStyle==="numeric"){var fe=it.scalebarFont;h+=blocoFonte(fe,fe.bold&&fe.italic?"Negrito Itálico":fe.bold?"Negrito":fe.italic?"Itálico":(fe.style||"Normal"))}
   h+='<div class="pl"><label for="e-uni">Unidades</label><select id="e-uni">'+[["mapunits","Unidades do mapa"],["m","Metros"],["km","Quilômetros"],["ft","Pés"],["yd","Jardas"],["mi","Milhas"],["nm","Milhas náuticas"],["cm","Centímetros"],["mm","Milímetros"],["in","Polegadas"]].map(function(x){return opt(x[0],x[1],it.scalebarUnits)}).join("")+'</select></div>';
   h+='<div class="pl"><label for="e-sl">Segmentos à esquerda</label><input type="number" id="e-sl" min="0" step="1" value="'+it.segmentsLeft+'"></div>';
   h+='<div class="pl"><label for="e-sr">Segmentos à direita</label><input type="number" id="e-sr" min="1" step="1" value="'+it.segmentsRight+'"></div>';
@@ -2411,15 +2425,31 @@ function painelEscala(it){
   h+='<div class="pl"><label for="e-max">Máximo no papel (mm)</label><input type="number" id="e-max" min="0" step="5" value="'+it.segmentWidthAdjust.max+'"'+(it.fixedWidthMode?" disabled":"")+'></div>';
   h+='<div class="pl"><label for="e-alt">Altura (mm)</label><input type="number" id="e-alt" min="0" step="0.5" value="'+it.segmentHeight+'"></div>';
   h+='<div class="pl"><label for="e-pos">Posição dos números</label><select id="e-pos">'+opt("above","Acima da barra",it.labelPlacement)+opt("below","Abaixo da barra",it.labelPlacement)+'</select></div>';
-  if(it.scalebarStyle!=="numeric")h+='<div class="pl"><label for="e-tam">Tamanho da letra (pt)</label><input type="number" id="e-tam" min="4" step="1" value="'+it.scalebarFont.size+'"></div>';
   h+='<div class="lin"><label for="e-c1">Cor primária</label><input type="color" id="e-c1" value="'+it.primaryFill+'"></div><div class="lin"><label for="e-c2">Cor secundária</label><input type="color" id="e-c2" value="'+it.secondaryFill+'"></div>';
+  /* Texto da escala: vale para TODOS os estilos (antes só o "Numérico" mostrava a fonte, então a cor dos números da caixa dupla não dava para mudar) */
+  var fe=it.scalebarFont;
+  h+=blocoFonte(fe,fe.bold&&fe.italic?"Negrito Itálico":fe.bold?"Negrito":fe.italic?"Itálico":(fe.style||"Normal"),"Texto da escala");
+  h+='<h3>Formatação do texto</h3>'+tfS("Caixa","textCase",fe.textCase,[["none","Normal"],["upper","MAIÚSCULAS"],["lower","minúsculas"],["capitalize","Capitalizar"]]);
+  h+='<div class="par">'+tfN("Letras (mm)","letterSpacing",fe.letterSpacing,0.1)+tfN("Palavras (mm)","wordSpacing",fe.wordSpacing,0.1)+'</div>';
+  h+='<h3>Contorno do texto</h3>'+tfK("Desenhar contorno","bufferEnabled",fe.bufferEnabled)+'<div class="par">'+tfN("Tamanho (mm)","bufferSize",fe.bufferSize,0.1,0)+tfC("Cor","bufferColor",fe.bufferColor)+'</div>';
+  h+='<h3>Sombra do texto</h3>'+tfK("Desenhar sombra","shadowEnabled",fe.shadowEnabled)+'<div class="par">'+tfN("Ângulo","shadowAngle",fe.shadowAngle,5)+tfN("Distância (mm)","shadowDistance",fe.shadowDistance,0.1,0)+'</div><div class="par">'+tfN("Desfoque (mm)","shadowBlur",fe.shadowBlur,0.1,0)+tfC("Cor","shadowColor",fe.shadowColor)+'</div>';
+  return h;
+}
+/* painel da forma simples (retângulo, círculo, triângulo) */
+function painelForma(it){
+  var al=it.preencheAlfa===undefined?100:it.preencheAlfa;
+  var h='<h3>Forma</h3>';
+  h+='<div class="lin"><label><input type="checkbox" id="sf-pon"'+(it.preenche!==false?" checked":"")+'> Preenchimento</label><input type="color" id="sf-pc" aria-label="Cor do preenchimento" value="'+(it.preencheCor||"#d7ecdf")+'"></div>';
+  h+='<div class="pl"><label for="sf-al">Opacidade do preenchimento: '+al+'%</label><input type="range" id="sf-al" min="0" max="100" value="'+al+'"></div>';
+  h+='<div class="lin"><label><input type="checkbox" id="sf-con"'+(it.contorno!==false?" checked":"")+'> Contorno</label><input type="color" id="sf-cc" aria-label="Cor do contorno" value="'+(it.contornoCor||"#1e7a4c")+'"></div>';
+  h+='<div class="pl"><label for="sf-esp">Espessura do contorno (mm)</label><input type="number" id="sf-esp" min="0.1" step="0.1" value="'+(it.contornoEsp===undefined?0.5:it.contornoEsp)+'"></div>';
   return h;
 }
 function props(){
   var it=getIt(sel),p=$("prop");
   if(!it){p.innerHTML='<h2>Escolha um item</h2><p class="vazio">Clique em um item da folha para mudar as cores, o texto e o tamanho.</p><p class="vazio" style="margin-top:10px">Arraste para mover. Puxe a bolinha laranja para mudar o tamanho.</p><p class="vazio" style="margin-top:10px">Para escolher vários itens, segure Shift e clique neles. Depois use Levantar, Alinhar, Distribuir e Redimensionar na barra.</p>'+(areaTransf?'<div class="acoes" style="margin-top:12px"><button class="mini" data-a="colar" type="button" title="Colar o item copiado (Ctrl+V)">'+ic("colar")+'Colar item copiado</button></div>':'');return}
   if(it.t==="legenda"&&it._lgEdit!=null){var lc=snap.camadas.filter(function(x){return x.id===it._lgEdit})[0];if(lc){p.innerHTML=painelLegItem(it,lc);decorateColorInputs(p);return}it._lgEdit=null}
-  var nomes={mapa:"Mapa",titulo:"Título",legenda:"Legenda",escala:"Escala",norte:"Seta do Norte",texto:"Texto",fig:"Imagem"},h="<h2>"+nomes[it.t]+"</h2>";
+  var nomes={mapa:"Mapa",titulo:"Título",legenda:"Legenda",escala:"Escala",norte:"Seta do Norte",texto:"Texto",fig:"Imagem"},h="<h2>"+(it.t==="forma"?FORMAS[it.forma||"ret"]:nomes[it.t])+"</h2>";
   if(selExtra.length)h+='<p class="vazio" style="margin:0 0 10px"><b>+'+selExtra.length+(selExtra.length>1?' itens também escolhidos':' item também escolhido')+'.</b> Use Levantar, Alinhar, Distribuir e Redimensionar na barra.</p>';
   if(it.t==="titulo"||it.t==="texto")h+=painelTexto(it);
   if(it.t==="legenda"){
@@ -2428,6 +2458,7 @@ function props(){
   }
   if(it.t==="norte")h+=painelNorte(it);
   if(it.t==="escala")h+=painelEscala(it);
+  if(it.t==="forma")h+=painelForma(it);
   if(it.t==="fig"){
     h+='<div class="pl"><label>Imagem do computador</label><div class="acoes"><button class="mini" data-img="up" type="button">'+ic("imagem")+(it.img?'Trocar imagem':'Escolher arquivo')+'</button>'+(it.img?'<button class="mini perigo" data-img="rm" type="button">'+ic("lixo")+'Tirar imagem</button>':'')+'</div><p class="vazio" style="margin-top:6px;font-size:13px">JPG, PNG ou WebP, sem animação. Até 8 MB.</p></div>';
     if(it.img)h+='<div class="pl"><label for="p-ajuste">Encaixe</label><select id="p-ajuste">'+opt("contain","Inteira (sem cortar)",it.ajuste||"contain")+opt("cover","Preencher (pode cortar)",it.ajuste||"contain")+opt("fill","Esticar",it.ajuste||"contain")+'</select></div>';
@@ -2435,7 +2466,7 @@ function props(){
   }
   if(it.t==="mapa")h+=painelMexer(it)+painelCamadas(it)+'<h3>Escala</h3><div class="pl"><label for="p-esc">Escala do mapa</label><span class="esc-wrap"><input type="text" id="p-esc" value="'+scaleTextForZoom(it.zoom)+'" autocomplete="off"><span class="esc-setas"><button type="button" class="esc-seta" data-esc="1" tabindex="-1" aria-label="Aumentar a escala (afastar)">▲</button><button type="button" class="esc-seta" data-esc="-1" tabindex="-1" aria-label="Diminuir a escala (aproximar)">▼</button></span></span></div>';
   if(it.t==="mapa")h+=painelMapa(it);
-  h+='<h3>Aparência</h3><div class="lin"><label><input type="checkbox" id="p-fun"'+(ver(it,"fundo")?" checked":"")+'> Fundo</label><input type="color" id="p-func" aria-label="Cor do fundo" value="'+(it.fundoCor||"#ffffff")+'"></div><div class="lin"><label><input type="checkbox" id="p-bor"'+(ver(it,"moldura")?" checked":"")+'> Borda</label><input type="color" id="p-borc" aria-label="Cor da borda" value="'+(it.molduraCor||"#000000")+'"></div>';
+  h+='<h3>Aparência</h3>';if(it.t!=="forma")h+='<div class="lin"><label><input type="checkbox" id="p-fun"'+(ver(it,"fundo")?" checked":"")+'> Fundo</label><input type="color" id="p-func" aria-label="Cor do fundo" value="'+(it.fundoCor||"#ffffff")+'"></div><div class="lin"><label><input type="checkbox" id="p-bor"'+(ver(it,"moldura")?" checked":"")+'> Borda</label><input type="color" id="p-borc" aria-label="Cor da borda" value="'+(it.molduraCor||"#000000")+'"></div>';
   h+='<div class="pl"><label for="p-giro">Girar: '+(it.giro||0)+'°</label><input type="range" id="p-giro" min="-180" max="180" step="5" value="'+(it.giro||0)+'"></div>';
   if(it.t==="mapa")h+=painelMapaComum(it);
   h+='<hr class="sep">';
@@ -2476,6 +2507,21 @@ $("prop").addEventListener("click",function(e){
   else if(a==="baixo"&&ix>0){itens.splice(ix,1);itens.unshift(it);$("pagina").insertBefore(it._el,$("pagina").firstChild)}
   atualizaEscalas();listaItens();agendar();
 });
+function addForma(k){var d={ret:[160,110],circ:[120,120],tri:[140,120]}[k]||[140,110];adicionar("forma",{forma:k,w:d[0],h:d[1]})}
+function aplicaF(e){
+  var id=e.target.id;if(!id||id.indexOf("sf-")!==0)return;
+  var it=getIt(sel);if(!it||it.t!=="forma")return;
+  var v=e.target.value,on=e.target.checked,pr=e.target.previousElementSibling;
+  if(id==="sf-pon")it.preenche=on;
+  else if(id==="sf-pc"){it.preencheCor=v;it.preenche=true;var a=$("sf-pon");if(a)a.checked=true}
+  else if(id==="sf-al"){it.preencheAlfa=+v;if(pr)pr.textContent="Opacidade do preenchimento: "+it.preencheAlfa+"%"}
+  else if(id==="sf-con")it.contorno=on;
+  else if(id==="sf-cc"){it.contornoCor=v;it.contorno=true;var b=$("sf-con");if(b)b.checked=true}
+  else if(id==="sf-esp"){var n=parseFloat(v);if(!(n>0))return;it.contornoEsp=n}
+  else return;
+  desenhaConteudo(it);agendar();
+}
+$("prop").addEventListener("input",aplicaF);$("prop").addEventListener("change",aplicaF);
 document.querySelectorAll("[data-add]").forEach(function(b){b.onclick=function(){adicionar(b.dataset.add);if(b.dataset.add==="fig")abrirImagem(getIt(sel))}});
 function apagarItem(it){
   var ix=itens.indexOf(it);if(ix<0)return;
@@ -2722,6 +2768,10 @@ var ORG_MENUS={
     {id:"vcenter",t:"Distribuir pelo centro vertical",ic:"o-di-vcen",n:2,f:function(){orgDistribuir("vcenter")}},
     {id:"vspace",t:"Espaçamento vertical igual",ic:"o-di-vesp",n:2,f:function(){orgDistribuir("vspace")}},
     {id:"bottom",t:"Distribuir pela borda da base",ic:"o-di-base",n:2,f:function(){orgDistribuir("bottom")}}],
+  formas:[
+    {id:"ret",t:"Retângulo",ic:"i-ret",n:0,f:function(){addForma("ret")}},
+    {id:"circ",t:"Círculo",ic:"i-circ",n:0,f:function(){addForma("circ")}},
+    {id:"tri",t:"Triângulo",ic:"i-tri",n:0,f:function(){addForma("tri")}}],
   tamanho:[
     {id:"narrowest",t:"Redimensionar ao mais estreito",ic:"o-re-estreito",n:2,f:function(){orgTamanho("narrowest")}},
     {id:"widest",t:"Redimensionar ao mais amplo",ic:"o-re-amplo",n:2,f:function(){orgTamanho("widest")}},
@@ -2729,14 +2779,14 @@ var ORG_MENUS={
     {id:"tallest",t:"Redimensionar ao mais alto",ic:"o-re-alto",n:2,f:function(){orgTamanho("tallest")}},
     {id:"square",t:"Redimensionar ao quadrado",ic:"o-re-quad",n:1,f:function(){orgTamanho("square")}}]
 };
-var ORG_IDS={levantar:["dd-levantar","b-levantar"],alinhar:["dd-alinhar","b-alinhar"],distribuir:["dd-distribuir","b-distribuir"],tamanho:["dd-tamanho","b-tamanho"]};
-var orgUltima={levantar:"raise",alinhar:"left",distribuir:"hcenter",tamanho:"narrowest"}; /* o botão repete a última opção usada */
+var ORG_IDS={levantar:["dd-levantar","b-levantar"],alinhar:["dd-alinhar","b-alinhar"],distribuir:["dd-distribuir","b-distribuir"],tamanho:["dd-tamanho","b-tamanho"],formas:["dd-formas","b-formas"]};
+var orgUltima={levantar:"raise",alinhar:"left",distribuir:"hcenter",tamanho:"narrowest",formas:"ret"}; /* o botão repete a última opção usada */
 var orgAberto=null,orgMenuEl=null;
 function orgAchou(m,id){return ORG_MENUS[m].filter(function(e){return e.id===id})[0]}
 function orgTem(m){var s=selecionados();return m==="levantar"?s.length:s.filter(function(i){return !i.locked}).length}
 function atualizaOrg(){
   var s=selecionados().length,n=orgTem("alinhar");
-  var reg={levantar:s>=1,alinhar:n>=2,distribuir:n>=2,tamanho:n>=1};
+  var reg={levantar:s>=1,alinhar:n>=2,distribuir:n>=2,tamanho:n>=1,formas:true};
   Object.keys(ORG_IDS).forEach(function(m){
     var dd=$(ORG_IDS[m][0]),b=$(ORG_IDS[m][1]);if(!dd||!b)return;
     dd.classList.toggle("off",!reg[m]);b.setAttribute("aria-disabled",String(!reg[m]));
@@ -2762,6 +2812,7 @@ function orgAbre(m){
     if(ok)r.addEventListener("click",function(){orgFecha();orgRoda(m,en)});
     orgMenuEl.appendChild(r);
   });
+  orgMenuEl.style.minWidth=m==="formas"?"180px":"";
   var rc=dd.getBoundingClientRect();
   orgMenuEl.style.left=Math.round(rc.left)+"px";orgMenuEl.style.top=Math.round(rc.bottom+2)+"px";
   orgMenuEl.classList.add("show");
@@ -5078,8 +5129,8 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
 
 
 /* ---------- aba Camadas: lista dos itens da folha (igual ao painel Itens do layout.html) ---------- */
-function nomeItem(it){var n={mapa:"Mapa",titulo:"Título",legenda:"Legenda",escala:"Escala",norte:"Seta do Norte",texto:"Texto",fig:"Imagem"};return(n[it.t]||it.t)+" "+String(it.id).replace(/\D/g,"")}
-function iconeItem(it){var m={mapa:"mapa",titulo:"texto",texto:"texto",legenda:"legenda",escala:"escala",norte:"norte",fig:"imagem"};return ic(m[it.t]||"mapa")}
+function nomeItem(it){if(it.t==="forma")return FORMAS[it.forma||"ret"]+" "+String(it.id).replace(/\D/g,"");var n={mapa:"Mapa",titulo:"Título",legenda:"Legenda",escala:"Escala",norte:"Seta do Norte",texto:"Texto",fig:"Imagem"};return(n[it.t]||it.t)+" "+String(it.id).replace(/\D/g,"")}
+function iconeItem(it){if(it.t==="forma")return ic(it.forma||"ret");var m={mapa:"mapa",titulo:"texto",texto:"texto",legenda:"legenda",escala:"escala",norte:"norte",fig:"imagem"};return ic(m[it.t]||"mapa")}
 function aplicaVis(it){if(!it._el)return;it._el.style.display=it.visible===false?"none":"";if(it.visible!==false&&it._m)invalidarMapa(it)}
 function aplicaTrava(it){
   if(!it._el)return;
@@ -5170,7 +5221,7 @@ function moverNaPilha(mid,tid,depois){
 var _props=props;props=function(){_props.apply(this,arguments);listaItens()};
 var _montar=montar;montar=function(it){_montar(it);if(it.visible===false)aplicaVis(it);if(it.locked)aplicaTrava(it)};
 var _pegar=pegar;pegar=function(e,it,m,d){aba("prop");_pegar(e,it,m,d)};
-var _adicionar=adicionar;adicionar=function(t){aba("prop");_adicionar(t)};
+var _adicionar=adicionar;adicionar=function(t,extra){aba("prop");_adicionar(t,extra)};
 
 /* ---------- tela "Layouts": criar novo, abrir, editar título, duplicar, excluir ---------- */
 var ovL=$("lays-ov"),grL=$("lays-grade"),renId=null,delId=null;
