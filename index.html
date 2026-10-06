@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f0eee7" media="(pointer:coarse)">
 <title>GisJr.</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -14,7 +15,6 @@
 <script src="https://cdn.jsdelivr.net/npm/georaster-layer-for-leaflet@3.10.0/dist/georaster-layer-for-leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/shpjs@6.2.0/dist/shp.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mapbox/shp-write@0.4.3/shpwrite.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-wasm.js"></script>
 <style>
 :root{
@@ -1677,7 +1677,7 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
   <main>
     <section class="bloco criar" aria-labelledby="t-criar">
       <h1 id="t-criar">Criar mapa</h1>
-      <button class="novo" id="novo" data-ir="mapa"><i>+</i><span><b>Novo mapa vazio</b><small>Comece do zero e escolha as camadas que quiser.</small></span></button>
+      <button class="novo" id="novo"><i>+</i><span><b>Novo mapa vazio</b><small>Comece do zero e escolha as camadas que quiser.</small></span></button>
     </section>
     <section class="bloco" aria-labelledby="t-ja">
       <h1 id="t-ja">Mapas já criados</h1>
@@ -1711,6 +1711,7 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
       <button class="b" id="b-id" aria-pressed="false" title="Identificar feição: clique numa feição do mapa para ver os atributos (clique de novo para sair)"><svg><use href="#i-info"/></svg>Identificar feição</button>
       <button class="b" id="b-selec" aria-pressed="false" title="Selecionar feição: clique numa feição do mapa (clique de novo para sair)"><svg><use href="#i-selec"/></svg>Selecionar feição</button>
       <button class="b" id="b-desselec" title="Desselecionar todas as feições"><svg><use href="#i-desselec"/></svg>Desselecionar</button>
+      <button class="b" id="b-exp-sel" title="Exportar as feições selecionadas (de todas as camadas) como shapefile .zip"><svg><use href="#i-zip"/></svg>Exportar seleção</button>
       <button class="b" id="b-remover" title="Remover as feições selecionadas"><svg><use href="#i-x"/></svg>Remover feição</button>
     </div>
   </div>
@@ -2016,6 +2017,44 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
   /* ---------- Persistência: dados no IndexedDB, lista de mapas (com miniatura) no localStorage ---------- */
 var naoExportado=false; // há mudanças feitas depois da última exportação (.zip), abertura ou criação do mapa
 function temPendencia(){return naoExportado&&camadas.length>0}
+/* Mapa sem nada dentro (nenhuma camada e nenhum mapa de fundo) não é guardado: o nome escolhido em "Novo mapa" fica só pendente
+   e o projeto só nasce quando entra a primeira camada. Se um mapa guardado ficar vazio, é apagado ao voltar para o Início. */
+var nomePendente=null,criandoPend=false;
+function mapaVazio(){return !camadas.length&&!fundo}
+function temLayoutsSalvos(id){try{var l=JSON.parse(localStorage.getItem("mapinha:layouts:"+id)||"[]");return Array.isArray(l)&&l.length>0}catch(e){return false}}
+function criarDoPendente(){
+  if(criandoPend||!nomePendente||mapaVazio())return;
+  criandoPend=true;
+  var m={id:novoId(),t:nomePendente,d:"",dt:"SIRGAS 2000"};
+  gravar(m).then(function(){atual=m.id;nomePendente=null;aviso("Mapa \""+m.t+"\" salvo. Ele aparece em Mapas já criados, no Início.")})
+    .catch(function(e){console.error(e);aviso("Não foi possível salvar o mapa (espaço do navegador cheio?).")})
+    .then(function(){criandoPend=false});
+}
+function apagarMapaVazio(){
+  nomePendente=null;
+  if(atual==null||!mapaVazio())return;
+  var m=mapas.filter(function(x){return x.id===atual})[0];
+  if(!m||temLayoutsSalvos(m.id))return; // com layouts salvos o trabalho do layout não se perde
+  clearTimeout(autoT);autoT=null;
+  excluirMapa(m.id);render();
+  aviso("O mapa \""+m.t+"\" ficou sem camadas e foi apagado.",4000);
+}
+/* limpa da lista os mapas que ficaram sem nada (inclui os criados vazios por versões anteriores) */
+function limparMapasVazios(){
+  var fora=[],dep=[];
+  mapas.forEach(function(m){
+    if(m.n===0)fora.push(m.id);
+    else if(m.n===undefined&&!m.thumb)dep.push(m.id); // sem miniatura e sem contagem: confere os dados guardados
+  });
+  fora.forEach(function(id){if(!temLayoutsSalvos(id))excluirMapa(id)});
+  dep.forEach(function(id){
+    idbLer(id).then(function(snap){
+      if(!snap)return;
+      var vazio=!(snap.camadas&&snap.camadas.length)&&!snap.fundo;
+      if(vazio&&!temLayoutsSalvos(id)&&id!==atual){excluirMapa(id);render()}
+    }).catch(function(e){console.error(e)});
+  });
+}
 var CHAVE_IDX="mapinha:projetos-index",IDB_NOME="mapinha",IDB_STORE="projetos",idbP=null,autoT=null,importando=false;
 function lerIndice(){try{var l=JSON.parse(localStorage.getItem(CHAVE_IDX)||"[]");return Array.isArray(l)?l:[]}catch(e){return[]}}
 var mapas=lerIndice(),atual=null;
@@ -2074,15 +2113,16 @@ function miniatura(cs){
 }
 // Grava o mapa (dados + índice). Tudo é copiado agora, antes de qualquer troca de mapa.
 function gravar(m){
-  var snap=tirarFoto(),th=miniatura(camadas);
+  var snap=tirarFoto(),th=miniatura(camadas),n=camadas.length+(fundo?1:0);
   return idbSalvar(m.id,snap).then(function(){
-    m.d=new Date().toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});m.thumb=th;
+    if(m._apagado){idbApagar(m.id).catch(function(){});return} // foi apagado enquanto gravava: não deixa reaparecer
+    m.d=new Date().toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});m.thumb=th;m.n=n;
     if(mapas.indexOf(m)<0)mapas.unshift(m);
     gravarIndice();render();
   });
 }
 // Autosave: só para mapas que já têm nome (depois do primeiro Salvar), com pequeno atraso.
-function agendarAutosave(){if(atual==null)return;clearTimeout(autoT);autoT=setTimeout(descarregar,800)}
+function agendarAutosave(){if(atual==null){criarDoPendente();return}clearTimeout(autoT);autoT=setTimeout(descarregar,800)}
 function descarregar(){ // grava já o que estiver pendente
   if(!autoT)return;
   clearTimeout(autoT);autoT=null;
@@ -2094,11 +2134,16 @@ async function salvarMapa(){
   clearTimeout(autoT);autoT=null;
   var m=mapas.filter(function(x){return x.id===atual})[0];
   if(!m){
-    var n=await dialogo({titulo:"Salvar mapa",msg:"Como você quer chamar este mapa?",campo:true,valor:"Mapa sem título",ok:"Salvar"});
-    if(n===null)return;
-    m={id:novoId(),t:n.trim()||"Mapa sem título",d:"",dt:"SIRGAS 2000"};
+    if(mapaVazio()){aviso("Adicione pelo menos uma camada antes de salvar: mapas vazios não são guardados.",4000);return}
+    var nome=nomePendente; // o nome já foi confirmado em "Novo mapa"
+    if(!nome){
+      var n=await dialogo({titulo:"Salvar mapa",msg:"Como você quer chamar este mapa?",campo:true,valor:"Mapa sem título",ok:"Salvar"});
+      if(n===null)return;
+      nome=n.trim()||"Mapa sem título";
+    }
+    m={id:novoId(),t:nome,d:"",dt:"SIRGAS 2000"};
   }
-  try{await gravar(m);atual=m.id;aviso("Mapa \""+m.t+"\" salvo. Ele aparece em Mapas já criados, no Início.")}
+  try{await gravar(m);atual=m.id;nomePendente=null;aviso("Mapa \""+m.t+"\" salvo. Ele aparece em Mapas já criados, no Início.")}
   catch(err){console.error(err);aviso("Não foi possível salvar o mapa (espaço do navegador cheio?).")}
 }
 async function abrirMapa(id){
@@ -2112,6 +2157,7 @@ async function abrirMapa(id){
   aviso("Mapa \""+(m?m.t:"")+"\" aberto.");
 }
 function excluirMapa(id){
+  mapas.forEach(function(x){if(x.id===id)x._apagado=true});
   mapas=mapas.filter(function(x){return x.id!==id});gravarIndice();
   if(atual===id){atual=null;clearTimeout(autoT);autoT=null}
   idbApagar(id).catch(function(e){console.error(e)});
@@ -2122,7 +2168,7 @@ function excluirMapa(id){
   function h(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
   function ico(id){var s=document.createElementNS(NS,"svg"),u=document.createElementNS(NS,"use");u.setAttribute("href","#"+id);s.appendChild(u);return s}
   function mini(cls,icon,txt,fn){var b=h("button","mini "+cls);if(icon)b.appendChild(ico(icon));b.appendChild(document.createTextNode(txt));b.addEventListener("click",fn);return b}
-  function ir(v){fecharPropriedades();document.getElementById("inicio").hidden=v!=="inicio";document.getElementById("mapa").hidden=v!=="mapa";document.getElementById("topo").hidden=v==="mapa";if(v==="mapa")garantirMapa();else{pararModos();descarregar()}}
+  function ir(v){fecharPropriedades();document.getElementById("inicio").hidden=v!=="inicio";document.getElementById("mapa").hidden=v!=="mapa";document.getElementById("topo").hidden=v==="mapa";if(v==="mapa"){garantirMapa();setTimeout(function(){if(typeof ofertaTutorialMapa==="function")ofertaTutorialMapa()},700)}else{pararModos();apagarMapaVazio();descarregar()}}
   function render(){
     var box=document.getElementById("lista");box.innerHTML="";
     if(!mapas.length){box.appendChild(h("p","vazio","Nenhum mapa criado ainda. Quando você salvar um mapa, ele aparece aqui."));return}
@@ -2159,7 +2205,13 @@ function excluirMapa(id){
     }
     ir(b.dataset.ir);
   })});
-  document.getElementById("novo").addEventListener("click",function(){descarregar();atual=null;carregarFoto(null)});
+  document.getElementById("novo").addEventListener("click",async function(){
+    var n=await dialogo({titulo:"Nome do novo mapa",msg:"Escolha o nome do mapa e confirme para criá-lo.",campo:true,valor:"Mapa sem título",ok:"Criar mapa"});
+    if(n===null)return; // cancelou: nada é criado
+    ir("mapa");descarregar();atual=null;carregarFoto(null);
+    nomePendente=n.trim()||"Mapa sem título";
+    aviso("Mapa \""+nomePendente+"\" criado. Ele só é guardado quando você adicionar a primeira camada.",4500);
+  });
   document.getElementById("salvar").addEventListener("click",salvarMapa);
   var tt;function aviso(t){var e=document.getElementById("aviso-t");e.textContent=t;e.hidden=false;clearTimeout(tt);tt=setTimeout(function(){e.hidden=true},2800)}
   /* ================= Mapa e ferramentas (baseado no index.html) ================= */
@@ -3563,14 +3615,16 @@ const POINT_ANCHOR_TO_DIRECTION = {
         `).join('');
 
         rows.querySelectorAll('input').forEach(input => {
-          input.addEventListener('change', () => {
+          const aplicarStop = () => {
             const idx = Number(input.dataset.idx);
             const field = input.dataset.field;
             const stop = stops[idx];
             if (!stop) return;
             stop[field] = field === 'value' ? Number(input.value) : input.value;
             applyRasterSymbology(layer);
-          });
+          };
+          input.addEventListener('change', aplicarStop);
+          if (input.type === 'color') input.addEventListener('input', aplicarStop); // prévia ao vivo vinda do seletor de cor
         });
         rows.querySelectorAll('.rsym-stops-remove').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -4322,6 +4376,73 @@ const POINT_ANCHOR_TO_DIRECTION = {
     }).join("");
     L.popup({maxWidth:300,maxHeight:260}).setLatLng(ll).setContent(html).openOn(map);
   }
+
+  /* ---------- Tutorial guiado do mapa (balões + tela escurecida) ---------- */
+  var PASSOS_TUTORIAL_MAPA=[
+    {t:"Bem-vindo ao GisJr!",x:"Este tutorial rápido mostra como montar um mapa: de <b>adicionar camadas</b> até o que <b>cada ferramenta</b> faz. Use <b>Próximo</b> (ou a seta → do teclado). Para sair, clique em <b>Pular tutorial</b> ou aperte Esc."},
+    {sel:"#menubar",t:"Barra de menus",pos:"baixo",x:"<b>Visualizar</b>: mover o mapa, ver tudo e voltar ou avançar entre vistas. <b>Desenhar feições</b>: ponto, linha, polígono, círculo, retângulo e elipse. <b>Vetor</b>: geoprocessamento (buffer, recortar, dissolver, união, interseção…). <b>Tema</b>: muda as cores do site. Em <b>Ajuda</b> você abre este tutorial de novo."},
+    {sel:"#add-cam",t:"1. Adicionar uma camada",pos:"dir",x:"Tudo começa aqui. Clique em <b>Adicionar</b> e escolha entre as <b>malhas do IBGE</b> (Brasil, regiões ou estados), os <b>mapas virtuais de fundo</b> (OpenStreetMap, Esri, EOX) ou um <b>arquivo do seu computador</b> (.zip de shapefile, .gpkg ou .tif). Também dá para arrastar o arquivo e soltar na tela."},
+    {sel:"aside.camadas",t:"2. A lista de camadas",pos:"dir",x:"Cada camada adicionada aparece aqui, com um controle para <b>mostrar ou ocultar</b>. A alça de pontinhos permite <b>arrastar para mudar a ordem</b>: a camada de cima fica por cima no mapa. Clique com o <b>botão direito</b> (ou toque longo no celular) para abrir o menu da camada: <b>Propriedades</b> (cores, simbologia categorizada ou graduada e rótulos), tabela de atributos, aproximar, renomear, duplicar, copiar e colar estilo, agrupar, exportar e remover."},
+    {sel:"#rem-cam",t:"Remover camadas",pos:"dir",x:"Escolha uma ou mais camadas na lista (segure Ctrl ou Shift para escolher várias) e clique em <b>Remover</b> para tirá-las do mapa."},
+    {sel:"#map",t:"3. A área do mapa",x:"É aqui que o mapa aparece. <b>Arraste</b> para mover e use a <b>roda do mouse</b> (ou o gesto de pinça) para aproximar e afastar. Enquanto não houver camadas, ela fica vazia."},
+    {sel:'#mapa .barra [data-ir="inicio"]',t:"Início",x:"Volta à tela inicial, onde ficam os seus mapas já criados. Se houver alterações ainda não exportadas, o site avisa antes de sair."},
+    {sel:"#b-abrir",t:"Abrir",x:"Abre um arquivo <b>.zip</b> (shapefile), <b>.gpkg</b> ou <b>.tif</b> do seu computador e coloca como camada. É o mesmo que Adicionar › Do meu computador."},
+    {sel:"#salvar",t:"Salvar",x:"Guarda o mapa neste navegador. Depois do primeiro salvamento, as mudanças passam a ser guardadas sozinhas. O mapa fica na lista <b>Mapas já criados</b>, no Início."},
+    {sel:"#baixar",t:"Exportar zip",x:"Gera um arquivo <b>.zip</b> com o projeto inteiro. É a forma de guardar uma cópia fora do navegador. Só fica ativo quando existe pelo menos uma camada."},
+    {sel:"#b-layout",t:"Layout",x:"Abre, em outra aba, a tela para <b>montar o mapa para imprimir</b>: mapa, legenda, escala, seta do Norte, textos e imagens numa folha A4. Precisa de pelo menos uma camada."},
+    {sel:["#b-aprox","#b-afast"],t:"Aproximar e Afastar",x:"Clique em um dos botões e depois no mapa para dar zoom mais perto ou mais longe."},
+    {sel:["#b-desfazer","#b-refazer"],t:"Desfazer e Refazer",x:"Voltam ou repetem as últimas ações no mapa. Atalhos: <b>Ctrl+Z</b> e <b>Ctrl+Y</b>."},
+    {sel:"#b-regua",t:"Régua",x:"Mede distâncias: clique nos pontos do mapa e o resultado aparece na tela. Fica ativa quando há camadas."},
+    {sel:"#b-tabela",t:"Tabela de atributos",x:"Abre a tabela da <b>camada ativa</b>. Nela você seleciona linhas, inverte a seleção, dá zoom na seleção, adiciona campos e exclui feições."},
+    {sel:"#b-calc",t:"Calcular",x:"<b>Calculadora de campo</b>: cria ou atualiza um campo da tabela a partir de uma expressão, como na calculadora de campo do QGIS."},
+    {sel:"#b-id",t:"Identificar feição",x:"Clique numa feição do mapa para ver todos os atributos dela. Clique de novo no botão para sair desse modo."},
+    {sel:"#b-selec",t:"Selecionar feição",x:"Clique nas feições do mapa para selecioná-las (elas ficam amarelas). Segure Shift ou Ctrl para escolher várias. Clique de novo no botão para sair."},
+    {sel:"#b-desselec",t:"Desselecionar",x:"Limpa a seleção de todas as feições, de todas as camadas."},
+    {sel:"#b-exp-sel",t:"Exportar seleção",x:"Exporta só as feições selecionadas (de todas as camadas) como shapefile em <b>.zip</b>."},
+    {sel:"#b-remover",t:"Remover feição",x:"Apaga do mapa as feições selecionadas. Selecione antes só o que deseja remover; se errar, use <b>Desfazer</b>."},
+    {t:"Pronto!",x:"O caminho é este: <b>1)</b> adicione camadas, <b>2)</b> ajuste cores e rótulos em Propriedades, <b>3)</b> explore e edite com as ferramentas, <b>4)</b> salve, <b>5)</b> monte o <b>Layout</b> para imprimir. Para rever este tutorial, abra o menu <b>Ajuda</b>."}
+  ];
+  window.PASSOS_TUTORIAL_MAPA=PASSOS_TUTORIAL_MAPA;
+  function abrirTutorialMapa(){if(window.gisTour)window.gisTour.iniciar(PASSOS_TUTORIAL_MAPA)}
+  function ofertaTutorialMapa(){
+    if(!window.gisTour||byId("mapa").hidden)return;
+    window.gisTour.oferecer("mapa",{titulo:"Quer um tutorial rápido?",texto:"Posso mostrar, com balões e destacando cada parte da tela, como o GisJr funciona: desde adicionar camadas até o que cada ferramenta faz."},abrirTutorialMapa);
+  }
+  /* ---- Ajuda > Sobre o projeto ---- */
+  function abrirSobre(){
+    var ov=byId("dlg"),box=h("div","dlg-box dlg-sobre"),ant=document.activeElement;
+    var cit="SANTOS, Hélder Rocha dos; OLIVEIRA, Gabriel Cavalcante Soares. GisJr.: sistema de informação geográfica para navegador. Maceió: Instituto de Geografia, Desenvolvimento e Meio Ambiente, Universidade Federal de Alagoas, 2026.";
+    box.setAttribute("role","dialog");box.setAttribute("aria-modal","true");
+    box.innerHTML='<h2>Sobre o GisJr.</h2>'
+      +'<p>Projeto desenvolvido por alunos do <b>IGDEMA/UFAL</b> (Instituto de Geografia, Desenvolvimento e Meio Ambiente da Universidade Federal de Alagoas).</p>'
+      +'<h3>Autores</h3><ul><li>Hélder Rocha dos Santos &ndash; <a href="mailto:helder.santos@igdema.ufal.br">helder.santos@igdema.ufal.br</a></li>'
+      +'<li>Gabriel Cavalcante Soares Oliveira &ndash; <a href="mailto:gabriel.soares@igdema.ufal.br">gabriel.soares@igdema.ufal.br</a></li></ul>'
+      +'<h3>Objetivo</h3><p>Um SIG simples, que roda direto no navegador e não precisa de instalação, para visualizar, editar e analisar dados geoespaciais e montar mapas prontos para impressão.</p>'
+      +'<h3>O que ele faz</h3><ul><li>Adiciona camadas vetoriais e raster (como shapefile, GeoPackage e GeoTIFF), com cores, simbologia e rótulos.</li>'
+      +'<li>Tabela de atributos, seleção e identificação de feições, calculadora de campo e régua.</li>'
+      +'<li>Desenho de feições e geoprocessamento (buffer, recorte, união, interseção, dissolver e outros).</li>'
+      +'<li>Exporta a seleção em shapefile (.zip) e salva o mapa.</li>'
+      +'<li>Layout em A4 com mapa, legenda, escala, seta do Norte, textos e imagens.</li></ul>'
+      +'<h3>Tecnologias</h3><p>HTML, CSS e JavaScript, com as bibliotecas Leaflet 1.9.4, Leaflet.draw 1.0.4, Turf.js 6.5.0, georaster 1.6.0, georaster-layer-for-leaflet 3.10.0, JSZip 3.10.1, shp.js 6.2.0 e sql.js 1.10.3. Fonte Atkinson Hyperlegible.</p>'
+      +'<h3>Inspiração</h3><p>O GisJr. foi inspirado no <a href="https://qgis.org" target="_blank" rel="noopener">QGIS</a>, software livre de SIG. É um projeto independente, sem vínculo com o QGIS.ORG.</p>'
+      +'<h3>Licença e como citar</h3><p>Os direitos do GisJr. pertencem aos seus autores. As bibliotecas acima mantêm as próprias licenças de código aberto.</p>'
+      +'<p id="sobre-cit" class="sobre-cit"></p>'
+      +'<h3>Contato e sugestões</h3><p>Encontrou um erro ou tem uma ideia? Escreva para os autores pelos e-mails acima.</p>';
+    byId("dlg").hidden=true;
+    box.querySelector("#sobre-cit").textContent=cit;
+    var bt=h("div","dlg-bts"),cp=h("button","mini","Copiar citação"),fe=h("button","mini ok","Fechar");
+    cp.type="button";fe.type="button";bt.appendChild(cp);bt.appendChild(fe);box.appendChild(bt);
+    ov.innerHTML="";ov.appendChild(box);ov.hidden=false;
+    function fechar(){ov.hidden=true;ov.innerHTML="";document.removeEventListener("keydown",tecla,true);ov.onclick=null;if(ant&&ant.focus){try{ant.focus()}catch(x){}}}
+    function tecla(e){if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fechar()}}
+    cp.addEventListener("click",function(){
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(cit).then(function(){aviso("Citação copiada.")},function(){aviso("Não foi possível copiar. Selecione o texto da citação.")});
+      else aviso("Não foi possível copiar. Selecione o texto da citação.");
+    });
+    fe.addEventListener("click",fechar);
+    ov.onclick=function(e){if(e.target===ov)fechar()};
+    document.addEventListener("keydown",tecla,true);fe.focus();
+  }
   // Barra de menu: lista de grupos; novos menus entram só acrescentando itens aqui.
   var MENUS=[
     {n:"Visualizar",it:[
@@ -4338,7 +4459,8 @@ const POINT_ANCHOR_TO_DIRECTION = {
       "-",{r:"Eliminar polígonos selecionados…",f:runEliminateSelected}]},
     {n:"Tema",it:(window.gisTema?window.gisTema.lista:["claro"]).map(function(k){
       return {r:function(){return (window.gisTema&&window.gisTema.get()===k?"\u2713 ":"\u2003 ")+window.gisTema.nome(k)},f:function(){window.gisTema.set(k)}};
-    })}
+    })},
+    {n:"Ajuda",it:[{r:"Tutorial do mapa",f:abrirTutorialMapa},"-",{r:"Sobre o projeto",f:abrirSobre}]}
   ];
   (function(){
     var bar=byId("menubar"),drop=h("div");drop.id="mb-drop";drop.hidden=true;document.body.appendChild(drop);
@@ -4736,17 +4858,224 @@ const POINT_ANCHOR_TO_DIRECTION = {
     setTimeout(function(){URL.revokeObjectURL(a.href)},1500);
   }
   function nomeArquivo(n){return n.replace(/[\\/:*?"<>|]+/g,"_")}
-  function exportarCamada(c,soSel){
+  /* ---------- Escritor de shapefile próprio (SHP + SHX + DBF + PRJ + CPG) ----------
+     Substitui o shp-write, que grava Polygon e MultiPolygon (e linhas simples e múltiplas)
+     no MESMO nome de arquivo dentro do .zip — o segundo sobrescreve o primeiro e as feições
+     do outro tipo somem (ex.: estados "Polygon" como CE e PI desapareciam ao lado dos "MultiPolygon").
+     Aqui Polygon + MultiPolygon viram um único shapefile de polígonos (com várias partes). */
+  var SHP_PRJ='GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]';
+  function shpAreaAnel(r){var s=0;for(var i=0;i<r.length-1;i++)s+=r[i][0]*r[i+1][1]-r[i+1][0]*r[i][1];return s/2}
+  function shpPtOk(p){return Array.isArray(p)&&isFinite(p[0])&&isFinite(p[1])&&p[0]!==null&&p[1]!==null}
+  function shpAnel(r,horario){
+    if(!Array.isArray(r))return null;
+    var a=r.filter(shpPtOk).map(function(p){return[+p[0],+p[1]]});
+    if(a.length<3)return null;
+    var f=a[0],l=a[a.length-1];
+    if(f[0]!==l[0]||f[1]!==l[1])a.push([f[0],f[1]]);
+    if(a.length<4)return null;
+    var ar=shpAreaAnel(a);
+    if(ar===0)return null;
+    if((ar<0)!==horario)a.reverse(); // shapefile: anel externo horário, buracos anti-horário
+    return a;
+  }
+  function shpPoligono(coords,partes){
+    if(!Array.isArray(coords)||!coords.length)return false;
+    var ext=shpAnel(coords[0],true);
+    if(!ext)return false;
+    partes.push(ext);
+    for(var i=1;i<coords.length;i++){var b=shpAnel(coords[i],false);if(b)partes.push(b)}
+    return true;
+  }
+  function shpLinha(coords){
+    if(!Array.isArray(coords))return null;
+    var a=coords.filter(shpPtOk).map(function(p){return[+p[0],+p[1]]});
+    return a.length>=2?a:null;
+  }
+  // Decompõe uma geometria em "registros" por família: pontos, multipontos, linhas, polígonos
+  function shpRegistros(g,props,out){
+    if(!g||!g.type)return 0;
+    var n=0;
+    function add(fam,item){out[fam].push({item:item,props:props});n++}
+    if(g.type==="Point"){if(shpPtOk(g.coordinates)){add("pt",[[+g.coordinates[0],+g.coordinates[1]]])}}
+    else if(g.type==="MultiPoint"){var ps=(g.coordinates||[]).filter(shpPtOk).map(function(p){return[+p[0],+p[1]]});if(ps.length)add("mp",ps)}
+    else if(g.type==="LineString"){var l=shpLinha(g.coordinates);if(l)add("ln",[l])}
+    else if(g.type==="MultiLineString"){var ls=(g.coordinates||[]).map(shpLinha).filter(Boolean);if(ls.length)add("ln",ls)}
+    else if(g.type==="Polygon"){var pa=[];if(shpPoligono(g.coordinates,pa))add("pg",pa)}
+    else if(g.type==="MultiPolygon"){var pm=[];(g.coordinates||[]).forEach(function(poly){shpPoligono(poly,pm)});if(pm.length)add("pg",pm)}
+    else if(g.type==="GeometryCollection"){(g.geometries||[]).forEach(function(s){n+=shpRegistros(s,props,out)})}
+    return n;
+  }
+  var SHP_TIPO={pt:1,mp:8,ln:3,pg:5};
+  function shpSHP(fam,regs){
+    var tipo=SHP_TIPO[fam],tam=regs.map(function(r){
+      var it=r.item;
+      if(fam==="pt")return 20;
+      if(fam==="mp")return 40+16*it.length;
+      var N=0;it.forEach(function(p){N+=p.length});
+      return 44+4*it.length+16*N;
+    });
+    var total=100;tam.forEach(function(t){total+=8+t});
+    var shp=new DataView(new ArrayBuffer(total)),shx=new DataView(new ArrayBuffer(100+8*regs.length));
+    var xmin=Infinity,ymin=Infinity,xmax=-Infinity,ymax=-Infinity;
+    function bb(pts){var a=Infinity,b=Infinity,c=-Infinity,d=-Infinity;pts.forEach(function(p){if(p[0]<a)a=p[0];if(p[0]>c)c=p[0];if(p[1]<b)b=p[1];if(p[1]>d)d=p[1]});return[a,b,c,d]}
+    var off=100;
+    regs.forEach(function(r,i){
+      var it=r.item,o=off;
+      shx.setInt32(100+8*i,off/2,false);shx.setInt32(104+8*i,tam[i]/2,false);
+      shp.setInt32(o,i+1,false);shp.setInt32(o+4,tam[i]/2,false);o+=8;
+      shp.setInt32(o,tipo,true);o+=4;
+      var todos=fam==="pt"||fam==="mp"?it:[].concat.apply([],it),b=bb(todos);
+      if(b[0]<xmin)xmin=b[0];if(b[1]<ymin)ymin=b[1];if(b[2]>xmax)xmax=b[2];if(b[3]>ymax)ymax=b[3];
+      if(fam==="pt"){shp.setFloat64(o,it[0][0],true);shp.setFloat64(o+8,it[0][1],true)}
+      else{
+        for(var k=0;k<4;k++)shp.setFloat64(o+8*k,b[k],true);o+=32;
+        if(fam==="mp"){shp.setInt32(o,it.length,true);o+=4;it.forEach(function(p){shp.setFloat64(o,p[0],true);shp.setFloat64(o+8,p[1],true);o+=16})}
+        else{
+          shp.setInt32(o,it.length,true);shp.setInt32(o+4,todos.length,true);o+=8;
+          var ini=0;it.forEach(function(p){shp.setInt32(o,ini,true);o+=4;ini+=p.length});
+          todos.forEach(function(p){shp.setFloat64(o,p[0],true);shp.setFloat64(o+8,p[1],true);o+=16});
+        }
+      }
+      off+=8+tam[i];
+    });
+    if(!regs.length){xmin=ymin=xmax=ymax=0}
+    [[shp,total],[shx,100+8*regs.length]].forEach(function(par){
+      var v=par[0];
+      v.setInt32(0,9994,false);v.setInt32(24,par[1]/2,false);v.setInt32(28,1000,true);v.setInt32(32,tipo,true);
+      v.setFloat64(36,xmin,true);v.setFloat64(44,ymin,true);v.setFloat64(52,xmax,true);v.setFloat64(60,ymax,true);
+    });
+    return{shp:new Uint8Array(shp.buffer),shx:new Uint8Array(shx.buffer)};
+  }
+  function shpNomesCampos(chaves){
+    var usados={};
+    return chaves.map(function(k){
+      var b=String(k).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9_]/g,"_").slice(0,10)||"campo",n=b,i=1;
+      while(usados[n.toUpperCase()]){var suf="_"+(i++);n=b.slice(0,10-suf.length)+suf}
+      usados[n.toUpperCase()]=1;return n;
+    });
+  }
+  function shpTexto(v){
+    if(v===null||v===undefined)return"";
+    if(typeof v==="object")try{return JSON.stringify(v)}catch(e){return String(v)}
+    return String(v);
+  }
+  function shpBytes(s){return new TextEncoder().encode(s)}
+  function shpDBF(regs){
+    var enc=new TextEncoder(),chaves=[],vistos={};
+    regs.forEach(function(r){Object.keys(r.props||{}).forEach(function(k){if(!vistos[k]){vistos[k]=1;chaves.push(k)}})});
+    var campos=chaves.map(function(k){
+      var vals=regs.map(function(r){return(r.props||{})[k]}).filter(function(v){return v!==null&&v!==undefined&&v!==""});
+      var todosNum=vals.length>0&&vals.every(function(v){return typeof v==="number"&&isFinite(v)});
+      var todosBool=vals.length>0&&vals.every(function(v){return typeof v==="boolean"});
+      var c={k:k,tipo:"C",len:1,dec:0};
+      if(todosNum){
+        var dec=0;vals.forEach(function(v){if(Math.floor(v)!==v){var s=String(v),m=/e-(\d+)/i.exec(s),d=m?+m[1]:((s.split(".")[1]||"").length);if(d>dec)dec=d}});
+        dec=Math.min(dec,15);
+        var len=0;vals.forEach(function(v){len=Math.max(len,v.toFixed(dec).length)});
+        while(len>19&&dec>0){dec--;len=0;vals.forEach(function(v){len=Math.max(len,v.toFixed(dec).length)})}
+        if(len<=19){c.tipo="N";c.len=Math.max(len,1);c.dec=dec;return c}
+      }
+      if(todosBool){c.tipo="L";c.len=1;return c}
+      var mx=1;vals.forEach(function(v){mx=Math.max(mx,enc.encode(shpTexto(v)).length)});
+      c.len=Math.min(mx,254);return c;
+    });
+    var nomes=shpNomesCampos(chaves);
+    if(!campos.length){campos=[{k:null,tipo:"N",len:10,dec:0,idx:true}];nomes=["ID"]}
+    var tamReg=1;campos.forEach(function(c){tamReg+=c.len});
+    var tamCab=32+32*campos.length+1,buf=new Uint8Array(tamCab+tamReg*regs.length+1),dv=new DataView(buf.buffer);
+    var d=new Date();
+    buf[0]=3;buf[1]=d.getFullYear()-1900;buf[2]=d.getMonth()+1;buf[3]=d.getDate();
+    dv.setUint32(4,regs.length,true);dv.setUint16(8,tamCab,true);dv.setUint16(10,tamReg,true);buf[29]=0;
+    campos.forEach(function(c,i){
+      var o=32+32*i,nm=enc.encode(nomes[i]);buf.set(nm.slice(0,10),o);
+      buf[o+11]=c.tipo.charCodeAt(0);buf[o+16]=c.len;buf[o+17]=c.dec;
+    });
+    buf[tamCab-1]=0x0D;
+    regs.forEach(function(r,ri){
+      var o=tamCab+tamReg*ri;buf[o]=0x20;o++;
+      campos.forEach(function(c){
+        var v=c.idx?ri+1:(r.props||{})[c.k],txt;
+        if(v===null||v===undefined||v===""){txt=c.tipo==="L"?"?":""}
+        else if(c.tipo==="N")txt=typeof v==="number"?v.toFixed(c.dec):"";
+        else if(c.tipo==="L")txt=v?"T":"F";
+        else txt=shpTexto(v);
+        var b;
+        if(c.tipo==="N"){b=enc.encode(txt.padStart(c.len," "))}
+        else{
+          b=enc.encode(txt);
+          while(b.length>c.len){txt=Array.from(txt).slice(0,-1).join("");b=enc.encode(txt)}
+        }
+        buf.fill(0x20,o,o+c.len);buf.set(b,o);o+=c.len;
+      });
+    });
+    buf[buf.length-1]=0x1A;
+    return buf;
+  }
+  // features (GeoJSON) -> {arquivos:[{nome,dados}], usadas, ignoradas}. Um shapefile por família de geometria.
+  function shpGerar(features,base){
+    var out={pt:[],mp:[],ln:[],pg:[]},usadas=0,ign=0;
+    features.forEach(function(f){
+      var n=shpRegistros(f&&f.geometry,(f&&f.properties)||{},out);
+      if(n)usadas++;else ign++;
+    });
+    // Point + MultiPoint na mesma camada: tudo vira multiponto (um único arquivo)
+    if(out.mp.length&&out.pt.length){out.pt.forEach(function(r){out.mp.push(r)});out.pt=[]}
+    var fams=["pg","ln","pt","mp"].filter(function(k){return out[k].length}),sufixo={pg:"poligonos",ln:"linhas",pt:"pontos",mp:"pontos"},arq=[];
+    fams.forEach(function(fam){
+      var nome=fams.length>1?base+"_"+sufixo[fam]:base,s=shpSHP(fam,out[fam]);
+      arq.push({nome:nome+".shp",dados:s.shp},{nome:nome+".shx",dados:s.shx},{nome:nome+".dbf",dados:shpDBF(out[fam])},
+        {nome:nome+".prj",dados:shpBytes(SHP_PRJ)},{nome:nome+".cpg",dados:shpBytes("UTF-8")});
+    });
+    return{arquivos:arq,usadas:usadas,ignoradas:ign};
+  }
+
+  function geomValida(f){
+    if(!f||!f.geometry||!f.geometry.type)return false;
+    var g=f.geometry;
+    if(g.type==="GeometryCollection")return !!(g.geometries&&g.geometries.length);
+    return Array.isArray(g.coordinates)&&g.coordinates.length>0;
+  }
+  function featsSelecionadas(c){
+    return Array.from(c.sel).sort(function(a,b){return a-b}).map(function(i){return c.geojson.features[i]}).filter(Boolean);
+  }
+  function totalSelecionadas(){var n=0;camadas.forEach(function(c){if(!c.isRaster&&c.sel)n+=c.sel.size});return n}
+  // Exporta UMA camada (toda ou só as feições selecionadas dela) como shapefile .zip
+  async function exportarCamada(c,soSel){
     if(c.isRaster){aviso("Camada raster não vira shapefile. Ela vai dentro do Exportar zip.");return}
-    if(typeof shpwrite==="undefined"){aviso("A biblioteca de shapefile (shp-write) não carregou — verifique sua conexão.");return}
-    var gj=soSel?{type:"FeatureCollection",features:Array.from(c.sel).sort(function(a,b){return a-b}).map(function(i){return c.geojson.features[i]}).filter(Boolean)}:c.geojson;
-    if(!gj.features.length){aviso(soSel?"Nenhuma feição selecionada nesta camada.":"A camada não tem feições para exportar.");return}
-    var base=nomeArquivo(soSel?c.name+"_selecionados":c.name);
+    if(!window.JSZip){aviso("Biblioteca de zip (JSZip) não carregou — verifique sua conexão.");return}
+    var todas=soSel?featsSelecionadas(c):c.geojson.features;
+    if(!todas.length){aviso(soSel?"Nenhuma feição selecionada nesta camada.":"A camada não tem feições para exportar.");return}
     try{
-      Promise.resolve(shpwrite.zip(gj,{folder:base,filename:base,outputType:"blob",compression:"STORE"})).then(function(blob){
-        baixarBlob(blob,base+".zip");
-        aviso("Camada \""+c.name+"\" exportada como shapefile (.zip).");
-      }).catch(function(err){console.error(err);aviso("Erro ao exportar: "+err.message)});
+      var base=nomeArquivo(soSel?c.name+"_selecionados":c.name),r=shpGerar(todas,base);
+      if(!r.usadas){aviso("As feições não têm geometria válida para exportar.");return}
+      var z=new JSZip(),pasta=z.folder(base);
+      r.arquivos.forEach(function(a){pasta.file(a.nome,a.dados)});
+      baixarBlob(await z.generateAsync({type:"blob",compression:"STORE"}),base+".zip");
+      aviso("Camada \""+c.name+"\" exportada como shapefile (.zip): "+r.usadas+" feição(ões)."+(r.ignoradas?" "+r.ignoradas+" sem geometria válida foi(ram) ignorada(s).":""));
+    }catch(err){console.error(err);aviso("Erro ao exportar: "+err.message)}
+  }
+  // Exporta as feições selecionadas de TODAS as camadas: um .zip com uma pasta/shapefile por camada
+  async function exportarSelecaoTodas(){
+    var alvos=camadas.filter(function(c){return !c.isRaster&&c.sel&&c.sel.size});
+    if(!alvos.length){aviso("Nenhuma feição selecionada.");return}
+    if(alvos.length===1){exportarCamada(alvos[0],true);return}
+    if(!window.JSZip){aviso("Biblioteca de zip (JSZip) não carregou — verifique sua conexão.");return}
+    try{
+      var out=new JSZip(),usados={},total=0,ign=0,nCam=0;
+      alvos.forEach(function(c){
+        var base=nomeArquivo(c.name+"_selecionados"),b0=base,n=2;
+        while(usados[base])base=b0+"_"+(n++);
+        usados[base]=1;
+        var r=shpGerar(featsSelecionadas(c),base);
+        ign+=r.ignoradas;
+        if(!r.usadas)return;
+        var pasta=out.folder(base);
+        r.arquivos.forEach(function(a){pasta.file(a.nome,a.dados)});
+        total+=r.usadas;nCam++;
+      });
+      if(!total){aviso("As feições selecionadas não têm geometria válida para exportar.");return}
+      baixarBlob(await out.generateAsync({type:"blob",compression:"STORE"}),"selecao.zip");
+      aviso(total+" feição(ões) de "+nCam+" camada(s) exportada(s) em \"selecao.zip\"."+(ign?" "+ign+" sem geometria válida foi(ram) ignorada(s).":""));
     }catch(err){console.error(err);aviso("Erro ao exportar: "+err.message)}
   }
   async function removerSelecionadas(){
@@ -4866,7 +5195,8 @@ const POINT_ANCHOR_TO_DIRECTION = {
       {r:plural?"Ocultar selecionadas":"Ocultar camada",f:function(){camadasSelecionadas(false)}}
     ].concat(itensGlobais(),["-",
       {r:"Exportar camada (.zip shapefile)",f:function(){exportarCamada(c,false)}},
-      {r:"Exportar só as feições selecionadas",off:!c.sel.size,f:function(){exportarCamada(c,true)}},"-",
+      {r:"Exportar só as feições selecionadas desta camada",off:!c.sel.size,f:function(){exportarCamada(c,true)}},
+      {r:"Exportar seleção de todas as camadas",off:!totalSelecionadas(),f:exportarSelecaoTodas},"-",
       {r:plural?"Remover "+n+" camadas":"Remover camada",perigo:true,f:removerSelecionadas}
     ]);
     abrirMenu(x,y,itens);
@@ -5337,6 +5667,9 @@ const POINT_ANCHOR_TO_DIRECTION = {
 
   // Calcular (calculadora de campo): abre o diálogo para criar/atualizar um campo por expressão.
   byId("b-calc").addEventListener("click",function(){abrirCalculadora()});
+
+  // Exportar seleção: feições selecionadas de todas as camadas (shapefile .zip)
+  byId("b-exp-sel").addEventListener("click",function(){exportarSelecaoTodas()});
 
   // Desselecionar: limpa a seleção de feições em todas as camadas.
   byId("b-desselec").addEventListener("click",function(){
@@ -6142,7 +6475,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     return"#3388cc";
   }
   /* ---------- Janela "Propriedades da camada": flutuante e arrastável (Informação e Simbologia) ---------- */
-  var propId=null,propDraft={},propTocado={},propAba="simb",propAnt=null;
+  var propId=null,propDraft={},propTocado={},propAba="simb",propAnt=null,propPrevia=false;
   var GEOM_PT={Point:"Ponto",MultiPoint:"Multiponto",LineString:"Linha",MultiLineString:"Multilinha",Polygon:"Polígono",MultiPolygon:"Multipolígono",GeometryCollection:"Coleção de geometrias"};
   function tiposGeom(c){
     var t={};
@@ -6186,13 +6519,27 @@ const POINT_ANCHOR_TO_DIRECTION = {
     p.style.background="transparent";p.style.border="0";
     p.innerHTML=svgPrevia(d.cor,d.opac,d.corc,d.esp,d.fillStyle,d.strokeStyle,d.joinStyle);
   }
+  // Mostra no mapa, sem gravar na camada, o que está na janela (símbolo simples). Só vale de verdade ao Aplicar/OK.
+  function previaMapaProp(){
+    var c=camadaPorId(propId),d=propDraft;
+    if(!c||c.isRaster||!c.leaf||d.renderer!=="single")return;
+    var forma=Object.assign({},formaBase(c),{opacity:d.opac,strokeColor:d.corc,strokeWidth:d.esp,fillStyle:d.fillStyle,strokeStyle:d.strokeStyle,joinStyle:d.joinStyle});
+    var ix=new Map();c.geojson.features.forEach(function(f,i){ix.set(f,i)});
+    c.leaf.eachLayer(function(l){
+      if(!l.setStyle)return;
+      var s=c.sel.has(ix.get(l.feature))?estilo(c,true,l.feature):estiloDoSimbolo(forma,d.cor);
+      if(s.fillPattern===undefined)s.fillPattern=null;
+      l.setStyle(s);
+    });
+    propPrevia=true;
+  }
   function mostrarCamposProp(){
     var nenhum=propDraft.renderer==="none";
     var r=propDraft.renderer,cg=r==="categorized"||r==="graduated";
     byId("lp-simples").hidden=r!=="single";byId("lp-nota-nenhum").hidden=!nenhum;
     byId("lp-cat").hidden=r!=="categorized";byId("lp-grad").hidden=r!=="graduated";byId("lp-base").hidden=!cg;document.querySelector(".lp-prev").hidden=cg;
   }
-  function abrirPropriedades(c,aba){
+  function abrirPropriedades(c,aba,manter){
     if(!map||!c)return;
     if(byId("lp").hidden)propAnt=document.activeElement;
     propId=c.id;propTocado={};propRaster=!!c.isRaster;
@@ -6209,18 +6556,24 @@ const POINT_ANCHOR_TO_DIRECTION = {
     byId("lp-esp").value=String(propDraft.esp);
     initCG(c);initRot(c);mostrarCamposProp();previaProp();preencherInfo(c);}
     byId("lp-titulo").textContent="Propriedades da camada — "+c.name;
-    var j=byId("lp-janela");j.style.left="50%";j.style.top="";j.style.transform="translateX(-50%)"; // volta à posição inicial
+    if(!manter){var j=byId("lp-janela");j.style.left="50%";j.style.top="";j.style.transform="translateX(-50%)"} // volta à posição inicial
     byId("lp").hidden=false;
     selecionarAba(aba||"simb");
-    byId(propAba==="info"?"aba-info":propAba==="rot"?"aba-rot":"lp-tipo").focus();
+    if(!manter)byId(propAba==="info"?"aba-info":propAba==="rot"?"aba-rot":"lp-tipo").focus();
+  }
+  // Descarta o que foi alterado na janela e não aplicado, na camada a que ela está ligada (propId).
+  function descartarPendentesProp(){
+    var c0=camadaPorId(propId);
+    if(c0&&c0.isRaster&&rBk&&JSON.stringify({s:c0.symbology,o:c0.opacity})!==rBk){var bb=JSON.parse(rBk);c0.symbology=bb.s;c0.opacity=bb.o;applyRasterSymbology(c0)} // raster
+    if(c0&&!c0.isRaster&&propBk!=null&&JSON.stringify(c0.symbology||null)!==propBk){c0.symbology=JSON.parse(propBk);restilizar(c0)}
+    else if(c0&&!c0.isRaster&&propPrevia)restilizar(c0); // prévia de cor/opacidade do símbolo simples
+    propPrevia=false;
+    if(c0&&!c0.isRaster&&labBk!=null&&JSON.stringify(c0.labeling||null)!==labBk){c0.labeling=JSON.parse(labBk);rotular(c0)}
   }
   function fecharPropriedades(){
     var lp=byId("lp");
     if(!lp||lp.hidden){propId=null;return}
-    var c0=camadaPorId(propId);
-    if(c0&&c0.isRaster&&rBk&&JSON.stringify({s:c0.symbology,o:c0.opacity})!==rBk){var bb=JSON.parse(rBk);c0.symbology=bb.s;c0.opacity=bb.o;applyRasterSymbology(c0)} // descarta o que não foi aplicado (raster)
-    if(c0&&!c0.isRaster&&propBk!=null&&JSON.stringify(c0.symbology||null)!==propBk){c0.symbology=JSON.parse(propBk);restilizar(c0)} // descarta o que não foi aplicado
-    if(c0&&!c0.isRaster&&labBk!=null&&JSON.stringify(c0.labeling||null)!==labBk){c0.labeling=JSON.parse(labBk);rotular(c0)}
+    descartarPendentesProp();
     byId("ramp-picker-popover").classList.remove("show");fecharDDs();
     lp.hidden=true;propId=null;propTocado={};
     if(propAnt&&document.body.contains(propAnt)){try{propAnt.focus()}catch(e){}}
@@ -6230,8 +6583,15 @@ const POINT_ANCHOR_TO_DIRECTION = {
   function atualizarPropriedades(){
     var lp=byId("lp");
     if(!lp||lp.hidden||propId==null)return;
-    var c=camadaPorId(propId);
+    var c=camadaPorId(propId),at=camadaAtiva();
     if(!c){fecharPropriedades();aviso("A camada da janela de propriedades não existe mais.");return}
+    // Clicou em outra camada na lista: a janela passa a mostrar a camada agora selecionada.
+    if(at&&at.id!==propId){
+      descartarPendentesProp();
+      byId("ramp-picker-popover").classList.remove("show");fecharDDs();
+      abrirPropriedades(at,propAba,true);
+      return;
+    }
     byId("lp-titulo").textContent="Propriedades da camada — "+c.name;
     preencherInfo(c);
   }
@@ -6288,9 +6648,16 @@ const POINT_ANCHOR_TO_DIRECTION = {
       e.preventDefault();var a=ABAS[(ABAS.indexOf(k)+(e.key==="ArrowRight"?1:ABAS.length-1))%ABAS.length];selecionarAba(a);byId("aba-"+a).focus();
     })});
     byId("lp-tipo").addEventListener("change",function(){propDraft.renderer=this.value;propTocado.renderer=true;mostrarCamposProp();previaProp()});
-    byId("lp-cor").addEventListener("input",function(){propDraft.cor=this.value;propTocado.cor=true;previaProp()});
-    byId("lp-corc").addEventListener("input",function(){propDraft.corc=this.value;propTocado.corc=true;previaProp()});
-    byId("lp-opac").addEventListener("input",function(){propDraft.opac=+this.value;propTocado.opac=true;byId("lp-opac-v").textContent=Math.round(propDraft.opac)+" %";previaProp()});
+    function difGravado(k,v){ // true se o valor da janela difere do que a camada tem gravado (permite voltar ao original sem "mudança")
+      var c=camadaPorId(propId);if(!c||c.isRaster)return true;
+      var f=formaBase(c);
+      if(k==="cor")return String(v).toLowerCase()!==hex6(c.color).toLowerCase();
+      if(k==="corc")return String(v).toLowerCase()!==hex6(f.strokeColor).toLowerCase();
+      return +v!==(f.opacity==null?100:f.opacity);
+    }
+    byId("lp-cor").addEventListener("input",function(){propDraft.cor=this.value;propTocado.cor=difGravado("cor",this.value);previaProp();previaMapaProp()});
+    byId("lp-corc").addEventListener("input",function(){propDraft.corc=this.value;propTocado.corc=difGravado("corc",this.value);previaProp();previaMapaProp()});
+    byId("lp-opac").addEventListener("input",function(){propDraft.opac=+this.value;propTocado.opac=difGravado("opac",this.value);byId("lp-opac-v").textContent=Math.round(propDraft.opac)+" %";previaProp();previaMapaProp()});
     byId("lp-esp").addEventListener("input",function(){
       var v=parseFloat(String(this.value).replace(",","."));
       propTocado.esp=true;if(isFinite(v)&&v>=0){propDraft.esp=Math.min(v,20);previaProp()}
@@ -7261,6 +7628,7 @@ function initCG(c){
     else setTimeout(function(){enviarLayout(true)},900);
   });
 
+  limparMapasVazios();
   render();
 })();
 </script>
@@ -7316,7 +7684,7 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
       </div>
       <div class="cp-hex-row">
         <span>#</span>
-        <input type="text" id="cp-hex-input" maxlength="6" autocomplete="off" spellcheck="false">
+        <input type="text" id="cp-hex-input" maxlength="64" autocomplete="off" spellcheck="false">
         <span class="cp-prev"><i id="cp-prev-old"></i>Atual</span>
         <span class="cp-prev"><i id="cp-prev-new"></i>Nova</span>
       </div>
@@ -7348,6 +7716,27 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
   var cpAlphaBox=document.getElementById('cp-alpha-box'),cpAlphaRow=document.getElementById('cp-alpha-row'),cpAlphaFill=document.getElementById('cp-alpha-fill'),cpAlphaHandle=document.getElementById('cp-alpha-handle'),cpAlphaVal=document.getElementById('cp-alpha-val');
   var cpAlpha=1,cpAlphaOrig=1,cpAlphaOn=false;
   var cpHue=120,cpSat=1,cpVal=1,cpWheelGeom=null;
+  // Prévia ao vivo: enquanto o modal está aberto, a cor (e a opacidade) vão para o campo/mapa só como "input";
+  // fechar sem Aplicar devolve o original. O Aplicar é que confirma (dispara também o "change").
+  var cpLive=false,cpLastHex=null,cpLastA=null,cpAlphaRaw=null,cpRaf=0;
+  function cpEnviarPrevia(){
+    var t=cpTarget;if(!cpLive||!t)return;
+    var h=cpDraft.toLowerCase();
+    if(t.preview&&h!==cpLastHex){cpLastHex=h;t.preview(h)}
+    if(cpAlphaOn&&t.previewAlpha){var p=Math.round(cpAlpha*100);if(p!==cpLastA){cpLastA=p;t.previewAlpha(p)}}
+  }
+  function cpAgendarPrevia(){
+    if(!cpLive||!cpTarget||cpRaf)return;
+    cpRaf=requestAnimationFrame(function(){cpRaf=0;cpEnviarPrevia()}); // no máx. 1 atualização por quadro ao arrastar
+  }
+  function cpCancelarRaf(){if(cpRaf){cancelAnimationFrame(cpRaf);cpRaf=0}}
+  function cpReverterPrevia(){
+    cpCancelarRaf();
+    var t=cpTarget;if(!cpLive||!t)return;
+    cpLive=false;
+    if(t.preview&&cpLastHex!==cpOriginal.toLowerCase())t.preview(cpOriginal);
+    if(cpAlphaOn&&t.previewAlpha&&cpAlphaRaw!=null&&cpLastA!==Math.round(cpAlphaOrig*100))t.previewAlpha(cpAlphaRaw);
+  }
 
   function toast(t){var e=document.getElementById('aviso-t');if(!e)return;e.textContent=t;e.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(function(){e.hidden=true},2800)}
 
@@ -7410,30 +7799,39 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
   function refreshBars(){updateWheelHandlePosition();updateValBar();updateSatBar();updateAlphaBar()}
 
   // A cor escolhida fica só no modal (rascunho); só vai para o campo quando clicar em Aplicar.
-  function showDraft(hex){cpDraft=hex;cpHex.value=hex.replace('#','').toUpperCase();paintSwatch(cpPrevNew,hex,cpAlpha)}
-  function setColorFromHex(hex){
+  function showDraft(hex,keep){cpDraft=hex;if(!keep)cpHex.value=hex.replace('#','').toUpperCase();paintSwatch(cpPrevNew,hex,cpAlpha);cpAgendarPrevia()}
+  function setColorFromHex(hex,keep){
     var hsv=hexToHsv(hex);
     cpHue=hsv.h;cpSat=hsv.s;cpVal=hsv.v;
-    drawColorWheel();refreshBars();showDraft(hex);
+    drawColorWheel();refreshBars();showDraft(hex,keep);
   }
   function setColorFromHsv(){refreshBars();showDraft(hsvToHex(cpHue,cpSat,cpVal))}
 
   function openColorPicker(target){
+    if(cpTarget&&cpLive)cpReverterPrevia(); // trocou de campo sem aplicar: desfaz a prévia do anterior
+    cpLive=false;cpCancelarRaf();
     cpTarget=target;cpOriginal=target.get();
     // a barra de opacidade só aparece quando o campo tem uma opacidade ligada a ele
     cpAlphaOn=!!(target.setAlpha&&target.getAlpha);
     cpAlpha=cpAlphaOn?Math.max(0,Math.min(1,(parseFloat(target.getAlpha())||0)/100)):1;
-    cpAlphaOrig=cpAlpha;cpAlphaBox.hidden=!cpAlphaOn;
+    cpAlphaOrig=cpAlpha;cpAlphaBox.hidden=!cpAlphaOn;cpAlphaRaw=cpAlphaOn?target.getAlpha():null;
     paintSwatch(cpPrevOld,cpOriginal,cpAlpha);
     cpOverlay.classList.add('show'); // precisa estar visível para medir as barras
     cpPosicionar();
     setColorFromHex(cpOriginal);
+    cpLastHex=cpOriginal.toLowerCase();cpLastA=Math.round(cpAlpha*100);cpLive=true;
   }
-  function closeColorPicker(){cpOverlay.classList.remove('show');cpTarget=null}
+  // confirmado=false (Fechar, X, Esc): desfaz a prévia. confirmado=true (Aplicar): mantém.
+  function closeColorPicker(confirmado){
+    if(!confirmado)cpReverterPrevia();
+    cpLive=false;cpCancelarRaf();
+    cpOverlay.classList.remove('show');cpTarget=null;
+  }
   function applyColorPicker(){
+    cpCancelarRaf();cpEnviarPrevia(); // garante que a prévia está igual ao rascunho antes de confirmar
     var t=cpTarget,hex=cpDraft,mudou=hex.toLowerCase()!==cpOriginal.toLowerCase();
     var pct=Math.round(cpAlpha*100),mudouA=!!(t&&cpAlphaOn&&pct!==Math.round(cpAlphaOrig*100));
-    closeColorPicker();
+    closeColorPicker(true);
     if(t&&mudou)t.set(hex);
     if(t&&mudouA)t.setAlpha(pct);
   }
@@ -7467,31 +7865,69 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
     updateAlphaBar();showDraft(cpDraft);
   });
 
-  cpHex.addEventListener('change',function(){
-    var v=cpHex.value.replace('#','').trim();
-    if(/^[0-9a-fA-F]{6}$/.test(v))setColorFromHex('#'+v.toLowerCase());
+
+  // Aceita qualquer cor CSS (nome, hsl(), rgb() moderno...) usando o próprio navegador para interpretar
+  function corCssParaHex(t){
+    var c=document.createElement('canvas').getContext('2d');
+    c.fillStyle='#010203';c.fillStyle=t;var a=c.fillStyle;
+    if(a==='#010203'){c.fillStyle='#030201';c.fillStyle=t;if(c.fillStyle==='#030201')return null;a=c.fillStyle}
+    return a;
+  }
+  // Texto -> {hex:'#rrggbb', a:opacidade 0-1 ou null}. Aceita #RGB, #RGBA, #RRGGBB, #RRGGBBAA (com ou sem #),
+  // rgb()/rgba()/hsl()/hsla(), nomes de cor (red) e um código dentro de um texto maior ("cor: #1a2b3c;").
+  function lerCor(texto){
+    if(texto==null)return null;
+    var t=String(texto).trim().replace(/^["'\s]+|["'\s;,]+$/g,''),m,s,a=null;
+    if(!t)return null;
+    m=t.match(/^#?([0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{4}|[0-9a-f]{3})$/i)||t.match(/#([0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{4}|[0-9a-f]{3})(?![0-9a-f])/i);
+    if(m){
+      s=m[1];if(s.length<=4)s=s.replace(/./g,function(x){return x+x});
+      if(s.length===8)a=parseInt(s.slice(6),16)/255;
+      return{hex:'#'+s.slice(0,6).toLowerCase(),a:a};
+    }
+    var css=corCssParaHex(t);
+    if(!css)return null;
+    if(css.charAt(0)==='#')return{hex:css.toLowerCase(),a:null};
+    m=css.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/i);
+    if(!m)return null;
+    function f(n){return Math.max(0,Math.min(255,parseInt(n,10))).toString(16).padStart(2,'0')}
+    return{hex:'#'+f(m[1])+f(m[2])+f(m[3]),a:m[4]!=null?Math.max(0,Math.min(1,parseFloat(m[4]))):null};
+  }
+
+  // Aplica uma cor lida de texto: cor no seletor e, se o campo tiver opacidade e o texto trouxer uma, a opacidade também.
+  function aplicarCorLida(c,keep){
+    if(c.a!=null&&cpAlphaOn)cpAlpha=Math.round(c.a*100)/100;
+    setColorFromHex(c.hex,keep);
+  }
+  function confirmarHexDigitado(){
+    var c=lerCor(cpHex.value);
+    if(c)aplicarCorLida(c);
     else cpHex.value=cpDraft.replace('#','').toUpperCase();
+  }
+  // Colar no campo: aceita qualquer formato (#FF0000, FF0000, #f00, rgb(...), hsl(...), nome...)
+  cpHex.addEventListener('paste',function(e){
+    var txt=(e.clipboardData||window.clipboardData).getData('text'),c=lerCor(txt);
+    e.preventDefault();
+    if(c){aplicarCorLida(c);toast('Cor colada.')}
+    else toast('Código de cor inválido.');
   });
+  // Digitando: atualiza na hora quando já houver 6 dígitos; 3 dígitos ou outros formatos valem ao sair do campo ou com Enter.
+  cpHex.addEventListener('input',function(){
+    var v=cpHex.value.replace('#','').trim();
+    if(/^[0-9a-fA-F]{6}$/.test(v))setColorFromHex('#'+v.toLowerCase(),true);
+  });
+  cpHex.addEventListener('change',confirmarHexDigitado);
+  cpHex.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();confirmarHexDigitado()}});
 
   document.getElementById('cp-menu-copy').addEventListener('click',function(){
     if(navigator.clipboard)navigator.clipboard.writeText(cpDraft).catch(function(){});
     toast('Cor copiada.');
   });
-  function parseColorFromText(text){
-    if(!text)return null;
-    var t=text.trim(),m=t.match(/^#?([0-9a-fA-F]{6})$/);
-    if(m)return '#'+m[1].toLowerCase();
-    m=t.match(/^#?([0-9a-fA-F]{3})$/);
-    if(m){var s=m[1];return '#'+s[0]+s[0]+s[1]+s[1]+s[2]+s[2]}
-    m=t.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
-    if(m){var f=function(n){return Math.max(0,Math.min(255,parseInt(n,10))).toString(16).padStart(2,'0')};return '#'+f(m[1])+f(m[2])+f(m[3])}
-    return null;
-  }
   document.getElementById('cp-menu-paste').addEventListener('click',async function(){
     try{
       var text=navigator.clipboard?await navigator.clipboard.readText():'';
-      var hex=parseColorFromText(text);
-      if(hex){setColorFromHex(hex);toast('Cor colada.')}
+      var c=lerCor(text);
+      if(c){aplicarCorLida(c);toast('Cor colada.')}
       else toast('Nada de válido na área de transferência.');
     }catch(err){toast('Não foi possível ler a área de transferência.')}
   });
@@ -7503,8 +7939,8 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
   cpNative.addEventListener('input',function(){setColorFromHex(cpNative.value)});
 
   document.getElementById('cp-ok-btn').addEventListener('click',applyColorPicker);
-  document.getElementById('cp-cancel-btn').addEventListener('click',closeColorPicker);
-  document.getElementById('cp-close-btn').addEventListener('click',closeColorPicker);
+  document.getElementById('cp-cancel-btn').addEventListener('click',function(){closeColorPicker(false)});
+  document.getElementById('cp-close-btn').addEventListener('click',function(){closeColorPicker(false)});
   // Janela flutuante: arrasta pelo cabeçalho; o fundo não escurece nem bloqueia mais a tela
   var cpPop=document.getElementById('color-picker-popover'),cpHead=cpPop.querySelector('.cp-header'),cpPos=null;
   function cpColocar(x,y){
@@ -7531,7 +7967,7 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
     e.preventDefault();
   });
   window.addEventListener('resize',function(){if(cpOverlay.classList.contains('show'))cpPosicionar()});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&cpOverlay.classList.contains('show'))closeColorPicker()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&cpOverlay.classList.contains('show'))closeColorPicker(false)});
 
   // Qual campo de opacidade acompanha esta cor (ou null se a cor não tem opacidade própria)
   function opacidadeDaCor(t){
@@ -7551,6 +7987,7 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
       if(t.disabled)return;
       var alvo={
         get:function(){return /^#[0-9a-f]{6}$/i.test(t.value)?t.value:'#000000'},
+        preview:function(hex){t.value=hex;t.dispatchEvent(new Event('input',{bubbles:true}))},
         set:function(hex){
           t.value=hex;
           t.dispatchEvent(new Event('input',{bubbles:true}));
@@ -7560,6 +7997,7 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
       var oe=opacidadeDaCor(t);
       if(oe&&!oe.disabled){
         alvo.getAlpha=function(){return oe.value};
+        alvo.previewAlpha=function(p){oe.value=p;oe.dispatchEvent(new Event('input',{bubbles:true}))};
         alvo.setAlpha=function(p){
           oe.value=p;
           oe.dispatchEvent(new Event('input',{bubbles:true}));
@@ -7587,5 +8025,416 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
   t.circle.tooltip={start:"Clique e arraste para desenhar o círculo."};
 })();
 </script>
+<style id="tur-css">
+/* ================= Tutorial guiado (tela escurecida + balões) ================= */
+#tur-bloq{position:fixed;inset:0;z-index:99990;background:transparent;cursor:default}
+#tur-bloq.cheio{background:rgba(0,0,0,.7)}
+#tur-foco{position:fixed;z-index:99991;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.7);outline:3px solid var(--sol,#f5b700);outline-offset:0;pointer-events:none;transition:left .25s ease,top .25s ease,width .25s ease,height .25s ease}
+#tur-bal{position:fixed;z-index:99992;box-sizing:border-box;width:350px;max-width:calc(100vw - 16px);background:var(--card,#fff);color:var(--tinta,#222);border:2px solid var(--agua,#1b6ca8);border-radius:12px;padding:14px 16px 12px;box-shadow:0 10px 32px rgba(0,0,0,.45);font:inherit;font-size:15px;line-height:1.4;transition:left .25s ease,top .25s ease}
+#tur-bal .tur-cab{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 6px}
+#tur-bal .tur-tit{font-size:18px;font-weight:700;margin:0;color:var(--agua,#1b6ca8)}
+#tur-bal .tur-n{flex:none;font-size:13px;color:var(--tinta-2,#555)}
+#tur-bal .tur-txt{margin:0 0 12px;color:var(--tinta,#222);max-height:calc(100vh - 200px);overflow:auto}
+#tur-bal .tur-barra{height:4px;border-radius:2px;background:var(--linha,#ccc);margin:0 0 12px;overflow:hidden}
+#tur-bal .tur-barra i{display:block;height:100%;background:var(--agua,#1b6ca8);transition:width .25s ease}
+#tur-bal .tur-bts{display:flex;align-items:center;gap:8px}
+#tur-bal .tur-bts .tur-esp{flex:1}
+.tur-btn{padding:8px 14px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--linha,#ccc);background:var(--card,#fff);color:var(--tinta,#222)}
+.tur-btn:hover:not(:disabled){border-color:var(--agua,#1b6ca8)}
+.tur-btn:disabled{opacity:.4;cursor:default}
+.tur-btn{white-space:nowrap}
+.tur-btn.ok{background:var(--agua,#1b6ca8);border-color:var(--agua,#1b6ca8);color:var(--papel,#fff)}
+.tur-btn.link{border-color:transparent;background:transparent;color:var(--tinta-2,#555);font-weight:400;text-decoration:underline;padding-left:0;padding-right:4px;white-space:nowrap}
+#tur-bal .tur-seta{position:absolute;width:14px;height:14px;background:var(--card,#fff);border:2px solid var(--agua,#1b6ca8);transform:rotate(45deg);display:none}
+#tur-bal.lado-baixo .tur-seta{display:block;top:-9px;border-right:0;border-bottom:0}
+#tur-bal.lado-cima .tur-seta{display:block;bottom:-9px;border-left:0;border-top:0}
+#tur-bal.lado-dir .tur-seta{display:block;left:-9px;border-right:0;border-top:0}
+#tur-bal.lado-esq .tur-seta{display:block;right:-9px;border-left:0;border-bottom:0}
+#tur-oferta{position:fixed;inset:0;z-index:99995;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+#tur-oferta .tur-caixa{box-sizing:border-box;width:430px;max-width:100%;background:var(--card,#fff);color:var(--tinta,#222);border:2px solid var(--agua,#1b6ca8);border-radius:14px;padding:20px;box-shadow:0 10px 32px rgba(0,0,0,.45)}
+#tur-oferta h2{margin:0 0 8px;font-size:21px;color:var(--agua,#1b6ca8)}
+#tur-oferta p{margin:0 0 10px;font-size:15px;line-height:1.45}
+#tur-oferta .tur-peq{font-size:13px;color:var(--tinta-2,#555)}
+#tur-oferta .tur-bts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}
+@media (prefers-reduced-motion:reduce){#tur-foco,#tur-bal,#tur-bal .tur-barra i{transition:none}}
+@media print{#tur-bloq,#tur-foco,#tur-bal,#tur-oferta{display:none!important}}
+</style>
+<script id="tur-js">
+/* Tutorial guiado: escurece a tela, deixa em destaque só a área explicada e mostra um balão.
+   window.gisTour.iniciar(passos)  -> começa o tutorial
+   window.gisTour.oferecer(chave, opcoes, aoAceitar) -> pergunta uma única vez (guarda a resposta no navegador)
+   Passo: {sel: seletor CSS | [seletores] | função, t: título, x: texto (HTML simples), pos: "baixo|cima|dir|esq", pad: px, sempre: true, antes: função}
+   Passo sem "sel" aparece no centro da tela. Passos cujo alvo não está visível são pulados. */
+(function(){
+var CH="gisjr:tutorial:",ativo=null;
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function visivel(e){
+  if(!e||!e.getBoundingClientRect)return false;
+  var r=e.getBoundingClientRect();if(r.width<1||r.height<1)return false;
+  var cs=getComputedStyle(e);return cs.visibility!=="hidden"&&cs.display!=="none";
+}
+function alvos(p){
+  var s=typeof p.sel==="function"?p.sel():p.sel,out=[];
+  if(!s)return out;
+  (Array.isArray(s)?s:[s]).forEach(function(x){
+    if(typeof x==="string"){[].forEach.call(document.querySelectorAll(x),function(e){out.push(e)})}
+    else if(x&&x.nodeType===1)out.push(x);
+  });
+  return out.filter(visivel);
+}
+function rolar(e){try{e.scrollIntoView({block:"nearest",inline:"nearest",behavior:"instant"})}catch(x){try{e.scrollIntoView(false)}catch(y){}}}
+function retangulo(a,pad){
+  var l=1e9,t=1e9,r=-1e9,b=-1e9,vw=window.innerWidth,vh=window.innerHeight;
+  a.forEach(function(e){var q=e.getBoundingClientRect();l=Math.min(l,q.left);t=Math.min(t,q.top);r=Math.max(r,q.right);b=Math.max(b,q.bottom)});
+  l=Math.max(2,l-pad);t=Math.max(2,t-pad);r=Math.min(vw-2,r+pad);b=Math.min(vh-2,b+pad);
+  return{left:l,top:t,right:r,bottom:b,width:r-l,height:b-t};
+}
+function iniciar(passos){
+  if(ativo)return;
+  var lista=passos.filter(function(p){return !p.sel||p.sempre||alvos(p).length});
+  if(!lista.length)return;
+  var i=0,ant=document.activeElement;
+  var bloq=el("div"),foco=el("div"),bal=el("div");
+  bloq.id="tur-bloq";foco.id="tur-foco";bal.id="tur-bal";
+  bal.setAttribute("role","dialog");bal.setAttribute("aria-live","polite");bal.setAttribute("aria-labelledby","tur-tit");
+  var cab=el("div","tur-cab"),tit=el("h3","tur-tit");tit.id="tur-tit";var num=el("span","tur-n");
+  cab.appendChild(tit);cab.appendChild(num);
+  var txt=el("p","tur-txt"),barra=el("div","tur-barra"),prog=el("i");barra.appendChild(prog);
+  var bts=el("div","tur-bts"),pula=el("button","tur-btn link","Pular tutorial"),esp=el("span","tur-esp"),
+      volta=el("button","tur-btn","Anterior"),avanca=el("button","tur-btn ok","Próximo"),seta=el("span","tur-seta");
+  [pula,volta,avanca].forEach(function(b){b.type="button"});
+  bts.appendChild(pula);bts.appendChild(esp);bts.appendChild(volta);bts.appendChild(avanca);
+  [seta,cab,txt,barra,bts].forEach(function(n){bal.appendChild(n)});
+  document.body.appendChild(bloq);document.body.appendChild(foco);document.body.appendChild(bal);
+  ativo={fim:fim};
+  function fim(){
+    document.removeEventListener("keydown",tecla,true);window.removeEventListener("resize",reposiciona);window.removeEventListener("scroll",reposiciona,true);
+    [bloq,foco,bal].forEach(function(n){if(n.parentNode)n.parentNode.removeChild(n)});
+    ativo=null;if(ant&&ant.focus){try{ant.focus()}catch(x){}}
+  }
+  function posiciona(p,r){
+    var bw=bal.offsetWidth,bh=bal.offsetHeight,vw=window.innerWidth,vh=window.innerHeight,g=16,m=8;
+    bal.className="";
+    if(!r){bal.style.left=Math.max(m,(vw-bw)/2)+"px";bal.style.top=Math.max(m,(vh-bh)/2)+"px";return}
+    var cx=r.left+r.width/2,cy=r.top+r.height/2;
+    var o={
+      baixo:{x:cx-bw/2,y:r.bottom+g,ok:r.bottom+g+bh<=vh-m},
+      cima:{x:cx-bw/2,y:r.top-g-bh,ok:r.top-g-bh>=m},
+      dir:{x:r.right+g,y:cy-bh/2,ok:r.right+g+bw<=vw-m},
+      esq:{x:r.left-g-bw,y:cy-bh/2,ok:r.left-g-bw>=m}
+    },ordem=["baixo","dir","cima","esq"];
+    if(p.pos&&o[p.pos])ordem=[p.pos].concat(ordem.filter(function(k){return k!==p.pos}));
+    var lado=null;ordem.some(function(k){if(o[k].ok){lado=k;return true}});
+    var x,y;
+    if(lado){x=o[lado].x;y=o[lado].y}
+    else{ /* alvo muito grande: o balão fica sobre ele, sem seta */
+      x=cx-bw/2;y=Math.min(Math.max(r.top+20,m),vh-bh-m);
+    }
+    x=Math.max(m,Math.min(x,vw-bw-m));y=Math.max(m,Math.min(y,vh-bh-m));
+    bal.style.left=x+"px";bal.style.top=y+"px";
+    if(lado){
+      bal.className="lado-"+lado;
+      if(lado==="baixo"||lado==="cima")seta.style.left=Math.max(16,Math.min(cx-x-7,bw-30))+"px",seta.style.top="";
+      else seta.style.top=Math.max(16,Math.min(cy-y-7,bh-30))+"px",seta.style.left="";
+    }
+  }
+  function mostra(){
+    var p=lista[i],a;
+    if(p.antes){try{p.antes()}catch(e){}}
+    a=p.sel?alvos(p):[];
+    tit.textContent=p.t||"";txt.innerHTML=p.x||"";
+    num.textContent=(i+1)+" de "+lista.length;prog.style.width=((i+1)/lista.length*100)+"%";
+    volta.disabled=i===0;avanca.textContent=i===lista.length-1?"Concluir":"Próximo";
+    if(a.length){
+      rolar(a[0]);if(a.length>1)rolar(a[a.length-1]);
+      var r=retangulo(a,p.pad==null?6:p.pad);
+      bloq.className="";foco.style.display="block";
+      foco.style.left=r.left+"px";foco.style.top=r.top+"px";foco.style.width=r.width+"px";foco.style.height=r.height+"px";
+      posiciona(p,r);
+    }else{
+      bloq.className="cheio";foco.style.display="none";
+      posiciona(p,null);
+    }
+    avanca.focus({preventScroll:true});
+  }
+  function reposiciona(){if(ativo)mostra()}
+  function prox(){if(i>=lista.length-1){fim();return}i++;mostra()}
+  function ante(){if(i>0){i--;mostra()}}
+  function tecla(e){
+    if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fim()}
+    else if(e.key==="ArrowRight"||e.key==="PageDown"){e.preventDefault();e.stopPropagation();prox()}
+    else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();e.stopPropagation();ante()}
+    else if(e.key==="Tab"){ /* o foco fica só dentro do balão */
+      var f=[pula,volta,avanca].filter(function(b){return !b.disabled}),k=f.indexOf(document.activeElement);
+      e.preventDefault();e.stopPropagation();
+      f[(k+(e.shiftKey?-1:1)+f.length)%f.length].focus();
+    }
+    else if(e.key==="Enter"&&document.activeElement===bal){e.preventDefault();prox()}
+  }
+  pula.addEventListener("click",fim);volta.addEventListener("click",ante);avanca.addEventListener("click",prox);
+  document.addEventListener("keydown",tecla,true);window.addEventListener("resize",reposiciona);window.addEventListener("scroll",reposiciona,true);
+  mostra();
+}
+/* pergunta uma única vez; a resposta (qualquer uma) fica guardada neste navegador */
+function oferecer(chave,o,aceitar){
+  try{if(localStorage.getItem(CH+chave))return}catch(e){}
+  if(ativo||document.getElementById("tur-oferta"))return;
+  try{localStorage.setItem(CH+chave,"1")}catch(e){}
+  var ant=document.activeElement,ov=el("div"),cx=el("div","tur-caixa");
+  ov.id="tur-oferta";cx.setAttribute("role","dialog");cx.setAttribute("aria-modal","true");cx.setAttribute("aria-labelledby","tur-of-t");
+  var h=el("h2",null,o.titulo);h.id="tur-of-t";cx.appendChild(h);
+  var p1=el("p");p1.innerHTML=o.texto;cx.appendChild(p1);
+  cx.appendChild(el("p","tur-peq",o.nota||"Essa pergunta aparece só uma vez. Depois, você pode abrir o tutorial quando quiser pelo botão de ajuda."));
+  var bts=el("div","tur-bts"),nao=el("button","tur-btn","Agora não"),sim=el("button","tur-btn ok","Sim, mostrar o tutorial");
+  nao.type="button";sim.type="button";bts.appendChild(nao);bts.appendChild(sim);cx.appendChild(bts);ov.appendChild(cx);document.body.appendChild(ov);
+  function fecha(v){
+    document.removeEventListener("keydown",tecla,true);
+    if(ov.parentNode)ov.parentNode.removeChild(ov);
+    if(ant&&ant.focus){try{ant.focus()}catch(x){}}
+    if(v&&aceitar)aceitar();
+  }
+  function tecla(e){
+    if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fecha(false)}
+    else if(e.key==="Tab"){e.preventDefault();e.stopPropagation();(document.activeElement===sim?nao:sim).focus()}
+  }
+  nao.addEventListener("click",function(){fecha(false)});sim.addEventListener("click",function(){fecha(true)});
+  document.addEventListener("keydown",tecla,true);sim.focus();
+}
+window.gisTour={iniciar:iniciar,oferecer:oferecer,ativo:function(){return !!ativo}};
+})();
+</script>
+<style id="dica-css">
+/* Dicas das ferramentas: mouse em cima (ou toque longo no celular) mostra o que a ferramenta faz */
+#dica-tip{display:none;position:fixed;left:0;top:0;z-index:99000;box-sizing:border-box;width:max-content;max-width:min(320px,calc(100vw - 16px));pointer-events:none;background:var(--card,#fff);color:var(--tinta,#222);border:2px solid var(--agua,#1b6ca8);border-radius:10px;padding:9px 12px 10px;box-shadow:0 6px 20px rgba(0,0,0,.35);font-size:14px;line-height:1.4;text-align:left;font-weight:400;letter-spacing:0;text-transform:none;white-space:normal}
+#dica-tip .dica-t{font-size:15px;font-weight:700;color:var(--agua,#1b6ca8);margin:0 0 3px}
+#dica-tip .dica-x{display:block}
+[data-dica]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+[data-dica]:disabled{pointer-events:none}
+@media print{#dica-tip{display:none!important}}
+</style>
+<script id="dica-js">
+(function(){
+"use strict";
+/* Usa os mesmos textos do tutorial (PASSOS_TUTORIAL_*): cada passo que aponta para uma ferramenta vira uma dica dela. */
+var EXCL=["#menubar","aside.camadas","#map","#pagina",".dir .abas"];
+var passos=window.PASSOS_TUTORIAL_MAPA||window.PASSOS_TUTORIAL_LAYOUT||[];
+var tip=null,alvo=null,tEsp=null,tLongo=null,tOculta=null,ultToque=0,bloqClique=0,seguro=false,xy=null;
+
+function marcar(el,p){
+  if(el.classList.contains("dd")){
+    [].forEach.call(el.querySelectorAll(":scope > button"),function(b){marcar(b,p)});
+    return;
+  }
+  el.dataset.dica=p.x;el.dataset.dicaT=p.t;
+  el.removeAttribute("title"); /* evita o balãozinho nativo duplicado */
+}
+function preparar(){
+  passos.forEach(function(p){
+    if(!p.sel||!p.x)return;
+    (Array.isArray(p.sel)?p.sel:[p.sel]).forEach(function(s){
+      if(EXCL.indexOf(s)>=0)return;
+      try{[].forEach.call(document.querySelectorAll(s),function(el){marcar(el,p)})}catch(e){}
+    });
+  });
+}
+function achar(x,y,t){
+  var a=t&&t.closest?t.closest("[data-dica]"):null;
+  if(a)return a;
+  /* botão desativado não recebe eventos: procura pela posição, só se o alvo for o fundo logo atrás dele */
+  var ds=document.querySelectorAll("[data-dica]:disabled");
+  for(var i=0;i<ds.length;i++){
+    if(!t||!t.contains(ds[i]))continue;
+    var r=ds[i].getBoundingClientRect();
+    if(r.width&&x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)return ds[i];
+  }
+  return null;
+}
+function mostrar(el,toque){
+  if(window.gisTour&&window.gisTour.ativo&&window.gisTour.ativo())return;
+  if(!el.isConnected)return;
+  if(!tip){
+    tip=document.createElement("div");tip.id="dica-tip";tip.setAttribute("role","tooltip");
+    document.body.appendChild(tip);
+  }
+  tip.textContent="";
+  var t=document.createElement("div");t.className="dica-t";t.textContent=el.dataset.dicaT||"";
+  var x=document.createElement("span");x.className="dica-x";x.innerHTML=el.dataset.dica||"";
+  tip.appendChild(t);tip.appendChild(x);
+  tip.style.display="block";
+  var r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight,vw=window.innerWidth,vh=window.innerHeight,m=8;
+  var abaixo=r.bottom+10,acima=r.top-h-10;
+  var y=toque?(acima>=m?acima:abaixo):(abaixo+h<=vh-m?abaixo:acima);
+  y=Math.max(m,Math.min(y,vh-m-h));
+  var l=r.left+r.width/2-w/2;
+  l=Math.max(m,Math.min(l,vw-m-w));
+  tip.style.left=l+"px";tip.style.top=y+"px";
+}
+function ocultar(manter){
+  clearTimeout(tEsp);clearTimeout(tOculta);
+  if(tip)tip.style.display="none";
+  if(!manter)alvo=null;
+}
+
+/* mouse: parar em cima por um instante */
+document.addEventListener("mousemove",function(e){
+  if(Date.now()-ultToque<900)return;
+  var a=achar(e.clientX,e.clientY,e.target);
+  if(a===alvo)return;
+  ocultar();
+  if(a){alvo=a;tEsp=setTimeout(function(){mostrar(a,false)},400)}
+},true);
+document.addEventListener("mousedown",function(){ocultar(true)},true);
+document.addEventListener("mouseleave",function(){ocultar()});
+document.addEventListener("wheel",function(){ocultar(true)},{capture:true,passive:true});
+window.addEventListener("scroll",function(){ocultar(true)},true);
+window.addEventListener("blur",function(){ocultar()});
+document.addEventListener("keydown",function(){ocultar(true)},true);
+
+/* celular: clicar e segurar */
+document.addEventListener("touchstart",function(e){
+  ultToque=Date.now();seguro=false;clearTimeout(tLongo);ocultar();
+  if(e.touches.length!==1)return;
+  var t=e.touches[0],a=achar(t.clientX,t.clientY,e.target);
+  if(!a)return;
+  xy=[t.clientX,t.clientY];
+  tLongo=setTimeout(function(){seguro=true;alvo=a;mostrar(a,true)},450);
+},{capture:true,passive:true});
+document.addEventListener("touchmove",function(e){
+  var t=e.touches[0];
+  if(t&&xy&&(Math.abs(t.clientX-xy[0])>10||Math.abs(t.clientY-xy[1])>10)){clearTimeout(tLongo);if(!seguro)ocultar()}
+},{capture:true,passive:true});
+function fimToque(e){
+  clearTimeout(tLongo);ultToque=Date.now();
+  if(seguro){
+    if(e.cancelable)e.preventDefault(); /* soltar o dedo depois da dica não aciona a ferramenta */
+    bloqClique=Date.now()+800;
+    clearTimeout(tOculta);tOculta=setTimeout(function(){ocultar()},3500);
+  }
+}
+document.addEventListener("touchend",fimToque,{capture:true,passive:false});
+document.addEventListener("touchcancel",fimToque,{capture:true,passive:false});
+document.addEventListener("click",function(e){
+  if(Date.now()<bloqClique){bloqClique=0;e.preventDefault();e.stopPropagation()}
+},true);
+document.addEventListener("contextmenu",function(e){
+  if(Date.now()-ultToque<1500&&e.target.closest&&e.target.closest("[data-dica]"))e.preventDefault();
+},true);
+
+/* teclado: Tab até a ferramenta também mostra a dica */
+document.addEventListener("focusin",function(e){
+  var a=e.target.closest&&e.target.closest("[data-dica]");
+  if(a&&a.matches(":focus-visible")){alvo=a;mostrar(a,false)}
+});
+document.addEventListener("focusout",function(){ocultar()});
+
+preparar();
+})();
+</script>
+<style id="mobile-vertical">
+/* Só celular em pé: toque + tela estreita. Desktop (mouse) nunca entra aqui. */
+@media (pointer:coarse) and (max-width:640px){
+  body{height:100%;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  #inicio{min-height:0;overflow:auto}
+  #mapa,.area{min-height:0}
+  .area{position:relative;grid-template-rows:minmax(0,1fr)}
+  .tela{z-index:auto;min-height:0}
+  /* camadas: gaveta inferior, o mapa ocupa a tela */
+  .camadas{position:absolute;left:0;right:0;bottom:0;z-index:1100;max-height:60dvh;border:0;border-top:2px solid var(--linha);border-radius:14px 14px 0 0;box-shadow:0 -4px 14px rgba(0,0,0,.2);transform:translateY(calc(100% - 52px));transition:transform .2s}
+  .camadas.aberta{transform:none}
+  .camadas h2{display:flex;justify-content:space-between;align-items:center;min-height:36px;cursor:pointer}
+  .camadas h2::after{content:"\25B2";font-size:14px;color:var(--agua)}
+  .camadas.aberta h2::after{content:"\25BC"}
+  /* barra de ferramentas: mostra que rola */
+  .barra{scrollbar-width:thin}
+  .barra::-webkit-scrollbar{display:block;height:4px}
+  .barra::-webkit-scrollbar-thumb{background:var(--linha);border-radius:2px}
+  /* tabela de atributos: painel grande embaixo */
+  #tab-attr{position:fixed;left:0;right:0;bottom:0;height:72dvh}
+  #tab-barra{flex-wrap:nowrap;overflow-x:auto}
+  #tab-barra .mini{flex:none;min-height:40px}
+  /* propriedades da camada: painel inferior */
+  #lp-janela{top:auto!important;bottom:0!important;left:0!important;transform:none!important;width:100%!important;max-height:88dvh!important;border-radius:14px 14px 0 0}
+  #lp-barra{cursor:default}
+}
+@media (pointer:coarse){
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea{font-size:16px!important}
+  .mini,.calc-ops button{min-height:44px}
+  .caret,.lp-x,.r-del,#tab-corpo .del-x,.cam .ol,.grp .ol{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  .menu-ctx{max-height:calc(100dvh - 12px)}
+  .dlg-box.calc{max-height:92dvh}
+}
+</style>
+<script>
+/* celular em pé: título "Camadas" abre/fecha a gaveta */
+(function(){var mq=matchMedia("(pointer:coarse) and (max-width:640px)"),a=document.querySelector("aside.camadas"),h=a&&a.querySelector("h2");
+if(h)h.addEventListener("click",function(){if(mq.matches)a.classList.toggle("aberta")})})();
+</script>
+<style id="mobile-multi">
+@media (pointer:coarse){#tab-corpo td.id,#pagina .it{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}}
+#gj-menu{position:fixed;z-index:9800;min-width:230px;max-width:92vw;max-height:70dvh;overflow:auto;background:var(--card);border:2px solid var(--linha);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.3);padding:4px}
+#gj-menu button{display:block;width:100%;min-height:48px;padding:0 16px;border:0;border-radius:6px;background:none;color:var(--tinta);font:inherit;font-size:17px;text-align:left;white-space:nowrap}
+#gj-menu button:disabled{opacity:.4}
+#gj-menu button:active:not(:disabled){background:var(--agua-claro)}
+#gj-pill{position:fixed;z-index:9800;left:50%;top:calc(8px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:5px 5px 5px 16px;background:var(--tinta);color:var(--papel);border-radius:999px;font-size:15px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+#gj-pill button{min-height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--agua);color:#fff;font:inherit;font-weight:700}
+#gj-pill button.sec{background:transparent;border:2px solid var(--papel);color:var(--papel)}
+</style>
+<script>
+/* celular: apertar e segurar abre um menu de ações; "Selecionar vários" liga o modo em que cada toque soma/tira da seleção */
+(function(){
+if(!matchMedia("(pointer:coarse)").matches)return;
+var multi=false,supr=false,tm=null,x0=0,y0=0,menu=null,pill=null,ult=0;
+function B(id,t){var b=document.getElementById(id);return{t:t,off:!b||b.disabled,f:function(){b.click()}}}
+function clicaEm(x,y,sh){var el=document.elementFromPoint(x,y);if(el)el.dispatchEvent(new MouseEvent("click",{bubbles:true,cancelable:true,composed:true,shiftKey:!!sh,clientX:x,clientY:y,view:window}))}
+function ident(x,y){var b=document.getElementById("b-id");if(b){b.click();setTimeout(function(){clicaEm(x,y)},60)}}
+function ACOES(){return[B("t-zoom","Zoom na seleção"),B("b-desselec","Desselecionar tudo"),B("b-exp-sel","Exportar seleção (.zip)"),B("b-remover","Remover selecionadas"),B("b-tabela","Abrir tabela de atributos"),B("t-todas","Selecionar tudo"),B("t-inv","Inverter seleção")]}
+function menuMapa(){return[{t:"Selecionar vários",f:function(x,y){clicaEm(x,y);entra()}},{t:"Identificar feição",f:ident},B("t-zoom","Zoom na seleção"),B("b-desselec","Desselecionar tudo"),B("b-exp-sel","Exportar seleção (.zip)"),B("b-remover","Remover feição"),B("b-tabela","Abrir tabela de atributos")]}
+function menuTab(i){return[{t:"Selecionar vários",f:function(){var c=document.querySelector('#tab-corpo tr[data-i="'+i+'"] td.id');if(c)c.click();entra()}},B("t-zoom","Zoom na seleção"),B("t-todas","Selecionar tudo"),B("t-inv","Inverter seleção"),B("t-desel","Desselecionar"),B("t-del","Excluir selecionadas"),B("b-exp-sel","Exportar seleção (.zip)")]}
+function fechaMenu(){if(menu){menu.remove();menu=null}}
+function pos(x,y){var w=menu.offsetWidth,h=menu.offsetHeight;menu.style.left=Math.max(8,Math.min(innerWidth-w-8,x-w/2))+"px";
+  var t=y+16+h<innerHeight-8?y+16:y-h-16;menu.style.top=Math.max(8,t)+"px"}
+function desenha(lista,x,y,voltar){menu.innerHTML="";
+  function add(i){var b=document.createElement("button");b.type="button";b.textContent=i.t+(i.sub?"   \u203A":"");b.disabled=!!i.off;
+    b.onclick=function(){if(i.back){voltar();pos(x,y);return}
+      if(i.sub){desenha(i.sub,x,y,function(){desenha(lista,x,y,voltar)});pos(x,y);return}
+      fechaMenu();i.f(x,y)};menu.appendChild(b)}
+  if(voltar)add({t:"\u2039 Voltar",back:true});lista.forEach(add)}
+function mostraMenu(x,y,lista){fechaMenu();menu=document.createElement("div");menu.id="gj-menu";document.body.appendChild(menu);desenha(lista,x,y,null);pos(x,y)}
+function entra(){multi=true;if(pill)return;pill=document.createElement("div");pill.id="gj-pill";pill.innerHTML="<span>Selecionando vários</span>";
+  var a=document.createElement("button");a.type="button";a.textContent="Ações";a.className="sec";
+  a.onclick=function(){var r=a.getBoundingClientRect();mostraMenu(r.left+r.width/2,r.bottom,ACOES())};
+  var b=document.createElement("button");b.type="button";b.textContent="Concluir";b.onclick=sai;pill.appendChild(a);pill.appendChild(b);document.body.appendChild(pill)}
+function sai(){multi=false;fechaMenu();if(pill){pill.remove();pill=null}}
+function desarma(){clearTimeout(tm);tm=null}
+function arma(e,getLista){if(multi)return;desarma();var x=x0=e.clientX,y=y0=e.clientY;
+  tm=setTimeout(function(){tm=null;supr=true;ult=Date.now();setTimeout(function(){supr=false},1500);mostraMenu(x,y,getLista(x,y))},550)}
+document.addEventListener("pointermove",function(e){if(tm&&(Math.abs(e.clientX-x0)>8||Math.abs(e.clientY-y0)>8))desarma()},true);
+["pointerup","pointercancel"].forEach(function(ev){document.addEventListener(ev,desarma,true)});
+document.addEventListener("click",function(e){if(supr&&!e.target.closest("#gj-menu,#gj-pill")){supr=false;e.stopImmediatePropagation();e.preventDefault()}},true);
+document.addEventListener("contextmenu",function(e){if(tm||Date.now()-ult<1500)e.preventDefault()},true);
+document.addEventListener("pointerdown",function(e){
+  if(e.pointerType==="mouse")return;var t=e.target;if(!t.closest)return;
+  if(!t.closest("#gj-menu,#gj-pill")){fechaMenu();supr=false}
+  if(tm&&!e.isPrimary)desarma();
+  var td=t.closest("#tab-corpo td.id");
+  if(td){var i=td.parentNode.dataset.i;arma(e,function(){return menuTab(i)});return}
+  if(t.closest("#map")&&selOn())arma(e,menuMapa);
+},true);
+function selOn(){var b=document.getElementById("b-selec");return !!b&&b.classList.contains("active")}
+document.addEventListener("click",function(e){
+  if(!multi||!e.isTrusted||e.shiftKey||e.ctrlKey||e.metaKey)return;var t=e.target;
+  if(!(t.closest("#tab-corpo td.id")||(t.closest("#map")&&selOn())))return;
+  e.stopImmediatePropagation();e.preventDefault();
+  t.dispatchEvent(new MouseEvent("click",{bubbles:true,cancelable:true,composed:true,shiftKey:true,clientX:e.clientX,clientY:e.clientY,view:window}))},true);
+})();
+</script>
+<style id="sobre-css">
+.dlg-sobre{max-width:520px;max-height:88dvh;overflow:auto}
+.dlg-sobre h3{margin:14px 0 4px;font-size:16px}
+.dlg-sobre ul{margin:0 0 8px;padding-left:20px}
+.dlg-sobre li{margin:0 0 4px}
+.dlg-sobre a{color:var(--agua);word-break:break-all}
+.dlg-sobre .sobre-cit{padding:8px 10px;border:1px solid var(--linha);border-radius:8px;background:var(--bg-campo);font-size:14px;user-select:text}
+</style>
 </body>
 </html>

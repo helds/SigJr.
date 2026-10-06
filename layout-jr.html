@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f0eee7" media="(pointer:coarse)">
 <title>Layout — GisJr</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -55,8 +56,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 aside{padding:14px;background:var(--card);overflow-y:auto;min-height:0}
 aside.prop{border-left:2px solid var(--linha)}
 aside h2{font-size:17px;margin:0 0 10px}
-#palco{overflow:auto;padding:16px;background:var(--mar);display:flex;justify-content:center;align-items:flex-start}
-#caixa{position:relative;flex:none}
+#palco{position:relative;overflow:hidden;touch-action:none;background:var(--mar);cursor:grab}
+#palco.panning,#palco.panning *{cursor:grabbing!important}
+#palco.espaco,#palco.espaco *{cursor:grab!important}
+#caixa{position:absolute;left:0;top:0;width:100%;height:100%}
+#zoom-chip{position:absolute;right:12px;bottom:10px;z-index:5;padding:4px 10px;font:inherit;font-size:14px;font-weight:700;border:2px solid var(--linha);border-radius:8px;background:var(--card);color:var(--tinta);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+#zoom-chip:hover{border-color:var(--agua);background:var(--agua-claro)}
 #pagina{position:absolute;left:0;top:0;width:1122px;height:793px;background:#fff;transform-origin:0 0;box-shadow:0 4px 18px rgba(0,0,0,.3)}
 .it{position:absolute;cursor:grab;touch-action:none;color:#000000}
 .it .cont{position:absolute;inset:0;overflow:hidden;pointer-events:auto}
@@ -70,6 +75,11 @@ aside h2{font-size:17px;margin:0 0 10px}
 .dd .b{min-width:84px;border-top-right-radius:0;border-bottom-right-radius:0;border-right-color:transparent}
 .dd-seta{display:flex;align-items:flex-end;justify-content:center;width:20px;padding:0 0 12px;border:2px solid transparent;border-left:0;border-radius:0 8px 8px 0;background:transparent;cursor:pointer}
 .dd-seta::before{content:"";border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--agua)}
+.dd-seta{position:relative}
+/* linha divisória: separa a ferramenta (esquerda) da área que abre o submenu (direita) enquanto há hover ou o menu está aberto */
+.dd-seta::after{content:"";display:none;position:absolute;left:-2px;top:-2px;bottom:-2px;width:2px;background:var(--agua);pointer-events:none}
+.dd:hover .dd-seta::after,.dd.open .dd-seta::after{display:block}
+.dd.off:hover .dd-seta::after{display:none}
 .dd:hover .b,.dd:hover .dd-seta,.dd.open .b,.dd.open .dd-seta{background:var(--agua-claro);border-color:var(--agua)}
 .dd:hover .b,.dd.open .b{border-right-color:transparent}
 .dd.off{opacity:.45}
@@ -172,8 +182,9 @@ aside h3{font-size:15px;margin:16px 0 8px;padding-top:12px;border-top:2px solid 
   .barra,aside,.dir,#aviso-t{display:none!important}
   html,body{height:auto;background:#fff}
   .area{display:block}
-  #palco{padding:0;background:none;overflow:visible;display:block}
-  #caixa{width:1122px!important;height:793px!important}
+  #palco{padding:0;background:none;overflow:visible;display:block;position:static}
+  #caixa{position:relative!important;left:auto!important;top:auto!important;width:1122px!important;height:793px!important}
+  #zoom-chip{display:none!important}
   #pagina{transform:none!important;box-shadow:none}
   .it.sel,.it.multi{outline:0}.it .al,.smart-guide,.smart-guide-point{display:none!important}
   #menu-org{display:none!important}
@@ -434,17 +445,29 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
 #lays-ov .mini.ok svg{stroke:var(--papel)}
 #lays-ov .mini.sim{background:#c0392b;border-color:#c0392b;color:#fff}
 #lays-ov .mini.sim svg{stroke:#fff}
-@media print{#lays-ov,#sair-overlay{display:none!important}}
+@media print{#lays-ov,#sair-overlay,#nome-overlay{display:none!important}}
 /* ---------- Diálogo "Sair do layout?" ---------- */
 #sair-overlay{display:none;position:fixed;inset:0;z-index:9450;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
 #sair-overlay.show{display:flex}
 #sair-dialog{display:flex;flex-direction:column;width:420px;max-width:100%;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);overflow:hidden}
+#nome-dialog{display:flex;flex-direction:column;width:420px;max-width:100%;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);overflow:hidden}
 #sair-dialog .sd-titulo{padding:12px 16px;font-weight:700;font-size:18px;border-bottom:2px solid var(--linha)}
+#nome-dialog .sd-titulo{padding:12px 16px;font-weight:700;font-size:18px;border-bottom:2px solid var(--linha)}
 #sair-dialog .sd-msg{margin:0;padding:14px 16px;font-size:15px;color:var(--tinta-2)}
+#nome-dialog .sd-msg{margin:0;padding:14px 16px;font-size:15px;color:var(--tinta-2)}
 #sair-dialog .sd-rodape{display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:2px solid var(--linha)}
+#nome-dialog .sd-rodape{display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:2px solid var(--linha)}
 #sair-dialog .sd-btn{padding:8px 16px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--linha);background:var(--card);color:var(--tinta)}
+#nome-dialog .sd-btn{padding:8px 16px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--linha);background:var(--card);color:var(--tinta)}
 #sair-dialog .sd-btn:hover{border-color:var(--agua)}
+#nome-dialog .sd-btn:hover{border-color:var(--agua)}
 #sair-dialog .sd-btn.perigo{background:#c0392b;border-color:#c0392b;color:#fff}
+#nome-dialog .sd-btn.perigo{background:#c0392b;border-color:#c0392b;color:#fff}
+#nome-overlay{display:none;position:fixed;inset:0;z-index:9450;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
+#nome-overlay.show{display:flex}
+#nome-dialog .nd-campo{padding:0 16px 14px}
+#nome-dialog .nd-campo input{width:100%;font:inherit;padding:8px 10px;border:2px solid var(--agua);border-radius:8px;background:var(--campo);color:var(--tinta)}
+#nome-dialog .sd-btn.ok{background:var(--agua);border-color:var(--agua);color:var(--papel)}
 </style>
 </head>
 <body>
@@ -477,6 +500,7 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
   <symbol id="i-layouts" viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></symbol>
   <symbol id="i-desfazer" viewBox="0 0 24 24"><path d="M9 6L4 11l5 5M4 11h10a5 5 0 010 10h-4"/></symbol>
   <symbol id="i-refazer" viewBox="0 0 24 24"><path d="M15 6l5 5-5 5M20 11H10a5 5 0 000 10h4"/></symbol>
+  <symbol id="i-ajuda" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.4 9.4a2.7 2.7 0 1 1 3.8 2.5c-.8.4-1.2.9-1.2 1.8"/><path d="M12 17.2v.01"/></symbol>
   <symbol id="i-foco" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
   <symbol id="o-levantar" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="4" y="13" width="10" height="7"/><rect x="10" y="9" width="10" height="7" style="fill:var(--card)"/><path d="M7 9V3M4.6 5.4L7 3l2.4 2.4"/></g></symbol>
   <symbol id="o-baixar" viewBox="0 0 24 24"><g stroke-width="1.6"><rect x="10" y="13" width="10" height="7"/><rect x="4" y="9" width="10" height="7" style="fill:var(--card)"/><path d="M17 3v6M14.6 6.6L17 9l2.4-2.4"/></g></symbol>
@@ -530,12 +554,13 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
     <div class="dd" id="dd-tamanho"><button class="b" id="b-tamanho" type="button" title="Deixar os itens escolhidos com o mesmo tamanho (segure Shift e clique para escolher vários)"><svg><use href="#o-re-estreito"/></svg>Redimensionar</button><button class="dd-seta" type="button" data-menu="tamanho" aria-haspopup="menu" aria-label="Mais opções de Redimensionar"></button></div>
   </div>
   <div class="grupo grupo-tema">
+    <button class="b" id="b-tutorial" type="button" title="Abrir o tutorial: explica cada ferramenta com balões"><svg><use href="#i-ajuda"/></svg>Tutorial</button>
     <label class="tema-lab">Tema<select class="tema-sel" aria-label="Tema de cores"><option value="claro">Claro</option><option value="escuro">Escuro</option><option value="oceano">Oceano</option><option value="ameixa">Ameixa</option><option value="brasa">Brasa</option></select></label>
   </div>
 </div>
 
 <div class="area">
-  <main id="palco"><div id="caixa"><div id="pagina"></div></div></main>
+  <main id="palco"><div id="caixa"><div id="pagina"></div></div><button id="zoom-chip" type="button" title="Zoom da folha. Clique para ajustar a folha na tela">100%</button></main>
   <div class="dir">
     <div class="abas" role="tablist"><button type="button" role="tab" data-aba="prop" class="on" aria-selected="true">Propriedades</button><button type="button" role="tab" data-aba="cam" aria-selected="false">Camadas</button></div>
     <aside class="prop" id="prop"></aside>
@@ -588,6 +613,14 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
     <div class="sd-rodape"><button type="button" class="sd-btn" id="sd-cancela">Cancelar</button><button type="button" class="sd-btn perigo" id="sd-sai">Sair mesmo assim</button></div>
   </div>
 </div>
+<div id="nome-overlay">
+  <div id="nome-dialog" role="dialog" aria-modal="true" aria-labelledby="nd-titulo">
+    <div class="sd-titulo" id="nd-titulo">Nome do novo layout</div>
+    <p class="sd-msg">Escolha o nome do layout e confirme. Depois de criado, use o botão Salvar para guardá-lo na lista.</p>
+    <div class="nd-campo"><input type="text" id="nd-nome" maxlength="60" aria-label="Nome do layout" autocomplete="off"></div>
+    <div class="sd-rodape"><button type="button" class="sd-btn" id="nd-cancela">Cancelar</button><button type="button" class="sd-btn ok" id="nd-ok">Criar layout</button></div>
+  </div>
+</div>
 <div id="export-overlay">
   <div id="export-dialog" role="dialog" aria-modal="true" aria-labelledby="ex-titulo">
     <div class="ex-header">
@@ -631,7 +664,7 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
       </div>
       <div class="cp-hex-row">
         <span>#</span>
-        <input type="text" id="cp-hex-input" maxlength="6" autocomplete="off" spellcheck="false">
+        <input type="text" id="cp-hex-input" maxlength="64" autocomplete="off" spellcheck="false">
         <span class="cp-prev"><i id="cp-prev-old"></i>Atual</span>
         <span class="cp-prev"><i id="cp-prev-new"></i>Nova</span>
       </div>
@@ -1950,7 +1983,7 @@ function gravar(){
     if(!gravaLays(l)){if(novoReg){try{localStorage.removeItem(CH)}catch(x){}}return false}
     if(novoReg){
       rascunho=false;
-      try{var q=new URLSearchParams(location.search);q.delete("novo");history.replaceState(null,"","?"+q.toString())}catch(x){}
+      try{var q=new URLSearchParams(location.search);q.delete("novo");q.delete("nome");history.replaceState(null,"","?"+q.toString())}catch(x){}
     }
     baseLay=null;
     return true;
@@ -1977,7 +2010,7 @@ function carregar(){
   try{d=JSON.parse(localStorage.getItem(CH)||"null")}catch(x){}
   if(d){prox=d.prox||1;itens=d.itens||[];itens.forEach(function(i){if(i.t==="mapa"&&i.c&&!i.center){i.center=i.c;i.zoom=i.z;delete i.c;delete i.z}})}
   nomeLay=(e&&e.nome)||(d&&d.nome)||nomeLay;
-  if(rascunho&&!e)nomeLay=padraoNome(lerLays());
+  if(rascunho&&!e)nomeLay=(qs.get("nome")||"").trim()||padraoNome(lerLays());
   document.title=nomeLay+" — Layout";
 }
 
@@ -2102,7 +2135,7 @@ function pegar(e,it,modo,dir){
   function up(){el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up);el.removeEventListener("pointercancel",up);limpaGuias();agendar()}
   el.addEventListener("pointermove",mv);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up);
 }
-$("pagina").addEventListener("pointerdown",function(e){if(e.target===this){sel=null;marcar();props()}});
+/* tocar no fundo da folha para desmarcar: tratado junto com o movimento da folha (ver "zoom e movimento da folha") */
 
 /* ---------- mapa (mesmas opções e mesmo comportamento do layout.html) ---------- */
 function atualizaCampoEscala(it){
@@ -2226,8 +2259,10 @@ function lgClasses(l){
   }
   return r.length?r:null;
 }
+/* nome da camada na legenda: o rótulo editado em "Item da legenda" ou, sem ele, o nome da camada */
+function lgRotuloCamada(it,x){var ov=(it.lgOv||{})[x.id]||{};return ov.label!==undefined&&ov.label!==""?ov.label:x.name}
 function lgHtmlCamada(it,x){
-  var ov=(it.lgOv||{})[x.id]||{},lb=ov.label!==undefined&&ov.label!==""?ov.label:x.name,tam=ov.tam>0?ov.tam:(it.lgTam||15),
+  var ov=(it.lgOv||{})[x.id]||{},lb=lgRotuloCamada(it,x),tam=ov.tam>0?ov.tam:(it.lgTam||15),
       w=ov.w>0?ov.w*3.78:16,h=ov.h>0?ov.h*3.78:16,cl=lgClasses(x),sy=lgSym(x,ov);
   if(!cl)return'<div style="white-space:pre-line;font-size:'+tam+'px"><i style="width:'+w+'px;height:'+h+'px;background:'+lgFill(sy)+';border:'+lgBord(sy)+'"></i>'+esc(lb)+'</div>';
   return'<div class="lgg" style="font-size:'+tam+'px"><div style="white-space:pre-line;font-weight:400">'+esc(lb)+'</div>'+cl.map(function(c){
@@ -2348,7 +2383,6 @@ function painelNorte(it){
   carregarArrows();
   var h='<div class="pl"><label>Estilo da seta</label><div class="nst">'+ids.map(function(i){var c2=it.cor2||(NORTES[i]?"#ffffff":cor);return'<button type="button" data-nst="'+i+'" class="'+(i===est?"on":"")+'" aria-label="Seta '+i+'"'+(arrowCache[i]?' title="'+arrowCache[i].nome+'"':'')+'>'+norteSvg(i,cor,c2)+'</button>'}).join("")+'</div>';
   if(arrowFim&&!arrowsDisponiveis().length)h+='<p class="vazio" style="margin-top:8px;font-size:13px">Não consegui carregar as setas da pasta <b>arrows/</b>. Abra o site por um endereço http(s); direto do arquivo o navegador bloqueia a leitura.</p>';
-  h+='<label class="imp">'+ic("mais")+'Importar SVG do QGIS<input type="file" id="n-imp" accept=".svg,image/svg+xml" multiple></label>';
   if(lib.length)h+=' <button type="button" class="mini perigo" data-nrm="1" style="margin-top:8px">Apagar importadas</button>';
   h+='</div><div class="lin"><label for="p-cor">Cor</label><input type="color" id="p-cor" value="'+cor+'"></div><div class="lin"><label for="p-cor2">Cor secundária / contorno</label><input type="color" id="p-cor2" value="'+(it.cor2||(NORTES[est]?"#ffffff":cor))+'"></div>';
   return h;
@@ -2359,15 +2393,6 @@ $("prop").addEventListener("click",function(e){
   if(b.dataset.nst){it.estiloN=b.dataset.nst;desenhaConteudo(it);props();agendar()}
   else if(b.dataset.nrm){salvaLibN([]);if(!NORTES[it.estiloN||"n0"])it.estiloN="n0";desenhaConteudo(it);props();agendar()}
 });
-$("prop").addEventListener("change",function(e){
-  if(e.target.id!=="n-imp")return;var it=getIt(sel);if(!it||it.t!=="norte")return;
-  var fs=[].slice.call(e.target.files),lib=libN(),n=0,ult=null;
-  Promise.all(fs.map(function(f){return new Promise(function(ok){var r=new FileReader();r.onload=function(){var t=String(r.result);
-    if(/<svg/i.test(t)){t=t.replace(/<script[\s\S]*?<\/script>/gi,"");var id="u"+Date.now()+"_"+(n++);lib.push({id:id,nome:f.name,svg:t});ult=id}ok()};r.onerror=ok;r.readAsText(f)})})).then(function(){
-    if(!ult){aviso("Não encontrei SVG válido nos arquivos.");return}
-    salvaLibN(lib);it.estiloN=ult;desenhaConteudo(it);props();agendar();aviso("Seta importada.")});
-});
-
 var FONTES=["Atkinson Hyperlegible","Arial","Verdana","Tahoma","Trebuchet MS","Times New Roman","Georgia","Courier New","Comic Sans MS","Impact"];
 function fmtTxt(it){
   if(!it.fmt){var f=defaultTextFormat();f.family="Atkinson Hyperlegible";f.size=Math.round((it.tam||20)*75)/100;f.color=it.cor||"#000000";f.bold=it.neg===undefined?it.t==="titulo":it.neg;f.align=it.alin||(it.t==="titulo"?"center":"left");f.lineHeight=115;it.fmt=f}
@@ -2454,7 +2479,7 @@ function props(){
   if(it.t==="titulo"||it.t==="texto")h+=painelTexto(it);
   if(it.t==="legenda"){
     var oc=it.lgOcultas||[],vis=lgOrdenadas(it,snap.camadas.filter(function(x){return x.visible}));
-    h+='<div class="pl"><label for="p-tit">Título da legenda</label><input type="text" id="p-tit" value="'+esc(it.tit||"")+'"></div><div class="par"><div class="pl"><label for="p-lgtit">Fonte do título (px)</label><input type="number" id="p-lgtit" min="6" max="120" step="1" value="'+(it.lgTitTam||it.lgTam||15)+'"></div><div class="pl"><label for="p-lgtam">Fonte das camadas (px)</label><input type="number" id="p-lgtam" min="6" max="120" step="1" value="'+(it.lgTam||15)+'"></div></div><div class="pl"><label>Camadas na legenda</label>'+(vis.length?'<div id="lg-lista">'+vis.map(function(x,i){return'<div class="lin lgrow" draggable="true" data-lgrow="'+x.id+'"><span class="lg-alca" title="Arraste para mudar a ordem" aria-hidden="true">⠿</span><label class="ck" title="'+esc(x.name)+'"><input type="checkbox" data-lg="'+x.id+'"'+(oc.indexOf(x.id)<0?" checked":"")+'><span class="lg-nome">'+esc(x.name)+'</span></label><button type="button" class="mini" data-lged="'+x.id+'">Editar</button></div>'}).join("")+'</div>':'<p class="vazio">Nenhuma camada visível ainda.</p>')+'</div>';
+    h+='<div class="pl"><label for="p-tit">Título da legenda</label><input type="text" id="p-tit" value="'+esc(it.tit||"")+'"></div><div class="par"><div class="pl"><label for="p-lgtit">Fonte do título (px)</label><input type="number" id="p-lgtit" min="6" max="120" step="1" value="'+(it.lgTitTam||it.lgTam||15)+'"></div><div class="pl"><label for="p-lgtam">Fonte das camadas (px)</label><input type="number" id="p-lgtam" min="6" max="120" step="1" value="'+(it.lgTam||15)+'"></div></div><div class="pl"><label>Camadas na legenda</label>'+(vis.length?'<div id="lg-lista">'+vis.map(function(x,i){return'<div class="lin lgrow" draggable="true" data-lgrow="'+x.id+'"><span class="lg-alca" title="Arraste para mudar a ordem" aria-hidden="true">⠿</span><label class="ck" title="'+esc(lgRotuloCamada(it,x).replace(/\s*\n\s*/g," "))+'"><input type="checkbox" data-lg="'+x.id+'"'+(oc.indexOf(x.id)<0?" checked":"")+'><span class="lg-nome">'+esc(lgRotuloCamada(it,x).replace(/\s*\n\s*/g," "))+'</span></label><button type="button" class="mini" data-lged="'+x.id+'">Editar</button></div>'}).join("")+'</div>':'<p class="vazio">Nenhuma camada visível ainda.</p>')+'</div>';
   }
   if(it.t==="norte")h+=painelNorte(it);
   if(it.t==="escala")h+=painelEscala(it);
@@ -2467,6 +2492,7 @@ function props(){
   if(it.t==="mapa")h+=painelMexer(it)+painelCamadas(it)+'<h3>Escala</h3><div class="pl"><label for="p-esc">Escala do mapa</label><span class="esc-wrap"><input type="text" id="p-esc" value="'+scaleTextForZoom(it.zoom)+'" autocomplete="off"><span class="esc-setas"><button type="button" class="esc-seta" data-esc="1" tabindex="-1" aria-label="Aumentar a escala (afastar)">▲</button><button type="button" class="esc-seta" data-esc="-1" tabindex="-1" aria-label="Diminuir a escala (aproximar)">▼</button></span></span></div>';
   if(it.t==="mapa")h+=painelMapa(it);
   h+='<h3>Aparência</h3>';if(it.t!=="forma")h+='<div class="lin"><label><input type="checkbox" id="p-fun"'+(ver(it,"fundo")?" checked":"")+'> Fundo</label><input type="color" id="p-func" aria-label="Cor do fundo" value="'+(it.fundoCor||"#ffffff")+'"></div><div class="lin"><label><input type="checkbox" id="p-bor"'+(ver(it,"moldura")?" checked":"")+'> Borda</label><input type="color" id="p-borc" aria-label="Cor da borda" value="'+(it.molduraCor||"#000000")+'"></div>';
+  if(it.t==="legenda"){var rr=it.molduraRaio===undefined?1.6:it.molduraRaio;h+='<div class="pl"><label for="p-raio">Arredondamento de canto: '+rr+' mm</label><input type="range" id="p-raio" min="0" max="15" step="0.5" value="'+rr+'"></div>'}
   h+='<div class="pl"><label for="p-giro">Girar: '+(it.giro||0)+'°</label><input type="range" id="p-giro" min="-180" max="180" step="5" value="'+(it.giro||0)+'"></div>';
   if(it.t==="mapa")h+=painelMapaComum(it);
   h+='<hr class="sep">';
@@ -2479,6 +2505,7 @@ $("prop").addEventListener("input",function(e){
   if(i==="p-txt")it.txt=v;else if(i==="p-tam")it.tam=+v;else if(i==="p-cor")it.cor=v;else if(i==="p-tit")it.tit=v;else if(i==="p-lgtam")it.lgTam=+v;else if(i==="p-lgtit")it.lgTitTam=+v;
   else if(i==="p-func"){it.fundoCor=v;it.fundo=true;$("p-fun").checked=true;estilo(it);agendar();return}
   else if(i==="p-borc"){it.molduraCor=v;it.moldura=true;$("p-bor").checked=true;estilo(it);agendar();return}
+  else if(i==="p-raio"){it.molduraRaio=+v;estilo(it);e.target.previousElementSibling.textContent="Arredondamento de canto: "+it.molduraRaio+" mm";agendar();return}
   else if(i==="p-giro"){it.giro=+v;estilo(it);e.target.previousElementSibling.textContent="Girar: "+it.giro+"°";agendar();return}
   else return;
   desenhaConteudo(it);agendar();
@@ -4765,11 +4792,97 @@ $("export-overlay").addEventListener("pointerdown",function(e){if(e.target===thi
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&$("export-overlay").classList.contains("show"))fecharExport()});
 
 /* ---------- ajuste de tamanho da folha ---------- */
+/* ---------- zoom e movimento da folha ---------- */
+/* Roda do mouse (ou pinça no celular) aproxima e afasta; arrastar o fundo (ou segurar Espaço e arrastar) move a folha.
+   Limite: o centro da área de trabalho fica sempre dentro da folha, ou seja, a folha nunca vai mais do que
+   metade dela para fora em nenhum lado, nem no movimento nem no zoom. */
+var vz={tx:0,ty:0,fit:1,auto:true},KMAX=4,KMIN_REL=0.25;
+function dimPalco(){var p=$("palco");return{w:p.clientWidth,h:p.clientHeight}}
+function aplicarVista(){
+  var d=dimPalco();
+  vz.tx=Math.max(d.w/2-W*k,Math.min(d.w/2,vz.tx));
+  vz.ty=Math.max(d.h/2-H*k,Math.min(d.h/2,vz.ty));
+  $("pagina").style.transform="translate("+vz.tx+"px,"+vz.ty+"px) scale("+k+")";
+  var c=$("zoom-chip");if(c)c.textContent=Math.round(k*100)+"%";
+}
 function ajustar(){
-  var av=$("palco").clientWidth-32;k=Math.min(1,av/W);
-  $("pagina").style.transform="scale("+k+")";$("caixa").style.width=W*k+"px";$("caixa").style.height=H*k+"px";
+  var d=dimPalco();if(!d.w||!d.h)return;
+  var f=Math.max(0.05,Math.min(1,(d.w-32)/W,(d.h-32)/H));
+  vz.fit=f;
+  if(vz.auto){k=f;vz.tx=(d.w-W*k)/2;vz.ty=(d.h-H*k)/2}
+  else k=Math.max(f*KMIN_REL,Math.min(KMAX,k));
+  aplicarVista();
+}
+function zoomEm(fator,cx,cy){
+  var k2=Math.max(vz.fit*KMIN_REL,Math.min(KMAX,k*fator));
+  if(k2===k)return;
+  vz.tx=cx-(cx-vz.tx)*(k2/k);vz.ty=cy-(cy-vz.ty)*(k2/k);
+  k=k2;vz.auto=false;aplicarVista();
 }
 window.addEventListener("resize",ajustar);
+if(window.ResizeObserver)new ResizeObserver(ajustar).observe($("palco"));
+(function(){
+  var palco=$("palco"),ptr={},gesto=null,espaco=false;
+  function pts(){return Object.keys(ptr).map(function(i){return ptr[i]})}
+  function iniciaGesto(){
+    var a=pts();
+    if(a.length===1)gesto={t:"pan",x:a[0].x,y:a[0].y,moveu:gesto?gesto.moveu:false,alvo:gesto?gesto.alvo:null,x0:gesto?gesto.x0:a[0].x,y0:gesto?gesto.y0:a[0].y};
+    else if(a.length>1)gesto={t:"pinch",d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1,mx:(a[0].x+a[1].x)/2,my:(a[0].y+a[1].y)/2,moveu:true};
+    else gesto=null;
+    palco.classList.toggle("panning",!!gesto);
+  }
+  palco.addEventListener("pointerdown",function(e){
+    var t=e.target,vazio=(t===palco||t===$("caixa")||t===$("pagina")),meio=e.pointerType==="mouse"&&e.button===1;
+    if(!(vazio||espaco||meio)||(e.pointerType==="mouse"&&e.button!==0&&!meio))return;
+    if(espaco||meio){e.preventDefault();e.stopPropagation()}
+    ptr[e.pointerId]={x:e.clientX,y:e.clientY};
+    try{palco.setPointerCapture(e.pointerId)}catch(x){}
+    if(!gesto)gesto={alvo:t};
+    var alvo=gesto.alvo||t,x0=e.clientX,y0=e.clientY;
+    gesto={alvo:alvo,x0:x0,y0:y0,moveu:false};
+    iniciaGesto();
+  },true);
+  palco.addEventListener("pointermove",function(e){
+    if(!ptr[e.pointerId]||!gesto)return;
+    var a=ptr[e.pointerId],r=palco.getBoundingClientRect();
+    if(gesto.t==="pan"){
+      vz.tx+=e.clientX-a.x;vz.ty+=e.clientY-a.y;vz.auto=false;
+      if(Math.abs(e.clientX-gesto.x0)>4||Math.abs(e.clientY-gesto.y0)>4)gesto.moveu=true;
+      a.x=e.clientX;a.y=e.clientY;aplicarVista();
+    }else{
+      a.x=e.clientX;a.y=e.clientY;
+      var p=pts(),d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)||1,mx=(p[0].x+p[1].x)/2,my=(p[0].y+p[1].y)/2;
+      vz.tx+=mx-gesto.mx;vz.ty+=my-gesto.my;
+      zoomEm(d/gesto.d,mx-r.left,my-r.top);aplicarVista();
+      gesto.d=d;gesto.mx=mx;gesto.my=my;
+    }
+  });
+  function solta(e){
+    if(!ptr[e.pointerId])return;
+    delete ptr[e.pointerId];
+    try{palco.releasePointerCapture(e.pointerId)}catch(x){}
+    if(!pts().length){
+      /* toque simples no fundo da folha, sem arrastar: desmarca o item (como antes) */
+      if(e.type==="pointerup"&&gesto&&gesto.t==="pan"&&!gesto.moveu&&gesto.alvo===$("pagina")){sel=null;selExtra=[];marcar();props()}
+      gesto=null;palco.classList.remove("panning");
+    }else iniciaGesto();
+  }
+  palco.addEventListener("pointerup",solta);palco.addEventListener("pointercancel",solta);
+  palco.addEventListener("wheel",function(e){
+    if(e.target.closest&&e.target.closest(".it.mapa.mexer"))return; /* mexendo dentro do mapa: a roda é do mapa */
+    e.preventDefault();
+    var r=palco.getBoundingClientRect(),dy=e.deltaY*(e.deltaMode===1?33:e.deltaMode===2?400:1);
+    zoomEm(Math.exp(-dy*0.0015),e.clientX-r.left,e.clientY-r.top);
+  },{passive:false});
+  function digitando(t){var n=t&&t.tagName;return n==="INPUT"||n==="TEXTAREA"||n==="SELECT"||n==="BUTTON"||(t&&t.isContentEditable)}
+  document.addEventListener("keydown",function(e){
+    if(e.code==="Space"&&!digitando(e.target)){espaco=true;palco.classList.add("espaco");e.preventDefault()}
+  });
+  document.addEventListener("keyup",function(e){if(e.code==="Space"){espaco=false;palco.classList.remove("espaco")}});
+  window.addEventListener("blur",function(){espaco=false;palco.classList.remove("espaco")});
+  var chip=$("zoom-chip");
+  if(chip)chip.onclick=function(){vz.auto=true;ajustar()};
+})();
 
 let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
   let cpValRow, cpValFill, cpValHandle, cpSatRow, cpSatFill, cpSatHandle, cpPrevOld, cpPrevNew;
@@ -4862,17 +4975,17 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
     cpUpdateAlphaBar();
   }
   // A cor escolhida fica só no modal (rascunho); só vai para o campo quando clicar em Aplicar.
-  function cpShowDraft(hex) {
+  function cpShowDraft(hex, keep) {
     cpDraft = hex;
-    cpHex.value = hex.replace('#', '').toUpperCase();
+    if (!keep) cpHex.value = hex.replace('#', '').toUpperCase();
     cpPaintSwatch(cpPrevNew, hex, cpAlpha);
   }
-  function cpSetColorFromHex(hex) {
+  function cpSetColorFromHex(hex, keep) {
     const hsv = cpHexToHsv(hex);
     cpHue = hsv.h; cpSat = hsv.s; cpVal = hsv.v;
     cpDrawColorWheel();
     cpRefreshBars();
-    cpShowDraft(hex);
+    cpShowDraft(hex, keep);
   }
   function cpSetColorFromHsv() {
     cpRefreshBars();
@@ -5033,38 +5146,69 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
       cpShowDraft(cpDraft);
     });
 
-    cpHex.addEventListener('change', () => {
-      const v = cpHex.value.replace('#', '').trim();
-      if (/^[0-9a-fA-F]{6}$/.test(v)) cpSetColorFromHex('#' + v.toLowerCase());
+
+  // Aceita qualquer cor CSS (nome, hsl(), rgb() moderno...) usando o próprio navegador para interpretar
+  function corCssParaHex(t){
+    var c=document.createElement('canvas').getContext('2d');
+    c.fillStyle='#010203';c.fillStyle=t;var a=c.fillStyle;
+    if(a==='#010203'){c.fillStyle='#030201';c.fillStyle=t;if(c.fillStyle==='#030201')return null;a=c.fillStyle}
+    return a;
+  }
+  // Texto -> {hex:'#rrggbb', a:opacidade 0-1 ou null}. Aceita #RGB, #RGBA, #RRGGBB, #RRGGBBAA (com ou sem #),
+  // rgb()/rgba()/hsl()/hsla(), nomes de cor (red) e um código dentro de um texto maior ("cor: #1a2b3c;").
+  function lerCor(texto){
+    if(texto==null)return null;
+    var t=String(texto).trim().replace(/^["'\s]+|["'\s;,]+$/g,''),m,s,a=null;
+    if(!t)return null;
+    m=t.match(/^#?([0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{4}|[0-9a-f]{3})$/i)||t.match(/#([0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{4}|[0-9a-f]{3})(?![0-9a-f])/i);
+    if(m){
+      s=m[1];if(s.length<=4)s=s.replace(/./g,function(x){return x+x});
+      if(s.length===8)a=parseInt(s.slice(6),16)/255;
+      return{hex:'#'+s.slice(0,6).toLowerCase(),a:a};
+    }
+    var css=corCssParaHex(t);
+    if(!css)return null;
+    if(css.charAt(0)==='#')return{hex:css.toLowerCase(),a:null};
+    m=css.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/i);
+    if(!m)return null;
+    function f(n){return Math.max(0,Math.min(255,parseInt(n,10))).toString(16).padStart(2,'0')}
+    return{hex:'#'+f(m[1])+f(m[2])+f(m[3]),a:m[4]!=null?Math.max(0,Math.min(1,parseFloat(m[4]))):null};
+  }
+
+    // Aplica uma cor lida de texto: cor no seletor e, se o campo tiver opacidade e o texto trouxer uma, a opacidade também.
+    function aplicarCorLida(c, keep) {
+      if (c.a != null && cpAlphaOn) cpAlpha = Math.round(c.a * 100) / 100;
+      cpSetColorFromHex(c.hex, keep);
+    }
+    function confirmarHexDigitado() {
+      const c = lerCor(cpHex.value);
+      if (c) aplicarCorLida(c);
       else cpHex.value = cpDraft.replace('#', '').toUpperCase();
+    }
+    // Colar no campo: aceita qualquer formato (#FF0000, FF0000, #f00, rgb(...), hsl(...), nome...)
+    cpHex.addEventListener('paste', (e) => {
+      const txt = (e.clipboardData || window.clipboardData).getData('text'), c = lerCor(txt);
+      e.preventDefault();
+      if (c) { aplicarCorLida(c); aviso('Cor colada.'); }
+      else aviso('Código de cor inválido.');
     });
+    // Digitando: atualiza na hora quando já houver 6 dígitos; 3 dígitos ou outros formatos valem ao sair do campo ou com Enter.
+    cpHex.addEventListener('input', () => {
+      const v = cpHex.value.replace('#', '').trim();
+      if (/^[0-9a-fA-F]{6}$/.test(v)) cpSetColorFromHex('#' + v.toLowerCase(), true);
+    });
+    cpHex.addEventListener('change', confirmarHexDigitado);
+    cpHex.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); confirmarHexDigitado(); } });
 
     document.getElementById('cp-menu-copy').addEventListener('click', () => {
       navigator.clipboard && navigator.clipboard.writeText(cpDraft).catch(() => {});
       aviso('Cor copiada.');
     });
-    function cpParseColorFromText(text) {
-      if (!text) return null;
-      const t = text.trim();
-      let m = t.match(/^#?([0-9a-fA-F]{6})$/);
-      if (m) return '#' + m[1].toLowerCase();
-      m = t.match(/^#?([0-9a-fA-F]{3})$/);
-      if (m) {
-        const s = m[1];
-        return '#' + s[0]+s[0]+s[1]+s[1]+s[2]+s[2];
-      }
-      m = t.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
-      if (m) {
-        const toHex = (n) => Math.max(0, Math.min(255, parseInt(n, 10))).toString(16).padStart(2, '0');
-        return '#' + toHex(m[1]) + toHex(m[2]) + toHex(m[3]);
-      }
-      return null;
-    }
     document.getElementById('cp-menu-paste').addEventListener('click', async () => {
       try {
         const text = navigator.clipboard ? await navigator.clipboard.readText() : '';
-        const hex = cpParseColorFromText(text);
-        if (hex) { cpSetColorFromHex(hex); aviso('Cor colada.'); }
+        const c = lerCor(text);
+        if (c) { aplicarCorLida(c); aviso('Cor colada.'); }
         else aviso('Nada de válido na área de transferência.');
       } catch (err) {
         aviso('Não foi possível ler a área de transferência.');
@@ -5230,7 +5374,7 @@ function nomeMapa(){
   try{var m=JSON.parse(localStorage.getItem("mapinha:projetos-index")||"[]").filter(function(x){return x.id===mapaId})[0];return(m&&m.t)||""}catch(e){return""}
 }
 function fmtData(t){try{return new Date(t).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})}catch(e){return""}}
-function irPara(id,novo){var q=new URLSearchParams();if(mapaId)q.set("mapa",mapaId);if(id)q.set("layout",id);if(id&&novo)q.set("novo","1");location.search="?"+q.toString()}
+function irPara(id,novo,nome){var q=new URLSearchParams();if(mapaId)q.set("mapa",mapaId);if(id)q.set("layout",id);if(id&&novo){q.set("novo","1");if(nome)q.set("nome",nome)}location.search="?"+q.toString()}
 function padraoNome(l){var n=l.length+1,ok;do{var t="Layout "+n++;ok=!l.some(function(x){return x.nome===t})}while(!ok);return t}
 function ico(id){return'<svg aria-hidden="true"><use href="#'+id+'"/></svg>'}
 function mini(cls,icon,txt,a,id){return'<button type="button" class="mini '+cls+'" data-a="'+a+'"'+(id?' data-id="'+id+'"':'')+'>'+(icon?ico(icon):'')+txt+'</button>'}
@@ -5260,9 +5404,26 @@ function mostrarHall(){
   desenhaLays();ovL.scrollTop=0;
 }
 function erroEspaco(){aviso("Não deu para salvar (espaço do navegador cheio?).",4000)}
-function criar(){
-  irPara(novoLid(),true); // nada é guardado agora: o layout só entra na lista ao salvar com pelo menos 1 item
+function criar(){ // abre o modal de nome; o layout só é criado quando o usuário confirma
+  var inp=$("nd-nome");
+  inp.value=padraoNome(lerLays());
+  $("nome-overlay").classList.add("show");
+  inp.focus();inp.select();
 }
+function fechaNome(){$("nome-overlay").classList.remove("show")}
+function confirmaNome(){
+  var nome=$("nd-nome").value.trim()||padraoNome(lerLays());
+  fechaNome();
+  irPara(novoLid(),true,nome); // nada é guardado agora: o layout só entra na lista ao salvar com pelo menos 1 item
+}
+$("nd-ok").onclick=confirmaNome;
+$("nd-cancela").onclick=fechaNome;
+$("nome-overlay").addEventListener("pointerdown",function(e){if(e.target===this)fechaNome()});
+document.addEventListener("keydown",function(e){
+  if(!$("nome-overlay").classList.contains("show"))return;
+  if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fechaNome()}
+  else if(e.key==="Enter"&&e.target.id!=="nd-cancela"){e.preventDefault();confirmaNome()}
+},true);
 function abrirLay(id){irPara(id)}
 function renomearLay(id,nome){
   var l=lerLays(),e=l.filter(function(x){return x.id===id})[0];
@@ -5393,6 +5554,38 @@ function refazerLay(){
   botoesHist();
 })();
 
+
+/* ---------- Tutorial guiado do layout (balões + tela escurecida) ---------- */
+var PASSOS_TUTORIAL_LAYOUT=[
+  {t:"Bem-vindo ao Layout!",x:"Aqui você monta o mapa para <b>imprimir ou exportar</b>: coloca o mapa, a legenda, a escala, a seta do Norte, textos e imagens numa folha A4. Use <b>Próximo</b> (ou a seta → do teclado). Para sair, clique em <b>Pular tutorial</b> ou aperte Esc."},
+  {sel:"#pagina",t:"A folha",x:"Esta é a folha A4 que será exportada. Cada item colocado nela pode ser <b>arrastado</b> para mudar de lugar e <b>redimensionado</b> puxando a bolinha laranja. Clique num item para ver as opções dele em <b>Propriedades</b>. Use a <b>roda do mouse</b> (ou a pinça no celular) para <b>aproximar e afastar</b> a folha e <b>arraste o fundo</b> (ou segure <b>Espaço</b> e arraste) para <b>movê-la</b>."},
+  {sel:"#b-lays",t:"Layouts",pos:"baixo",x:"Volta à lista de layouts deste mapa, onde você cria, abre, renomeia, duplica ou exclui. Se houver alterações não salvas, o site avisa antes de sair."},
+  {sel:"#salvar",t:"Salvar",x:"O layout <b>só é guardado quando você clica aqui</b>: não existe salvamento automático. Ele precisa ter pelo menos um item."},
+  {sel:"#imprimir",t:"Exportar",x:"Gera o layout em <b>PNG</b> (imagem da página inteira, em alta resolução) ou em <b>PDF</b> (abre a impressão; escolha “Salvar como PDF”)."},
+  {sel:["#b-desfazer","#b-refazer"],t:"Desfazer e Refazer",x:"Voltam ou repetem as últimas ações na folha. Atalhos: <b>Ctrl+Z</b> e <b>Ctrl+Y</b>."},
+  {sel:'[data-add="mapa"]',t:"Mapa",x:"Coloca na folha o mapa que você montou. Depois, em <b>Propriedades</b>, ajuste a escala, as camadas, a grade de coordenadas e a moldura."},
+  {sel:'[data-add="legenda"]',t:"Legenda",x:"Mostra o que cada cor e cada camada quer dizer. Em Propriedades você escolhe as camadas, muda a ordem, edita os rótulos e define o <b>arredondamento de canto</b>."},
+  {sel:'[data-add="escala"]',t:"Escala",x:"Barra de escala ligada a um mapa da folha: quanto mede o mapa. Há vários estilos e unidades (metros, quilômetros, milhas…)."},
+  {sel:'[data-add="norte"]',t:"Seta do Norte",x:"Coloca uma seta de orientação. Em Propriedades você escolhe o estilo e as cores."},
+  {sel:'[data-add="texto"]',t:"Texto",x:"Escreve títulos e textos na folha. Dá para mudar fonte, tamanho, cor, alinhamento, contorno e sombra."},
+  {sel:'[data-add="fig"]',t:"Imagem",x:"Coloca uma imagem do seu computador (JPG, PNG ou WebP, até 8 MB) ou um desenho pronto, como logotipos e símbolos."},
+  {sel:"#dd-formas",t:"Formas",x:"Desenha formas simples. Clicar no botão repete a última forma escolhida; a <b>setinha ao lado</b> abre o menu para trocar entre retângulo, círculo e triângulo."},
+  {sel:"#dd-levantar",t:"Levantar",x:"Muda a ordem dos itens: levantar, baixar, trazer para a frente ou enviar para trás. A <b>setinha ao lado</b> abre as outras opções. Atalhos: <b>Ctrl+]</b> e <b>Ctrl+[</b>."},
+  {sel:"#dd-alinhar",t:"Alinhar",x:"Alinha os itens escolhidos pela esquerda, centro, direita, topo, meio ou base. Para escolher vários itens, segure <b>Shift</b> e clique neles."},
+  {sel:"#dd-distribuir",t:"Distribuir",x:"Espalha três ou mais itens escolhidos com espaços iguais entre eles, na horizontal ou na vertical."},
+  {sel:"#dd-tamanho",t:"Redimensionar",x:"Deixa os itens escolhidos com a mesma largura, a mesma altura ou o mesmo tamanho."},
+  {sel:".grupo-tema select",t:"Tema",x:"Muda as cores do site (Claro, Escuro, Oceano, Ameixa ou Brasa). Não altera o que sai na exportação."},
+  {sel:".dir .abas",t:"Propriedades e Camadas da folha",pos:"esq",x:"<b>Propriedades</b> mostra as opções do item escolhido: texto, cores, fundo, borda, giro e o que for específico dele. <b>Camadas</b> lista todos os itens da folha: o olho esconde, o cadeado trava e arrastar muda a ordem (o de cima fica na frente)."},
+  {t:"Pronto!",x:"Dicas: <b>Shift+clique</b> escolhe vários itens, <b>Ctrl+C</b> e <b>Ctrl+V</b> copiam e colam, e lembre de clicar em <b>Salvar</b>. Para rever este tutorial, use o botão <b>Tutorial</b> na barra de cima."}
+];
+window.PASSOS_TUTORIAL_LAYOUT=PASSOS_TUTORIAL_LAYOUT;
+function abrirTutorialLayout(){if(window.gisTour)window.gisTour.iniciar(PASSOS_TUTORIAL_LAYOUT)}
+function ofertaTutorialLayout(){
+  if(hall||!window.gisTour)return;
+  window.gisTour.oferecer("layout",{titulo:"Quer um tutorial do layout?",texto:"Posso mostrar, com balões e destacando cada parte da tela, o que cada ferramenta do layout faz e como montar a folha para imprimir."},abrirTutorialLayout);
+}
+$("b-tutorial").onclick=abrirTutorialLayout;
+
 if(hall){
   migrarAntigo();
   limparVazios("");
@@ -5401,9 +5594,423 @@ if(hall){
   limparVazios(lid);
   carregar();bumpGrid();ajustar();initColorPickerPopover();
   itens.forEach(montar);props();
+  setTimeout(ofertaTutorialLayout,800);
   // fechar/recarregar a aba com alterações não salvas: o navegador mostra a própria caixa de confirmação
   window.addEventListener("beforeunload",function(e){if(saindo||!temAlteracao())return;e.preventDefault();e.returnValue="";return""});
 }
+})();
+</script>
+<style id="tur-css">
+/* ================= Tutorial guiado (tela escurecida + balões) ================= */
+#tur-bloq{position:fixed;inset:0;z-index:99990;background:transparent;cursor:default}
+#tur-bloq.cheio{background:rgba(0,0,0,.7)}
+#tur-foco{position:fixed;z-index:99991;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.7);outline:3px solid var(--sol,#f5b700);outline-offset:0;pointer-events:none;transition:left .25s ease,top .25s ease,width .25s ease,height .25s ease}
+#tur-bal{position:fixed;z-index:99992;box-sizing:border-box;width:350px;max-width:calc(100vw - 16px);background:var(--card,#fff);color:var(--tinta,#222);border:2px solid var(--agua,#1b6ca8);border-radius:12px;padding:14px 16px 12px;box-shadow:0 10px 32px rgba(0,0,0,.45);font:inherit;font-size:15px;line-height:1.4;transition:left .25s ease,top .25s ease}
+#tur-bal .tur-cab{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 6px}
+#tur-bal .tur-tit{font-size:18px;font-weight:700;margin:0;color:var(--agua,#1b6ca8)}
+#tur-bal .tur-n{flex:none;font-size:13px;color:var(--tinta-2,#555)}
+#tur-bal .tur-txt{margin:0 0 12px;color:var(--tinta,#222);max-height:calc(100vh - 200px);overflow:auto}
+#tur-bal .tur-barra{height:4px;border-radius:2px;background:var(--linha,#ccc);margin:0 0 12px;overflow:hidden}
+#tur-bal .tur-barra i{display:block;height:100%;background:var(--agua,#1b6ca8);transition:width .25s ease}
+#tur-bal .tur-bts{display:flex;align-items:center;gap:8px}
+#tur-bal .tur-bts .tur-esp{flex:1}
+.tur-btn{padding:8px 14px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--linha,#ccc);background:var(--card,#fff);color:var(--tinta,#222)}
+.tur-btn:hover:not(:disabled){border-color:var(--agua,#1b6ca8)}
+.tur-btn:disabled{opacity:.4;cursor:default}
+.tur-btn{white-space:nowrap}
+.tur-btn.ok{background:var(--agua,#1b6ca8);border-color:var(--agua,#1b6ca8);color:var(--papel,#fff)}
+.tur-btn.link{border-color:transparent;background:transparent;color:var(--tinta-2,#555);font-weight:400;text-decoration:underline;padding-left:0;padding-right:4px;white-space:nowrap}
+#tur-bal .tur-seta{position:absolute;width:14px;height:14px;background:var(--card,#fff);border:2px solid var(--agua,#1b6ca8);transform:rotate(45deg);display:none}
+#tur-bal.lado-baixo .tur-seta{display:block;top:-9px;border-right:0;border-bottom:0}
+#tur-bal.lado-cima .tur-seta{display:block;bottom:-9px;border-left:0;border-top:0}
+#tur-bal.lado-dir .tur-seta{display:block;left:-9px;border-right:0;border-top:0}
+#tur-bal.lado-esq .tur-seta{display:block;right:-9px;border-left:0;border-bottom:0}
+#tur-oferta{position:fixed;inset:0;z-index:99995;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+#tur-oferta .tur-caixa{box-sizing:border-box;width:430px;max-width:100%;background:var(--card,#fff);color:var(--tinta,#222);border:2px solid var(--agua,#1b6ca8);border-radius:14px;padding:20px;box-shadow:0 10px 32px rgba(0,0,0,.45)}
+#tur-oferta h2{margin:0 0 8px;font-size:21px;color:var(--agua,#1b6ca8)}
+#tur-oferta p{margin:0 0 10px;font-size:15px;line-height:1.45}
+#tur-oferta .tur-peq{font-size:13px;color:var(--tinta-2,#555)}
+#tur-oferta .tur-bts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}
+@media (prefers-reduced-motion:reduce){#tur-foco,#tur-bal,#tur-bal .tur-barra i{transition:none}}
+@media print{#tur-bloq,#tur-foco,#tur-bal,#tur-oferta{display:none!important}}
+</style>
+<script id="tur-js">
+/* Tutorial guiado: escurece a tela, deixa em destaque só a área explicada e mostra um balão.
+   window.gisTour.iniciar(passos)  -> começa o tutorial
+   window.gisTour.oferecer(chave, opcoes, aoAceitar) -> pergunta uma única vez (guarda a resposta no navegador)
+   Passo: {sel: seletor CSS | [seletores] | função, t: título, x: texto (HTML simples), pos: "baixo|cima|dir|esq", pad: px, sempre: true, antes: função}
+   Passo sem "sel" aparece no centro da tela. Passos cujo alvo não está visível são pulados. */
+(function(){
+var CH="gisjr:tutorial:",ativo=null;
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function visivel(e){
+  if(!e||!e.getBoundingClientRect)return false;
+  var r=e.getBoundingClientRect();if(r.width<1||r.height<1)return false;
+  var cs=getComputedStyle(e);return cs.visibility!=="hidden"&&cs.display!=="none";
+}
+function alvos(p){
+  var s=typeof p.sel==="function"?p.sel():p.sel,out=[];
+  if(!s)return out;
+  (Array.isArray(s)?s:[s]).forEach(function(x){
+    if(typeof x==="string"){[].forEach.call(document.querySelectorAll(x),function(e){out.push(e)})}
+    else if(x&&x.nodeType===1)out.push(x);
+  });
+  return out.filter(visivel);
+}
+function rolar(e){try{e.scrollIntoView({block:"nearest",inline:"nearest",behavior:"instant"})}catch(x){try{e.scrollIntoView(false)}catch(y){}}}
+function retangulo(a,pad){
+  var l=1e9,t=1e9,r=-1e9,b=-1e9,vw=window.innerWidth,vh=window.innerHeight;
+  a.forEach(function(e){var q=e.getBoundingClientRect();l=Math.min(l,q.left);t=Math.min(t,q.top);r=Math.max(r,q.right);b=Math.max(b,q.bottom)});
+  l=Math.max(2,l-pad);t=Math.max(2,t-pad);r=Math.min(vw-2,r+pad);b=Math.min(vh-2,b+pad);
+  return{left:l,top:t,right:r,bottom:b,width:r-l,height:b-t};
+}
+function iniciar(passos){
+  if(ativo)return;
+  var lista=passos.filter(function(p){return !p.sel||p.sempre||alvos(p).length});
+  if(!lista.length)return;
+  var i=0,ant=document.activeElement;
+  var bloq=el("div"),foco=el("div"),bal=el("div");
+  bloq.id="tur-bloq";foco.id="tur-foco";bal.id="tur-bal";
+  bal.setAttribute("role","dialog");bal.setAttribute("aria-live","polite");bal.setAttribute("aria-labelledby","tur-tit");
+  var cab=el("div","tur-cab"),tit=el("h3","tur-tit");tit.id="tur-tit";var num=el("span","tur-n");
+  cab.appendChild(tit);cab.appendChild(num);
+  var txt=el("p","tur-txt"),barra=el("div","tur-barra"),prog=el("i");barra.appendChild(prog);
+  var bts=el("div","tur-bts"),pula=el("button","tur-btn link","Pular tutorial"),esp=el("span","tur-esp"),
+      volta=el("button","tur-btn","Anterior"),avanca=el("button","tur-btn ok","Próximo"),seta=el("span","tur-seta");
+  [pula,volta,avanca].forEach(function(b){b.type="button"});
+  bts.appendChild(pula);bts.appendChild(esp);bts.appendChild(volta);bts.appendChild(avanca);
+  [seta,cab,txt,barra,bts].forEach(function(n){bal.appendChild(n)});
+  document.body.appendChild(bloq);document.body.appendChild(foco);document.body.appendChild(bal);
+  ativo={fim:fim};
+  function fim(){
+    document.removeEventListener("keydown",tecla,true);window.removeEventListener("resize",reposiciona);window.removeEventListener("scroll",reposiciona,true);
+    [bloq,foco,bal].forEach(function(n){if(n.parentNode)n.parentNode.removeChild(n)});
+    ativo=null;if(ant&&ant.focus){try{ant.focus()}catch(x){}}
+  }
+  function posiciona(p,r){
+    var bw=bal.offsetWidth,bh=bal.offsetHeight,vw=window.innerWidth,vh=window.innerHeight,g=16,m=8;
+    bal.className="";
+    if(!r){bal.style.left=Math.max(m,(vw-bw)/2)+"px";bal.style.top=Math.max(m,(vh-bh)/2)+"px";return}
+    var cx=r.left+r.width/2,cy=r.top+r.height/2;
+    var o={
+      baixo:{x:cx-bw/2,y:r.bottom+g,ok:r.bottom+g+bh<=vh-m},
+      cima:{x:cx-bw/2,y:r.top-g-bh,ok:r.top-g-bh>=m},
+      dir:{x:r.right+g,y:cy-bh/2,ok:r.right+g+bw<=vw-m},
+      esq:{x:r.left-g-bw,y:cy-bh/2,ok:r.left-g-bw>=m}
+    },ordem=["baixo","dir","cima","esq"];
+    if(p.pos&&o[p.pos])ordem=[p.pos].concat(ordem.filter(function(k){return k!==p.pos}));
+    var lado=null;ordem.some(function(k){if(o[k].ok){lado=k;return true}});
+    var x,y;
+    if(lado){x=o[lado].x;y=o[lado].y}
+    else{ /* alvo muito grande: o balão fica sobre ele, sem seta */
+      x=cx-bw/2;y=Math.min(Math.max(r.top+20,m),vh-bh-m);
+    }
+    x=Math.max(m,Math.min(x,vw-bw-m));y=Math.max(m,Math.min(y,vh-bh-m));
+    bal.style.left=x+"px";bal.style.top=y+"px";
+    if(lado){
+      bal.className="lado-"+lado;
+      if(lado==="baixo"||lado==="cima")seta.style.left=Math.max(16,Math.min(cx-x-7,bw-30))+"px",seta.style.top="";
+      else seta.style.top=Math.max(16,Math.min(cy-y-7,bh-30))+"px",seta.style.left="";
+    }
+  }
+  function mostra(){
+    var p=lista[i],a;
+    if(p.antes){try{p.antes()}catch(e){}}
+    a=p.sel?alvos(p):[];
+    tit.textContent=p.t||"";txt.innerHTML=p.x||"";
+    num.textContent=(i+1)+" de "+lista.length;prog.style.width=((i+1)/lista.length*100)+"%";
+    volta.disabled=i===0;avanca.textContent=i===lista.length-1?"Concluir":"Próximo";
+    if(a.length){
+      rolar(a[0]);if(a.length>1)rolar(a[a.length-1]);
+      var r=retangulo(a,p.pad==null?6:p.pad);
+      bloq.className="";foco.style.display="block";
+      foco.style.left=r.left+"px";foco.style.top=r.top+"px";foco.style.width=r.width+"px";foco.style.height=r.height+"px";
+      posiciona(p,r);
+    }else{
+      bloq.className="cheio";foco.style.display="none";
+      posiciona(p,null);
+    }
+    avanca.focus({preventScroll:true});
+  }
+  function reposiciona(){if(ativo)mostra()}
+  function prox(){if(i>=lista.length-1){fim();return}i++;mostra()}
+  function ante(){if(i>0){i--;mostra()}}
+  function tecla(e){
+    if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fim()}
+    else if(e.key==="ArrowRight"||e.key==="PageDown"){e.preventDefault();e.stopPropagation();prox()}
+    else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();e.stopPropagation();ante()}
+    else if(e.key==="Tab"){ /* o foco fica só dentro do balão */
+      var f=[pula,volta,avanca].filter(function(b){return !b.disabled}),k=f.indexOf(document.activeElement);
+      e.preventDefault();e.stopPropagation();
+      f[(k+(e.shiftKey?-1:1)+f.length)%f.length].focus();
+    }
+    else if(e.key==="Enter"&&document.activeElement===bal){e.preventDefault();prox()}
+  }
+  pula.addEventListener("click",fim);volta.addEventListener("click",ante);avanca.addEventListener("click",prox);
+  document.addEventListener("keydown",tecla,true);window.addEventListener("resize",reposiciona);window.addEventListener("scroll",reposiciona,true);
+  mostra();
+}
+/* pergunta uma única vez; a resposta (qualquer uma) fica guardada neste navegador */
+function oferecer(chave,o,aceitar){
+  try{if(localStorage.getItem(CH+chave))return}catch(e){}
+  if(ativo||document.getElementById("tur-oferta"))return;
+  try{localStorage.setItem(CH+chave,"1")}catch(e){}
+  var ant=document.activeElement,ov=el("div"),cx=el("div","tur-caixa");
+  ov.id="tur-oferta";cx.setAttribute("role","dialog");cx.setAttribute("aria-modal","true");cx.setAttribute("aria-labelledby","tur-of-t");
+  var h=el("h2",null,o.titulo);h.id="tur-of-t";cx.appendChild(h);
+  var p1=el("p");p1.innerHTML=o.texto;cx.appendChild(p1);
+  cx.appendChild(el("p","tur-peq",o.nota||"Essa pergunta aparece só uma vez. Depois, você pode abrir o tutorial quando quiser pelo botão de ajuda."));
+  var bts=el("div","tur-bts"),nao=el("button","tur-btn","Agora não"),sim=el("button","tur-btn ok","Sim, mostrar o tutorial");
+  nao.type="button";sim.type="button";bts.appendChild(nao);bts.appendChild(sim);cx.appendChild(bts);ov.appendChild(cx);document.body.appendChild(ov);
+  function fecha(v){
+    document.removeEventListener("keydown",tecla,true);
+    if(ov.parentNode)ov.parentNode.removeChild(ov);
+    if(ant&&ant.focus){try{ant.focus()}catch(x){}}
+    if(v&&aceitar)aceitar();
+  }
+  function tecla(e){
+    if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fecha(false)}
+    else if(e.key==="Tab"){e.preventDefault();e.stopPropagation();(document.activeElement===sim?nao:sim).focus()}
+  }
+  nao.addEventListener("click",function(){fecha(false)});sim.addEventListener("click",function(){fecha(true)});
+  document.addEventListener("keydown",tecla,true);sim.focus();
+}
+window.gisTour={iniciar:iniciar,oferecer:oferecer,ativo:function(){return !!ativo}};
+})();
+</script>
+<style id="dica-css">
+/* Dicas das ferramentas: mouse em cima (ou toque longo no celular) mostra o que a ferramenta faz */
+#dica-tip{display:none;position:fixed;left:0;top:0;z-index:99000;box-sizing:border-box;width:max-content;max-width:min(320px,calc(100vw - 16px));pointer-events:none;background:var(--card,#fff);color:var(--tinta,#222);border:2px solid var(--agua,#1b6ca8);border-radius:10px;padding:9px 12px 10px;box-shadow:0 6px 20px rgba(0,0,0,.35);font-size:14px;line-height:1.4;text-align:left;font-weight:400;letter-spacing:0;text-transform:none;white-space:normal}
+#dica-tip .dica-t{font-size:15px;font-weight:700;color:var(--agua,#1b6ca8);margin:0 0 3px}
+#dica-tip .dica-x{display:block}
+[data-dica]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+[data-dica]:disabled{pointer-events:none}
+@media print{#dica-tip{display:none!important}}
+</style>
+<script id="dica-js">
+(function(){
+"use strict";
+/* Usa os mesmos textos do tutorial (PASSOS_TUTORIAL_*): cada passo que aponta para uma ferramenta vira uma dica dela. */
+var EXCL=["#menubar","aside.camadas","#map","#pagina",".dir .abas"];
+var passos=window.PASSOS_TUTORIAL_MAPA||window.PASSOS_TUTORIAL_LAYOUT||[];
+var tip=null,alvo=null,tEsp=null,tLongo=null,tOculta=null,ultToque=0,bloqClique=0,seguro=false,xy=null;
+
+function marcar(el,p){
+  if(el.classList.contains("dd")){
+    [].forEach.call(el.querySelectorAll(":scope > button"),function(b){marcar(b,p)});
+    return;
+  }
+  el.dataset.dica=p.x;el.dataset.dicaT=p.t;
+  el.removeAttribute("title"); /* evita o balãozinho nativo duplicado */
+}
+function preparar(){
+  passos.forEach(function(p){
+    if(!p.sel||!p.x)return;
+    (Array.isArray(p.sel)?p.sel:[p.sel]).forEach(function(s){
+      if(EXCL.indexOf(s)>=0)return;
+      try{[].forEach.call(document.querySelectorAll(s),function(el){marcar(el,p)})}catch(e){}
+    });
+  });
+}
+function achar(x,y,t){
+  var a=t&&t.closest?t.closest("[data-dica]"):null;
+  if(a)return a;
+  /* botão desativado não recebe eventos: procura pela posição, só se o alvo for o fundo logo atrás dele */
+  var ds=document.querySelectorAll("[data-dica]:disabled");
+  for(var i=0;i<ds.length;i++){
+    if(!t||!t.contains(ds[i]))continue;
+    var r=ds[i].getBoundingClientRect();
+    if(r.width&&x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)return ds[i];
+  }
+  return null;
+}
+function mostrar(el,toque){
+  if(window.gisTour&&window.gisTour.ativo&&window.gisTour.ativo())return;
+  if(!el.isConnected)return;
+  if(!tip){
+    tip=document.createElement("div");tip.id="dica-tip";tip.setAttribute("role","tooltip");
+    document.body.appendChild(tip);
+  }
+  tip.textContent="";
+  var t=document.createElement("div");t.className="dica-t";t.textContent=el.dataset.dicaT||"";
+  var x=document.createElement("span");x.className="dica-x";x.innerHTML=el.dataset.dica||"";
+  tip.appendChild(t);tip.appendChild(x);
+  tip.style.display="block";
+  var r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight,vw=window.innerWidth,vh=window.innerHeight,m=8;
+  var abaixo=r.bottom+10,acima=r.top-h-10;
+  var y=toque?(acima>=m?acima:abaixo):(abaixo+h<=vh-m?abaixo:acima);
+  y=Math.max(m,Math.min(y,vh-m-h));
+  var l=r.left+r.width/2-w/2;
+  l=Math.max(m,Math.min(l,vw-m-w));
+  tip.style.left=l+"px";tip.style.top=y+"px";
+}
+function ocultar(manter){
+  clearTimeout(tEsp);clearTimeout(tOculta);
+  if(tip)tip.style.display="none";
+  if(!manter)alvo=null;
+}
+
+/* mouse: parar em cima por um instante */
+document.addEventListener("mousemove",function(e){
+  if(Date.now()-ultToque<900)return;
+  var a=achar(e.clientX,e.clientY,e.target);
+  if(a===alvo)return;
+  ocultar();
+  if(a){alvo=a;tEsp=setTimeout(function(){mostrar(a,false)},400)}
+},true);
+document.addEventListener("mousedown",function(){ocultar(true)},true);
+document.addEventListener("mouseleave",function(){ocultar()});
+document.addEventListener("wheel",function(){ocultar(true)},{capture:true,passive:true});
+window.addEventListener("scroll",function(){ocultar(true)},true);
+window.addEventListener("blur",function(){ocultar()});
+document.addEventListener("keydown",function(){ocultar(true)},true);
+
+/* celular: clicar e segurar */
+document.addEventListener("touchstart",function(e){
+  ultToque=Date.now();seguro=false;clearTimeout(tLongo);ocultar();
+  if(e.touches.length!==1)return;
+  var t=e.touches[0],a=achar(t.clientX,t.clientY,e.target);
+  if(!a)return;
+  xy=[t.clientX,t.clientY];
+  tLongo=setTimeout(function(){seguro=true;alvo=a;mostrar(a,true)},450);
+},{capture:true,passive:true});
+document.addEventListener("touchmove",function(e){
+  var t=e.touches[0];
+  if(t&&xy&&(Math.abs(t.clientX-xy[0])>10||Math.abs(t.clientY-xy[1])>10)){clearTimeout(tLongo);if(!seguro)ocultar()}
+},{capture:true,passive:true});
+function fimToque(e){
+  clearTimeout(tLongo);ultToque=Date.now();
+  if(seguro){
+    if(e.cancelable)e.preventDefault(); /* soltar o dedo depois da dica não aciona a ferramenta */
+    bloqClique=Date.now()+800;
+    clearTimeout(tOculta);tOculta=setTimeout(function(){ocultar()},3500);
+  }
+}
+document.addEventListener("touchend",fimToque,{capture:true,passive:false});
+document.addEventListener("touchcancel",fimToque,{capture:true,passive:false});
+document.addEventListener("click",function(e){
+  if(Date.now()<bloqClique){bloqClique=0;e.preventDefault();e.stopPropagation()}
+},true);
+document.addEventListener("contextmenu",function(e){
+  if(Date.now()-ultToque<1500&&e.target.closest&&e.target.closest("[data-dica]"))e.preventDefault();
+},true);
+
+/* teclado: Tab até a ferramenta também mostra a dica */
+document.addEventListener("focusin",function(e){
+  var a=e.target.closest&&e.target.closest("[data-dica]");
+  if(a&&a.matches(":focus-visible")){alvo=a;mostrar(a,false)}
+});
+document.addEventListener("focusout",function(){ocultar()});
+
+preparar();
+})();
+</script>
+<style id="mobile-vertical">
+/* Só celular: toque + tela estreita. Desktop (mouse) nunca entra aqui. */
+@media (pointer:coarse) and (max-width:900px){
+  html,body{height:100dvh}
+  body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  /* barra: uma linha rolável em vez de grade de 6 linhas */
+  .barra{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:2px;padding:6px 8px;flex:none;scrollbar-width:thin}
+  .barra .b{flex:none;min-width:68px;height:60px;padding:4px 6px;font-size:13px}
+  .barra .dd,.barra .tema-lab{flex:none}
+  .grupo-tema{margin-left:0}
+  /* folha ocupa o que sobra; propriedades sempre visíveis embaixo */
+  .area{position:relative;grid-template-rows:minmax(0,1fr) 46px;min-height:0}
+  /* Propriedades/Camadas: gaveta inferior retrátil (recolhida mostra só as abas) */
+  .dir{position:absolute;left:0;right:0;bottom:0;z-index:1100;max-height:60dvh;border-top:2px solid var(--linha);border-radius:14px 14px 0 0;box-shadow:0 -4px 14px rgba(0,0,0,.2);transform:translateY(calc(100% - 46px));transition:transform .2s}
+  .dir.aberta{transform:none}
+  .abas{align-items:stretch}
+  .abas button{min-height:44px}
+  .abas::after{content:"\25B2";flex:none;align-self:center;padding:0 16px;font-size:14px;color:var(--agua)}
+  .dir.aberta .abas::after{content:"\25BC"}
+  aside.prop{max-height:none}
+  #zoom-chip{padding:10px 14px}
+  .it .al::after{inset:-12px}
+  /* lista de camadas da folha: alvos maiores */
+  #lista-itens li{min-height:44px}
+  #lista-itens li .c-olho,#lista-itens li .c-trava,.cam-cab .c-olho,.cam-cab .c-trava{width:44px}
+}
+@media (pointer:coarse){
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea{font-size:16px!important}
+  .mini{min-height:44px}
+  .dd-seta{width:32px}
+  #menu-org .mo-i{padding:11px 12px}
+  #menu-org .mo-a{display:none}
+}
+/* sem hover no toque: evita botão "grudado" depois de tocar */
+@media (hover:none){
+  .b:hover,.dd:hover .b,.dd:hover .dd-seta{background:transparent;border-color:transparent}
+  .dd.open .b,.dd.open .dd-seta{background:var(--agua-claro);border-color:var(--agua)}
+}
+</style>
+<script>
+/* celular: tocar nas abas abre a gaveta; tocar na aba ativa (ou na seta) fecha */
+(function(){var mq=matchMedia("(pointer:coarse) and (max-width:900px)"),d=document.querySelector(".dir"),ab=d&&d.querySelector(".abas");
+if(!ab)return;
+ab.addEventListener("click",function(e){if(!mq.matches)return;var b=e.target.closest("button"),on=b&&b.classList.contains("on");
+if(!d.classList.contains("aberta"))d.classList.add("aberta");else if(!b||on)d.classList.remove("aberta")},true)})();
+</script>
+<style id="mobile-multi">
+@media (pointer:coarse){#tab-corpo td.id,#pagina .it{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}}
+#gj-menu{position:fixed;z-index:9800;min-width:230px;max-width:92vw;max-height:70dvh;overflow:auto;background:var(--card);border:2px solid var(--linha);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.3);padding:4px}
+#gj-menu button{display:block;width:100%;min-height:48px;padding:0 16px;border:0;border-radius:6px;background:none;color:var(--tinta);font:inherit;font-size:17px;text-align:left;white-space:nowrap}
+#gj-menu button:disabled{opacity:.4}
+#gj-menu button:active:not(:disabled){background:var(--agua-claro)}
+#gj-pill{position:fixed;z-index:9800;left:50%;top:calc(8px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:5px 5px 5px 16px;background:var(--tinta);color:var(--papel);border-radius:999px;font-size:15px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+#gj-pill button{min-height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--agua);color:#fff;font:inherit;font-weight:700}
+#gj-pill button.sec{background:transparent;border:2px solid var(--papel);color:var(--papel)}
+</style>
+<script>
+/* celular: apertar e segurar abre um menu de ações; "Selecionar vários" liga o modo em que cada toque soma/tira da seleção */
+(function(){
+if(!matchMedia("(pointer:coarse)").matches)return;
+var multi=false,supr=false,tm=null,x0=0,y0=0,menu=null,pill=null,ult=0;
+function ids(){return(sel?[sel]:[]).concat(selExtra||[])}
+function its(){return ids().map(getIt).filter(Boolean)}
+function sub(m){return ORG_MENUS[m].map(function(o){return{t:o.t,off:ids().length<o.n,f:o.f}})}
+function ordem(){return{t:"Ordem (frente/trás)",sub:sub("levantar")}}
+function dup(){var it=getIt(sel);if(it){copiarItem(it);colarItem()}}
+function excl(){its().forEach(function(it){apagarItem(it)})}
+function trav(){its().forEach(function(it){it.locked=!it.locked;aplicaTrava(it)});listaItens();agendar()}
+function escond(){its().forEach(function(it){it.visible=(it.visible===false);aplicaVis(it)});atualizaEscalas();marcar();props();listaItens();agendar()}
+function abreProp(){document.querySelector(".dir").classList.add("aberta");if(typeof aba==="function")aba("prop")}
+function menuUnico(){return[{t:"Selecionar vários",f:entra},{t:"Copiar",f:function(){copiarItem(getIt(sel))}},{t:"Colar",off:!areaTransf,f:colarItem},{t:"Duplicar",f:dup},ordem(),
+  {t:"Travar",f:trav},{t:"Esconder",f:escond},{t:"Propriedades",f:abreProp},{t:"Excluir",f:excl}]}
+function ACOES(){return[{t:"Alinhar",sub:sub("alinhar")},{t:"Distribuir",sub:sub("distribuir")},{t:"Redimensionar",sub:sub("tamanho")},ordem(),
+  {t:"Travar",f:trav},{t:"Esconder",f:escond},{t:"Excluir selecionados",f:excl}]}
+function fechaMenu(){if(menu){menu.remove();menu=null}}
+function pos(x,y){var w=menu.offsetWidth,h=menu.offsetHeight;menu.style.left=Math.max(8,Math.min(innerWidth-w-8,x-w/2))+"px";
+  var t=y+16+h<innerHeight-8?y+16:y-h-16;menu.style.top=Math.max(8,t)+"px"}
+function desenha(lista,x,y,voltar){menu.innerHTML="";
+  function add(i){var b=document.createElement("button");b.type="button";b.textContent=i.t+(i.sub?"   \u203A":"");b.disabled=!!i.off;
+    b.onclick=function(){if(i.back){voltar();pos(x,y);return}
+      if(i.sub){desenha(i.sub,x,y,function(){desenha(lista,x,y,voltar)});pos(x,y);return}
+      fechaMenu();i.f(x,y)};menu.appendChild(b)}
+  if(voltar)add({t:"\u2039 Voltar",back:true});lista.forEach(add)}
+function mostraMenu(x,y,lista){fechaMenu();menu=document.createElement("div");menu.id="gj-menu";document.body.appendChild(menu);desenha(lista,x,y,null);pos(x,y)}
+function entra(){multi=true;if(pill)return;pill=document.createElement("div");pill.id="gj-pill";pill.innerHTML="<span>Selecionando vários</span>";
+  var a=document.createElement("button");a.type="button";a.textContent="Ações";a.className="sec";
+  a.onclick=function(){var r=a.getBoundingClientRect();mostraMenu(r.left+r.width/2,r.bottom,ACOES())};
+  var b=document.createElement("button");b.type="button";b.textContent="Concluir";b.onclick=sai;pill.appendChild(a);pill.appendChild(b);document.body.appendChild(pill)}
+function sai(){multi=false;fechaMenu();if(pill){pill.remove();pill=null}}
+function desarma(){clearTimeout(tm);tm=null}
+function arma(e,getLista){if(multi)return;desarma();var x=x0=e.clientX,y=y0=e.clientY;
+  tm=setTimeout(function(){tm=null;supr=true;ult=Date.now();setTimeout(function(){supr=false},1500);mostraMenu(x,y,getLista(x,y))},550)}
+document.addEventListener("pointermove",function(e){if(tm&&(Math.abs(e.clientX-x0)>8||Math.abs(e.clientY-y0)>8))desarma()},true);
+["pointerup","pointercancel"].forEach(function(ev){document.addEventListener(ev,desarma,true)});
+document.addEventListener("click",function(e){if(supr&&!e.target.closest("#gj-menu,#gj-pill")){supr=false;e.stopImmediatePropagation();e.preventDefault()}},true);
+document.addEventListener("contextmenu",function(e){if(tm||Date.now()-ult<1500)e.preventDefault()},true);
+document.addEventListener("pointerdown",function(e){
+  if(e.pointerType==="mouse")return;var t=e.target;if(!t.closest)return;
+  if(!t.closest("#gj-menu,#gj-pill")){fechaMenu();supr=false}
+  if(tm&&!e.isPrimary)desarma();
+  var el=t.closest("#pagina .it");if(!el||t.classList.contains("al")||el.classList.contains("mexer"))return;
+  if(multi){if(e.isTrusted&&!e.shiftKey){e.stopImmediatePropagation();e.preventDefault();
+    t.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true,cancelable:true,composed:true,shiftKey:true,pointerId:e.pointerId,pointerType:e.pointerType,isPrimary:e.isPrimary,clientX:e.clientX,clientY:e.clientY,button:0,buttons:1}))}return}
+  arma(e,menuUnico);
+},true);
+
 })();
 </script>
 </body>
