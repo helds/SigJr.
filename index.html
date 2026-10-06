@@ -2218,6 +2218,8 @@ function excluirMapa(id){
   function byId(i){return document.getElementById(i)}
   var mapEl=byId("map"),map=null,camadas=[],ativaId=null,proxId=1;
   var modoZoom=null,modoSel=false,medindo=null;
+  /* Duplo clique dá zoom no Leaflet. Com "Selecionar feição" ou "Identificar feição" ativas isso atrapalha (cada clique já faz uma ação), então desliga só enquanto uma delas estiver ligada. A régua cuida do próprio duplo clique. */
+  function sincronizaDblZoom(){if(!map||!map.doubleClickZoom||medindo)return;if(modoSel||modoId)map.doubleClickZoom.disable();else map.doubleClickZoom.enable()}
   var hist={pilha:[],i:-1,max:10,E:null},restaurando=false;
   var CORES=["#e6194b","#3cb44b","#4363d8","#f58231","#911eb4","#42d4f4","#f032e6","#bfef45","#469990","#9a6324"];
   var VISTA_INICIAL={c:[-9.7,-36.0],z:7};
@@ -4342,10 +4344,10 @@ const POINT_ANCHOR_TO_DIRECTION = {
   function fazerPan(){pararModos();aviso("Pan: arraste o mapa para navegar.")}
   // Identificar (o index.html marca esta ferramenta como "não implementada": criada aqui do zero)
   var modoId=false;
-  function pararId(){modoId=false;var bi=byId("b-id");if(bi){bi.classList.remove("active");bi.setAttribute("aria-pressed","false")}mapEl.classList.remove("select-feature-cursor")}
+  function pararId(){modoId=false;var bi=byId("b-id");if(bi){bi.classList.remove("active");bi.setAttribute("aria-pressed","false")}mapEl.classList.remove("select-feature-cursor");sincronizaDblZoom()}
   function iniciarId(){
     if(!camadas.length){aviso("Adicione uma camada para identificar feições.");return}
-    pararRegua();pararZoom();pararSel();modoId=true;var bi=byId("b-id");bi.classList.add("active");bi.setAttribute("aria-pressed","true");mapEl.classList.add("select-feature-cursor");
+    pararRegua();pararZoom();pararSel();modoId=true;var bi=byId("b-id");bi.classList.add("active");bi.setAttribute("aria-pressed","true");mapEl.classList.add("select-feature-cursor");sincronizaDblZoom();
     aviso("Identificar: clique numa feição do mapa.");
   }
   function identificarClique(e){
@@ -5561,7 +5563,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
   
 /* ---------- Modos das ferramentas (só uma ativa por vez) ---------- */
   function pararZoom(){modoZoom=null;byId("b-aprox").classList.remove("active");byId("b-afast").classList.remove("active");mapEl.classList.remove("zoom-in-cursor","zoom-out-cursor")}
-  function pararSel(){modoSel=false;byId("b-selec").classList.remove("active");byId("b-selec").setAttribute("aria-pressed","false");mapEl.classList.remove("select-feature-cursor")}
+  function pararSel(){modoSel=false;byId("b-selec").classList.remove("active");byId("b-selec").setAttribute("aria-pressed","false");mapEl.classList.remove("select-feature-cursor");sincronizaDblZoom()}
   function pararRegua(){pararDesenho();if(medindo){medindo.disable();medindo=null}byId("b-regua").classList.remove("active")}
   function pararModos(){pararZoom();pararSel();pararRegua();pararId()}
 
@@ -5580,7 +5582,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     pararRegua();pararZoom();pararSel();pararId();
     this.blur();
     if(era){aviso("Modo de seleção desligado. As feições já selecionadas continuam selecionadas.");return} // só o modo desliga; a seleção permanece
-    modoSel=true;this.setAttribute("aria-pressed","true");this.classList.add("active");mapEl.classList.add("select-feature-cursor");
+    modoSel=true;this.setAttribute("aria-pressed","true");this.classList.add("active");mapEl.classList.add("select-feature-cursor");sincronizaDblZoom();
   });
 
   byId("b-id").addEventListener("click",function(){
