@@ -1166,6 +1166,18 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
   // (ferramentas exclusivas do mapa principal) — mas RESPEITA os overrides já
   // salvos em labeling.perFeature (hidden/pinned/offset), para o layout mostrar
   // fielmente o resultado de qualquer ajuste fino feito lá.
+  // Os rótulos de linhas e polígonos são marcadores soltos no mapa (não filhos da camada), então
+  // remover a camada NÃO remove os rótulos. Todo caminho que tira uma camada precisa chamar isto.
+  function removerRotulosDaCamada(item, layerId, leafletLayer) {
+    if (item._labelAnchors && item._labelAnchors.has(layerId)) {
+      (item._labelAnchors.get(layerId) || []).forEach(m => { try { item.leaflet.removeLayer(m); } catch (e) {} });
+      item._labelAnchors.delete(layerId);
+    }
+    if (leafletLayer && typeof leafletLayer.eachLayer === 'function') {
+      leafletLayer.eachLayer(sub => { if (typeof sub.unbindTooltip === 'function') sub.unbindTooltip(); });
+    }
+  }
+
   function applyLabelingToItemLayer(item, layerId, leafletLayer, layerData) {
     if (!item._labelAnchors) item._labelAnchors = new Map();
     const prevAnchors = item._labelAnchors.get(layerId);
@@ -1278,7 +1290,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
   function aplicarFundoNoItem(item) {
     const map = item.leaflet;
     let f;
-    if (item.lockLayers) { if (item._fundoTrav === undefined) item._fundoTrav = mapProjectState.fundo || null; f = item._fundoTrav; }
+    if (item.lockLayers) { if (item._fundoTrav === undefined && hasReceivedSnapshot) item._fundoTrav = mapProjectState.fundo || null; f = item._fundoTrav === undefined ? (mapProjectState.fundo || null) : item._fundoTrav; }
     else { item._fundoTrav = undefined; f = mapProjectState.fundo || null; }
     const d = (f && f.visible !== false && f.d && f.d.u) ? f.d : null;
     const chave = d ? f.k : null;
@@ -1297,6 +1309,8 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
   }
   function applySnapshotToMapItem(item) {
     if (!item.leaflet) return;
+    // O congelamento salvo ainda está sendo lido do navegador: não congela com o estado de agora (e não desenha em branco).
+    if (congeladoPendente && (item.lockLayers || item.lockStyles)) return;
     const map = item.leaflet;
     aplicarFundoNoItem(item);
     if (!item._layerGroups) item._layerGroups = new Map(); // layerId -> L.Layer
@@ -1307,8 +1321,9 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
     // adicionado/removido) no mapa principal. Isso é diferente do bloqueio no
     // painel de Itens (item.locked), que só impede mover/selecionar a moldura
     // no layout e não afeta em nada a sincronização de conteúdo.
+    if (item.lockLayers && !item._lockedLayerSnapshot && hasReceivedSnapshot) item._lockedLayerSnapshot = mapProjectState.layers.slice();
     const layersToRender = item.lockLayers
-      ? (item._lockedLayerSnapshot || (item._lockedLayerSnapshot = mapProjectState.layers.slice()))
+      ? (item._lockedLayerSnapshot || mapProjectState.layers)
       : mapProjectState.layers;
     if (!item.lockLayers) item._lockedLayerSnapshot = null; // limpa ao destravar
 
@@ -1318,12 +1333,9 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
     const currentIds = new Set(layersToRender.map(l => l.id));
     item._layerGroups.forEach((leafletLayer, layerId) => {
       if (!currentIds.has(layerId)) {
+        removerRotulosDaCamada(item, layerId, leafletLayer);
         map.removeLayer(leafletLayer);
         item._layerGroups.delete(layerId);
-        if (item._labelAnchors && item._labelAnchors.has(layerId)) {
-          (item._labelAnchors.get(layerId) || []).forEach(m => { try { map.removeLayer(m); } catch (e) {} });
-          item._labelAnchors.delete(layerId);
-        }
       }
     });
 
@@ -1364,6 +1376,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       }
 
       if (!layer.visible) {
+        removerRotulosDaCamada(item, layer.id, leafletLayer);
         if (leafletLayer) { map.removeLayer(leafletLayer); item._layerGroups.delete(layer.id); }
         return;
       }
@@ -1383,7 +1396,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
           if (!georaster) return;
           // O snapshot pode ter mudado enquanto o parse rodava (assíncrono) — se a
           // camada não existir mais ou tiver ficado invisível, descarta o resultado.
-          const stillWanted = mapProjectState.layers.find(l => l.id === layer.id);
+          const stillWanted = item.lockLayers ? layer : mapProjectState.layers.find(l => l.id === layer.id);
           if (!stillWanted || !stillWanted.visible || !stillWanted.isRaster) return;
           const old = item._layerGroups.get(layer.id);
           if (old) { try { map.removeLayer(old); } catch (e) {} }
@@ -1417,10 +1430,13 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       let styleFn;
       if (item.lockStyles) {
         if (!item._lockedStyles) item._lockedStyles = new Map();
-        if (!item._lockedStyles.has(layer.id)) item._lockedStyles.set(layer.id, buildLayoutLayerStyleFn(layer));
+        if (!item._lockedStyleSrc) item._lockedStyleSrc = new Map(); // receita (só dados) de cada estilo: é ela que vai para o disco
+        if (!item._lockedStyleSrc.has(layer.id)) item._lockedStyleSrc.set(layer.id, { symbology: JSON.parse(JSON.stringify(layer.symbology || {})), color: layer.color, fillOpacityPct: layer.fillOpacityPct });
+        if (!item._lockedStyles.has(layer.id)) item._lockedStyles.set(layer.id, buildLayoutLayerStyleFn(item._lockedStyleSrc.get(layer.id)));
         styleFn = item._lockedStyles.get(layer.id);
       } else {
         item._lockedStyles = null; // limpa ao destravar, para recongelar do zero na próxima vez
+        item._lockedStyleSrc = null;
         styleFn = buildLayoutLayerStyleFn(layer);
       }
 
@@ -1968,6 +1984,73 @@ var baseLay=null,saindo=false;
 function serLay(){return JSON.stringify({n:nomeLay,i:itens.map(function(i){var o={};for(var p in i)if(p[0]!=="_")o[p]=i[p];return o})},function(k,v){return typeof v==="number"&&v%1?Math.round(v*1000)/1000:v})}
 function temAlteracao(){return !hall&&baseLay!==null&&serLay()!==baseLay}
 ["pointerdown","keydown","input","change"].forEach(function(ev){document.addEventListener(ev,function(){if(baseLay===null&&!hall)baseLay=serLay()},true)});
+/* ---------- congelamento (Travar camadas / Travar cores) ----------
+   As camadas congeladas são grandes demais para o localStorage; vão para o IndexedDB (mesmo banco do mapa), uma entrada por layout.
+   Sem isto, ao sair e voltar o layout não sabia mais o que estava congelado: os mapas travados ficavam em branco. */
+var congeladoPendente=false,filaCong=Promise.resolve(),idbL=null;
+function chaveCong(id){return"congelado:"+GRUPO+":"+id}
+function idbLay(){
+  if(idbL)return idbL;
+  idbL=new Promise(function(ok,err){
+    if(!window.indexedDB){err(new Error("IndexedDB indisponível"));return}
+    var r=indexedDB.open("mapinha",1);
+    r.onupgradeneeded=function(){if(!r.result.objectStoreNames.contains("projetos"))r.result.createObjectStore("projetos",{keyPath:"id"})};
+    r.onsuccess=function(){ok(r.result)};
+    r.onerror=function(){idbL=null;err(r.error||new Error("Falha ao abrir o IndexedDB"))};
+  });
+  return idbL;
+}
+function idbLayOp(modo,fn){
+  return idbLay().then(function(db){return new Promise(function(ok,err){
+    var tx=db.transaction("projetos",modo),rq=fn(tx.objectStore("projetos"));
+    tx.oncomplete=function(){ok(rq&&rq.result)};
+    tx.onerror=tx.onabort=function(){err(tx.error||new Error("Falha no armazenamento do navegador"))};
+  })});
+}
+function coletaCongelado(){
+  var out={itens:{}},tem=false;
+  itens.forEach(function(it){
+    if(it.t!=="mapa"||!(it.lockLayers||it.lockStyles))return;
+    var o={},ok=false;
+    if(it.lockLayers&&it._lockedLayerSnapshot){o.camadas=it._lockedLayerSnapshot;o.fundo=it._fundoTrav;ok=true}
+    if(it.lockStyles&&it._lockedStyleSrc&&it._lockedStyleSrc.size){o.estilos=Array.from(it._lockedStyleSrc.entries());ok=true}
+    if(ok){out.itens[it.id]=o;tem=true}
+  });
+  return tem?out:null;
+}
+function gravaCongelado(){
+  var dados=coletaCongelado(),k=chaveCong(lid);
+  filaCong=filaCong.then(function(){return idbLayOp("readwrite",function(st){return dados?st.put({id:k,data:dados}):st.delete(k)})})
+    .catch(function(e){console.error(e);aviso("O layout foi salvo, mas não deu para guardar as camadas travadas (espaço do navegador cheio?).",5000)});
+}
+function copiaCongelado(de,para){
+  filaCong=filaCong.then(function(){return idbLayOp("readonly",function(st){return st.get(chaveCong(de))})})
+    .then(function(r){if(r&&r.data)return idbLayOp("readwrite",function(st){return st.put({id:chaveCong(para),data:r.data})})})
+    .catch(function(e){console.error(e)});
+}
+function apagaCongelado(id){
+  filaCong=filaCong.then(function(){return idbLayOp("readwrite",function(st){return st.delete(chaveCong(id))})}).catch(function(e){console.error(e)});
+}
+function restauraCongelado(dados){
+  itens.forEach(function(it){
+    var d=it.t==="mapa"&&dados&&dados.itens&&dados.itens[it.id];if(!d)return;
+    if(it.lockLayers&&d.camadas){it._lockedLayerSnapshot=d.camadas;if(d.fundo!==undefined)it._fundoTrav=d.fundo}
+    if(it.lockStyles&&d.estilos)it._lockedStyleSrc=new Map(d.estilos);
+  });
+}
+function carregaCongelado(){
+  if(!lid||!itens.some(function(i){return i.t==="mapa"&&(i.lockLayers||i.lockStyles)}))return;
+  congeladoPendente=true;
+  idbLayOp("readonly",function(st){return st.get(chaveCong(lid))})
+    .then(function(r){restauraCongelado(r&&r.data)})
+    .catch(function(e){console.error(e)})
+    .then(function(){
+      congeladoPendente=false;
+      // o que não tinha congelamento salvo (layouts antigos) congela agora, com o mapa como está
+      itens.forEach(function(it){if(it.t==="mapa"&&it.leaflet&&(it.lockLayers||it.lockStyles)&&hasReceivedSnapshot)applySnapshotToMapItem(it)});
+      if(hasReceivedSnapshot)atualizaEscalas();
+    });
+}
 function gravar(){
   if(!lid)return false;                 // no hall não há nada aberto para salvar
   if(!itens.length)return false;        // layout sem nenhum item não é guardado
@@ -1986,6 +2069,7 @@ function gravar(){
       try{var q=new URLSearchParams(location.search);q.delete("novo");q.delete("nome");history.replaceState(null,"","?"+q.toString())}catch(x){}
     }
     baseLay=null;
+    gravaCongelado();
     return true;
   }catch(err){return false}
 }
@@ -2001,7 +2085,7 @@ function limparVazios(exceto){
     if(n===0)fora.push(e.id);
   });
   if(!fora.length)return;
-  if(gravaLays(l.filter(function(e){return fora.indexOf(e.id)<0})))fora.forEach(function(id){try{localStorage.removeItem(chaveLay(id))}catch(x){}});
+  if(gravaLays(l.filter(function(e){return fora.indexOf(e.id)<0})))fora.forEach(function(id){try{localStorage.removeItem(chaveLay(id))}catch(x){}apagaCongelado(id)});
 }
 function agendar(){} // sem gravação automática: o layout só é salvo pelo botão Salvar
 function carregar(){
@@ -2211,7 +2295,7 @@ function criarMapa(it){
   map.on("zoom",function(){renderGridOverlayForItem(it);refreshLinkedScalebars(it.id)});
   map.on("zoomend",function(){ // o deslocamento dos rótulos depende do zoom do item
     if(!it._layerGroups||!mapProjectState||!mapProjectState.layers)return;
-    mapProjectState.layers.forEach(function(l){var lg=it._layerGroups.get(l.id);if(lg&&!l.isRaster&&!l.isBasemap&&l.labeling&&l.labeling.enabled)applyLabelingToItemLayer(it,l.id,lg,l)});
+    (it.lockLayers&&it._lockedLayerSnapshot?it._lockedLayerSnapshot:mapProjectState.layers).forEach(function(l){var lg=it._layerGroups.get(l.id);if(lg&&!l.isRaster&&!l.isBasemap&&l.labeling&&l.labeling.enabled)applyLabelingToItemLayer(it,l.id,lg,l)});
   });
   setTimeout(function(){
     invalidarMapa(it);
@@ -3045,7 +3129,7 @@ function mapaProps(e){
   var v=e.target.value,n=Number(v),on=e.target.checked,ch=e.type==="change";
   if(id==="m-rot"){it.mapRotation=n||0;applyMapRotation(it)}
   else if(id==="m-lockl"&&ch){it.lockLayers=on;if(!on)it._lockedLayerSnapshot=null;applySnapshotToMapItem(it);props()}
-  else if(id==="m-locks"&&ch){it.lockStyles=on;if(!on)it._lockedStyles=null;applySnapshotToMapItem(it)}
+  else if(id==="m-locks"&&ch){it.lockStyles=on;if(!on){it._lockedStyles=null;it._lockedStyleSrc=null}applySnapshotToMapItem(it)}
   else if(/^m-[xywh]$/.test(id)){
     if(v==="")return;
     var c=id.charAt(2);it[c]=Math.round(c==="w"?Math.max(40,n):c==="h"?Math.max(30,n):n);
@@ -5443,6 +5527,7 @@ function duplicarLay(id){
   try{localStorage.setItem(chaveLay(novo),raw)}catch(x){erroEspaco();return}
   l.splice(i+1,0,c);
   if(!gravaLays(l)){try{localStorage.removeItem(chaveLay(novo))}catch(x){}erroEspaco();return}
+  copiaCongelado(id,novo);
   desenhaLays();aviso("Layout duplicado.");
 }
 function excluirLay(id){
@@ -5450,6 +5535,7 @@ function excluirLay(id){
   delId=null;
   if(!gravaLays(l)){erroEspaco();desenhaLays();return}   // tira da lista primeiro: assim o salvamento ao sair não o recria
   try{localStorage.removeItem(chaveLay(id))}catch(e){}
+  apagaCongelado(id);
   desenhaLays();aviso("Layout excluído.");
 }
 function salvaRen(){
@@ -5515,8 +5601,19 @@ function commitHist(){
 function agendaHist(){clearTimeout(hist.t);hist.t=setTimeout(commitHist,450)}
 function restauraHist(f){
   clearTimeout(hist.t);
-  itens.forEach(function(it){try{if(it._m)it._m.remove()}catch(e){}if(it._el)it._el.remove()});
+  /* O congelamento (Travar camadas / Travar cores) vive em propriedades internas "_", que não entram na foto.
+     Guarda antes de recriar os mapas e devolve depois; senão cada mapa travado congelaria de novo no estado de agora. */
+  var congelado={};
+  itens.forEach(function(it){
+    if(it.t==="mapa"&&(it.lockLayers||it.lockStyles))congelado[it.id]={ls:it._lockedLayerSnapshot,st:it._lockedStyles,ss:it._lockedStyleSrc,ft:it._fundoTrav};
+    try{if(it._m)it._m.remove()}catch(e){}if(it._el)it._el.remove()});
   var novos=JSON.parse(f.d);
+  novos.forEach(function(n){
+    var g=congelado[n.id];if(!g)return;
+    if(n.lockLayers){if(g.ls)n._lockedLayerSnapshot=g.ls;if(g.ft!==undefined)n._fundoTrav=g.ft}
+    if(n.lockStyles&&g.st)n._lockedStyles=g.st;
+    if(n.lockStyles&&g.ss)n._lockedStyleSrc=g.ss;
+  });
   itens=novos;prox=Math.max(prox,f.p||1);
   if(f.n&&f.n!==nomeLay){nomeLay=f.n;document.title=nomeLay+" — Layout"}
   if(sel&&!getIt(sel))sel=null;
@@ -5592,7 +5689,7 @@ if(hall){
   mostrarHall();
 }else{
   limparVazios(lid);
-  carregar();bumpGrid();ajustar();initColorPickerPopover();
+  carregar();carregaCongelado();bumpGrid();ajustar();initColorPickerPopover();
   itens.forEach(montar);props();
   setTimeout(ofertaTutorialLayout,800);
   // fechar/recarregar a aba com alterações não salvas: o navegador mostra a própria caixa de confirmação
