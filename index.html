@@ -2447,14 +2447,52 @@ function excluirMapa(id){
   // Cada camada tem um "painel" próprio do Leaflet; o z-index do painel define quem fica por cima no mapa.
   function painelDe(c){var n="p"+c.id;if(!map.getPane(n))map.createPane(n);return n}
   function ordenarPaineis(){camadas.forEach(function(c,i){var p=map.getPane("p"+c.id);if(p)p.style.zIndex=210+i})}
+  /* Camadas grandes (muitas feições ou vértices) são desenhadas em Canvas: um único elemento na página por camada,
+     em vez de um elemento SVG por feição. Só muda o desenho na tela; os dados e as exportações são os mesmos.
+     Hachura só existe em SVG, então camada com hachura fica em SVG (e troca sozinha se a hachura for ligada/desligada). */
+  var CANVAS_FEICOES=3000,CANVAS_VERTICES=150000;
+  function camadaGrande(c){
+    var fs=c.geojson.features;
+    if(fs.length>=CANVAS_FEICOES)return true;
+    var n=0;
+    function conta(a){
+      if(typeof a[0]==="number"){n++;return n>=CANVAS_VERTICES}
+      for(var i=0;i<a.length;i++)if(conta(a[i]))return true;
+      return false;
+    }
+    for(var i=0;i<fs.length;i++){var g=fs[i]&&fs[i].geometry;if(g&&g.coordinates&&conta(g.coordinates))return true}
+    return false;
+  }
+  function camadaTemHachura(c){
+    var sym=c.symbology;if(!sym||sym.renderer==="none")return false;
+    var f=(sym.renderer==="categorized"||sym.renderer==="graduated")?(sym[sym.renderer]&&sym[sym.renderer].symbol):sym.single;
+    return !!(f&&temPadrao(f.fillStyle));
+  }
+  function usaCanvas(c){return !c.isRaster&&camadaGrande(c)&&!camadaTemHachura(c)}
+  function soltaRenderer(c){if(c._rend){try{map.removeLayer(c._rend)}catch(e){}c._rend=null}}
+  // Refaz a camada com o outro tipo de desenho (Canvas ⇄ SVG), mantendo visibilidade, seleção e rótulos.
+  function trocarRenderizador(c){
+    var vis=map.hasLayer(c.leaf);
+    try{map.removeLayer(c.leaf)}catch(e){}
+    clearLabelAnchors(c.id);soltaRenderer(c);
+    c.leaf=criarLeaflet(c);
+    if(vis){c.leaf.addTo(map);rotular(c)}
+    ordenarPaineis();marcarTabela(c);
+  }
   function criarLeaflet(c){
     var pn=painelDe(c);
-    return L.geoJSON(c.geojson,{
+    // feição → posição, montado uma vez só (indexOf para cada feição era quadrático em camada grande)
+    var ix=new Map();c.geojson.features.forEach(function(f,i){ix.set(f,i)});
+    function pos(f){var i=ix.get(f);return i===undefined?c.geojson.features.indexOf(f):i}
+    soltaRenderer(c);
+    c._canvas=usaCanvas(c);
+    var rend=c._canvas?(c._rend=L.canvas({pane:pn})):null;
+    var opcoes={
       pane:pn,
-      style:function(f){return estilo(c,c.sel.has(c.geojson.features.indexOf(f)),f)},
+      style:function(f){return estilo(c,c.sel.has(pos(f)),f)},
       pointToLayer:function(f,ll){
-        var st=estilo(c,c.sel.has(c.geojson.features.indexOf(f)),f);
-        return L.circleMarker(ll,Object.assign({pane:pn,radius:5},st));
+        var st=estilo(c,c.sel.has(pos(f)),f);
+        return L.circleMarker(ll,Object.assign({pane:pn,radius:5},st,rend?{renderer:rend}:null));
       },
       onEachFeature:function(f,lyr){
         lyr.on("click",function(e){
@@ -2463,9 +2501,13 @@ function excluirMapa(id){
           selecionar(c,c.geojson.features.indexOf(f),!!(oe&&(oe.shiftKey||oe.ctrlKey||oe.metaKey)));
         });
       }
-    });
+    };
+    if(rend)opcoes.renderer=rend;
+    return L.geoJSON(c.geojson,opcoes);
   }
-  function restilizar(c){if(c.isRaster)return;var ix=new Map();c.geojson.features.forEach(function(f,i){ix.set(f,i)});c.leaf.eachLayer(function(l){if(l.setStyle)l.setStyle(estilo(c,c.sel.has(ix.get(l.feature)),l.feature))});marcarTabela(c)}
+  function restilizar(c){if(c.isRaster)return;
+    if(c.leaf&&typeof c._canvas==="boolean"&&usaCanvas(c)!==c._canvas){trocarRenderizador(c);return} // hachura ligada/desligada em camada grande
+    var ix=new Map();c.geojson.features.forEach(function(f,i){ix.set(f,i)});c.leaf.eachLayer(function(l){if(l.setStyle)l.setStyle(estilo(c,c.sel.has(ix.get(l.feature)),l.feature))});marcarTabela(c)}
   function limparSel(){camadas.forEach(function(c){if(c.sel.size){c.sel.clear();restilizar(c)}})}
   // Clique simples: seleciona só esta. Shift/Ctrl/Cmd + clique: soma (ou tira) da seleção.
   function selecionar(c,i,adit){
@@ -4804,9 +4846,9 @@ const POINT_ANCHOR_TO_DIRECTION = {
   function aproximarSelecao(c){
     if(!c){aviso("Selecione uma camada primeiro.");return}
     if(!c.sel.size){aviso("Nenhuma feição selecionada nesta camada.");return}
-    var b=null;
+    var b=null,ixs=new Map();c.geojson.features.forEach(function(f,i){ixs.set(f,i)});
     c.leaf.eachLayer(function(l){
-      if(!c.sel.has(c.geojson.features.indexOf(l.feature)))return;
+      if(!c.sel.has(ixs.get(l.feature)))return;
       var lb=l.getBounds?l.getBounds():(l.getLatLng?L.latLngBounds([l.getLatLng()]):null);
       if(!lb||!lb.isValid())return;
       if(b)b.extend(lb);else b=L.latLngBounds(lb.getSouthWest(),lb.getNorthEast());
@@ -5088,7 +5130,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     var r=await dialogo({titulo:"Remover camada"+(ids.length>1?"s":""),msg:msg,ok:"Remover",perigo:true});
     if(!r)return;
     camadas=camadas.filter(function(c){
-      if(ids.indexOf(c.id)>-1){map.removeLayer(c.leaf);clearLabelAnchors(c.id);return false}
+      if(ids.indexOf(c.id)>-1){map.removeLayer(c.leaf);clearLabelAnchors(c.id);soltaRenderer(c);return false}
       return true;
     });
     selIds=new Set();ancora=null;
@@ -5485,7 +5527,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     var s=JSON.parse(JSON.stringify(snap)),rec={}; // cópia, para editar sem mexer na pilha
     grupos.forEach(function(g){rec[g.id]=g.recolhido});
     restaurando=true;
-    camadas.forEach(function(c){map.removeLayer(c.leaf);clearLabelAnchors(c.id)});camadas=[];
+    camadas.forEach(function(c){map.removeLayer(c.leaf);clearLabelAnchors(c.id);soltaRenderer(c)});camadas=[];
     s.camadas.forEach(function(x){
       if(x.isRaster){
         var rc=rasterCache.get(x.id);
@@ -5540,7 +5582,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     map.invalidateSize();
     pararModos();limparRegua();byId("res-regua").classList.remove("show");fecharMenu();fecharPropriedades();
     restaurando=true;
-    camadas.forEach(function(c){map.removeLayer(c.leaf);clearLabelAnchors(c.id)});camadas=[];ativaId=null;proxId=1;
+    camadas.forEach(function(c){map.removeLayer(c.leaf);clearLabelAnchors(c.id);soltaRenderer(c)});camadas=[];ativaId=null;proxId=1;
     grupos=[];proxGrupo=1;selIds=new Set();ancora=null;renomeando=null;
     restaurando=false;
     hist={pilha:[],i:-1,max:5,E:null};
@@ -7663,7 +7705,26 @@ function initCG(c){
   /* ---------- Ponte com o Layout (layout-jr.html): só manda dados, nunca recebe ---------- */
   var chLay=("BroadcastChannel" in window)?new BroadcastChannel("sigjr-layout-sync"):null,syncT=null;
   var rasterEnviado={}; // id do raster -> base64 já enviado ao layout (só reenvia se mudar ou se o layout pedir)
+  /* O layout avisa que está aberto ("pedido" ao abrir, "vivo" a cada poucos segundos, "fechou" ao sair).
+     Sem layout aberto não há para quem mandar: antes cada mudança e cada zoom copiava o projeto inteiro à toa. */
+  var layoutTs=0;
+  function layoutAberto(){return Date.now()-layoutTs<15000}
+  // Versão leve: lê direto das camadas (o postMessage já faz a cópia), sem a ida e volta por JSON do tirarFoto().
   function instantaneoLayout(completo){
+    var fu=fundo?Object.assign({},fundo):null;
+    if(fu&&FUNDOS[fu.k])fu.d=FUNDOS[fu.k];
+    var v=null;if(map){var c0=map.getCenter();v={c:[c0.lat,c0.lng],z:map.getZoom()}}
+    return{
+      camadas:camadas.map(function(c){
+        var o={id:c.id,name:c.name,color:c.color,visible:c.visible,groupId:c.groupId==null?null:c.groupId,symbology:c.symbology||null,labeling:c.labeling||null,isRaster:c.isRaster||undefined,opacity:c.opacity,geojson:c.isRaster?null:c.geojson};
+        if(c.isRaster){var rc=rasterCache.get(c.id),b=rc&&rc.b64;if(b&&(completo||rasterEnviado[c.id]!==b)){o.originalFileBase64=b;rasterEnviado[c.id]=b}}
+        return o;
+      }),
+      ativaId:ativaId,fundo:fu,view:v
+    };
+  }
+  // Versão antiga (com cópia completa), só como reserva se a leve falhar.
+  function instantaneoLayoutCopia(completo){
     var s=tirarFoto(); // traz o base64 dos rasters; aqui ele só segue quando o layout ainda não o tem
     return {
       camadas:s.camadas.map(function(c){
@@ -7676,15 +7737,24 @@ function initCG(c){
       view:s.view||null
     };
   }
-  function enviarLayout(completo){try{if(chLay&&map)chLay.postMessage({type:"snapshot",snapshot:instantaneoLayout(completo===true)})}catch(e){console.error("Layout:",e)}}
-  function agendarSyncLayout(ms){if(!chLay)return;clearTimeout(syncT);syncT=setTimeout(function(){enviarLayout()},ms==null?300:ms)}
-  if(chLay)chLay.onmessage=function(e){if(e.data&&e.data.type==="pedido")enviarLayout(true)};
+  function enviarLayout(completo){
+    if(!chLay||!map)return;
+    try{chLay.postMessage({type:"snapshot",snapshot:instantaneoLayout(completo===true)})}
+    catch(e){console.error("Layout:",e);try{chLay.postMessage({type:"snapshot",snapshot:instantaneoLayoutCopia(true)})}catch(e2){console.error("Layout:",e2)}}
+  }
+  function agendarSyncLayout(ms){if(!chLay||!layoutAberto())return;clearTimeout(syncT);syncT=setTimeout(function(){if(layoutAberto())enviarLayout()},ms==null?300:ms)}
+  if(chLay)chLay.onmessage=function(e){
+    var d=e.data;if(!d)return;
+    if(d.type==="pedido"){layoutTs=Date.now();enviarLayout(true)}
+    else if(d.type==="vivo"){var jaAberto=layoutAberto();layoutTs=Date.now();if(!jaAberto)enviarLayout(true)} // layout (re)apareceu: põe em dia
+    else if(d.type==="fechou")layoutTs=0;
+  };
   byId("b-layout").addEventListener("click",function(){
     if(!camadas.length){aviso("Adicione uma camada ao mapa antes de montar o layout.");return}
     descarregar(); // grava já o que estiver pendente
     var w=window.open("layout-jr.html"+(atual?"?mapa="+encodeURIComponent(atual):""),"sigjr_layout");
     if(!w)aviso("O navegador bloqueou a nova aba. Permita pop-ups para este site.");
-    else setTimeout(function(){enviarLayout(true)},900);
+    else{layoutTs=Date.now();setTimeout(function(){enviarLayout(true)},900)}
   });
 
   limparMapasVazios();

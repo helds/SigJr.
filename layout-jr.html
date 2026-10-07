@@ -1952,7 +1952,12 @@ else if("BroadcastChannel" in window){
   ch.onmessage=function(e){var m=e.data;if(m&&m.type==="snapshot"){var prim=!ligado;ligado=true;recebeu(m.snapshot);if(prim)aviso("Ligado ao mapa. Se você mudar o mapa, o layout muda junto.")}};
   ch.postMessage({type:"pedido"});
   var n=0,tm=setInterval(function(){if(ligado||++n>4){clearInterval(tm);if(!ligado)lerSalvo();return}ch.postMessage({type:"pedido"})},700);
-  window.addEventListener("beforeunload",function(){clearInterval(tm);ch.close()});
+  // Avisa o mapa que o layout está aberto (o mapa só manda atualizações para quem está aberto) e quando fecha.
+  var vivo=function(){try{ch.postMessage({type:"vivo"})}catch(e){}};
+  var vivoT=setInterval(vivo,4000);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)vivo()});
+  // pagehide (e não beforeunload): o beforeunload também dispara quando a pessoa cancela a saída, e o canal não pode fechar nesse caso
+  window.addEventListener("pagehide",function(e){if(e.persisted)return;clearInterval(tm);clearInterval(vivoT);try{ch.postMessage({type:"fechou"})}catch(x){}ch.close()});
 }else lerSalvo();
 
 /* ---------- layouts do mapa: cada mapa tem a sua lista e cada layout é guardado à parte ---------- */
