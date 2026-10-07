@@ -163,6 +163,9 @@ body.arrastando-corpo,body.arrastando-corpo *{cursor:grabbing!important;user-sel
 #tab-corpo table{border-collapse:collapse;font-size:14px;width:max-content;min-width:100%}
 #tab-corpo th,#tab-corpo td{padding:4px 10px;border-bottom:1px solid var(--linha);white-space:nowrap;text-align:left}
 #tab-corpo th{position:sticky;top:0;background:var(--bg-suave);z-index:1}
+#tab-corpo th.ordenavel{cursor:pointer}
+#tab-corpo th.ordenavel:hover{filter:brightness(.95)}
+#tab-corpo th .ord-ind{font-size:11px;opacity:.8}
 #tab-corpo td.n{color:var(--tinta-2)}
 #tab-corpo tr[data-i]{cursor:pointer}
 #tab-corpo tr.sel td{background:rgba(242,163,58,.35)}
@@ -195,6 +198,7 @@ body.arrastando-corpo,body.arrastando-corpo *{cursor:grabbing!important;user-sel
 #map.zoom-in-cursor,#map.zoom-in-cursor .leaflet-container,#map.zoom-in-cursor .leaflet-interactive{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 27 27"><g fill="none" stroke="%23222" stroke-width="2"><circle cx="11" cy="11" r="7" fill="rgba(255,255,255,0.85)"/><line x1="16.2" y1="16.2" x2="24" y2="24"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></g></svg>') 11 11, zoom-in}
 #map.zoom-out-cursor,#map.zoom-out-cursor .leaflet-container,#map.zoom-out-cursor .leaflet-interactive{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 27 27"><g fill="none" stroke="%23222" stroke-width="2"><circle cx="11" cy="11" r="7" fill="rgba(255,255,255,0.85)"/><line x1="16.2" y1="16.2" x2="24" y2="24"/><line x1="8" y1="11" x2="14" y2="11"/></g></svg>') 11 11, zoom-out}
 #map.select-feature-cursor,#map.select-feature-cursor .leaflet-container,#map.select-feature-cursor .leaflet-interactive{cursor:crosshair}
+#map .leaflet-pane>canvas{pointer-events:none} /* camadas em Canvas: o clique é tratado no mapa (selecionarNoClique) */
 #drop-ov{position:fixed;inset:0;z-index:6500;background:rgba(30,122,76,.18);display:flex;align-items:center;justify-content:center;pointer-events:none}
 .drop-box{border:3px dashed var(--agua);border-radius:12px;background:var(--card);padding:32px 48px;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.2)}
 .drop-box b{display:block;font-size:20px}
@@ -2230,7 +2234,7 @@ function excluirMapa(id){
     if(!map){
       map=L.map("map",{zoomControl:false,attributionControl:false,zoomSnap:0,zoomDelta:0.25}).setView(VISTA_INICIAL.c,VISTA_INICIAL.z);
       map.on("zoomend",function(){camadas.forEach(function(c){if(c.labeling&&c.labeling.enabled)rotular(c)});agendarSyncLayout()}); // visibilidade por escala; o layout precisa do zoom atual para manter a posição dos rótulos
-      map.on("click",identificarClique);map.on("moveend zoomend",pushViewHistorySoon);
+      map.on("click",identificarClique);map.on("click",selecionarNoClique);map.on("moveend zoomend",pushViewHistorySoon);
       // Aproximar/Afastar: com o modo ativo, um clique no mapa dá zoom centrado no ponto clicado.
       map.on("click",function(e){
         if(!modoZoom)return;
@@ -2498,6 +2502,7 @@ function excluirMapa(id){
         lyr.on("click",function(e){
           if(!modoSel)return; // fora do modo de seleção, clicar na feição não faz nada
           var oe=e.originalEvent;
+          if(oe)oe._selFeito=true; // o clique do mapa não precisa tratar de novo
           selecionar(c,c.geojson.features.indexOf(f),!!(oe&&(oe.shiftKey||oe.ctrlKey||oe.metaKey)));
         });
       }
@@ -2514,6 +2519,27 @@ function excluirMapa(id){
     if(!adit){limparSel();c.sel.add(i)}
     else if(c.sel.has(i))c.sel.delete(i);else c.sel.add(i);
     restilizar(c);
+  }
+  /* Camadas em Canvas não recebem clique por feição: cada Canvas cobre o mapa todo e os de baixo ficariam sem clique.
+     Por isso (e porque o CSS deixa o Canvas "transparente" ao mouse) a seleção delas é feita aqui, no clique do mapa,
+     usando a mesma geometria que o Leaflet desenhou. A camada de cima vence, como no SVG. */
+  function selecionarNoClique(e){
+    if(!modoSel)return;
+    var oe=e.originalEvent;
+    if(oe&&oe._selFeito)return; // uma feição em SVG já tratou este clique
+    var p=map.latLngToLayerPoint(e.latlng);
+    for(var k=camadas.length-1;k>=0;k--){
+      var c=camadas[k];
+      if(!c.visible||c.isRaster||!c._canvas||!c.leaf||!map.hasLayer(c.leaf))continue;
+      var achou=null;
+      c.leaf.eachLayer(function(l){try{if(l._containsPoint&&l._containsPoint(p))achou=l}catch(x){}});
+      if(!achou)continue;
+      var i=c.geojson.features.indexOf(achou.feature);
+      if(i<0)continue;
+      if(oe)oe._selFeito=true;
+      selecionar(c,i,!!(oe&&(oe.shiftKey||oe.ctrlKey||oe.metaKey)));
+      return;
+    }
   }
   function camadaAtiva(){return camadas.filter(function(c){return c.id===ativaId})[0]||null}
   function camadaPorId(id){return camadas.filter(function(c){return c.id===id})[0]||null}
@@ -5731,6 +5757,52 @@ const POINT_ANCHOR_TO_DIRECTION = {
      Essenciais: ver/editar valores, adicionar/excluir campo, excluir linha, selecionar pelo "#",
      selecionar tudo / inverter / desselecionar, zoom na seleção, excluir selecionadas. */
   var tabEl=byId("tab-attr"),tabSig="",tabEd={};
+  var tabOrd={},tabAnc=null,tabVis=[]; // ordenação por camada | âncora do Shift | feições que estão na tela, na ordem em que aparecem
+  var COLATOR=new Intl.Collator("pt-BR",{numeric:true,sensitivity:"base"});
+  // Ordem em que as linhas aparecem (índices das feições). null = ordem original.
+  // Números vêm antes de textos; vazios ficam sempre no fim, tanto de A–Z quanto de Z–A.
+  function tabOrdem(c,campos){
+    var o=tabOrd[c.id];if(!o)return null;
+    var fs=c.geojson.features,n=fs.length,ix=new Array(n),k;
+    for(k=0;k<n;k++)ix[k]=k;
+    if(o.campo===null)return o.dir<0?ix.reverse():null;
+    if(campos.indexOf(o.campo)<0){delete tabOrd[c.id];return null} // o campo foi excluído
+    var ch=new Array(n);
+    for(k=0;k<n;k++){
+      var v=(fs[k].properties||{})[o.campo],t=txt(v),vazio=t.trim()==="",nu=!vazio&&numLike(v);
+      ch[k]={v:vazio?null:(nu?num(v):t),e:vazio?2:(nu?0:1)};
+    }
+    var dir=o.dir;
+    ix.sort(function(a,b){
+      var A=ch[a],B=ch[b];
+      if(A.e===2||B.e===2){if(A.e!==B.e)return A.e===2?1:-1;return a-b}
+      var r=A.e!==B.e?A.e-B.e:(A.e===0?A.v-B.v:COLATOR.compare(A.v,B.v));
+      return r?r*dir:a-b;
+    });
+    return ix;
+  }
+  // Clique no título: A–Z; clique de novo no mesmo: Z–A. O "#" volta à ordem original (e inverte, se clicar de novo).
+  function alternarOrdem(c,campo){
+    var o=tabOrd[c.id];
+    tabOrd[c.id]=(o&&o.campo===campo)?{campo:campo,dir:-o.dir}:{campo:campo,dir:1};
+    byId("tab-corpo").scrollTop=0;renderTabela();
+  }
+  // Seleção de linhas como no Windows: clique = só esta | Ctrl = soma/tira | Shift = do último clique até esta | Ctrl+Shift = soma o intervalo
+  function selecaoTabela(c,i,e){
+    var shift=e.shiftKey,ctrl=e.ctrlKey||e.metaKey;
+    if(shift){
+      var anc=(tabAnc&&tabAnc.id===c.id&&tabVis.indexOf(tabAnc.i)>-1)?tabAnc.i:tabVis[0]; // sem clique anterior: começa na primeira linha
+      var a=tabVis.indexOf(anc),b=tabVis.indexOf(i);
+      if(a<0||b<0){selecionar(c,i,ctrl);tabAnc={id:c.id,i:i};return}
+      var faixa=tabVis.slice(Math.min(a,b),Math.max(a,b)+1);
+      if(!ctrl)limparSel();
+      faixa.forEach(function(j){c.sel.add(j)});
+      restilizar(c); // a âncora continua a mesma, como no Windows
+      return;
+    }
+    selecionar(c,i,ctrl);
+    tabAnc={id:c.id,i:i};
+  }
   function txt(v){return v==null?"":(typeof v==="object"?JSON.stringify(v):String(v))}
   function tabCampos(c){var o={},k,fs=c.geojson.features;for(k=0;k<fs.length&&k<500;k++)Object.keys(fs[k].properties||{}).forEach(function(n){o[n]=1});return Object.keys(o)}
   function edSet(c){var e=tabEd[c.id],n=c.geojson.features.length;if(!e||e.n!==n)e=tabEd[c.id]={n:n,s:new Set()};return e.s}
@@ -5749,21 +5821,32 @@ const POINT_ANCHOR_TO_DIRECTION = {
     }
     var fs=c.geojson.features,so=byId("tab-so").checked,MAX=1500,campos=tabCampos(c),ed=edSet(c);
     var t=h("table"),th=h("thead"),tr=h("tr"),tb=h("tbody"),mostradas=0,corte=false,k;
-    tr.appendChild(h("th",null,"#"));
+    var ord=tabOrdem(c,campos),oc=tabOrd[c.id],desc0=!!(oc&&oc.campo===null&&oc.dir<0);
+    var th0=h("th","ordenavel");
+    th0.appendChild(h("span",null,"#"));if(desc0)th0.appendChild(h("span","ord-ind"," ▼"));
+    th0.dataset.idx="1";th0.title="Ordem original (clique de novo para inverter)";
+    th0.setAttribute("aria-sort",desc0?"descending":"none");
+    tr.appendChild(th0);
     campos.forEach(function(n){
-      var x=h("th"),d=h("div","th-in"),b=h("button","del-x","✕");
+      var x=h("th","ordenavel"),d=h("div","th-in"),b=h("button","del-x","✕"),ativo=!!(oc&&oc.campo===n);
+      x.dataset.ord="1";x.dataset.c=n;x.title="Clique para ordenar de A a Z (de novo: Z a A)";
+      x.setAttribute("aria-sort",ativo?(oc.dir<0?"descending":"ascending"):"none");
       d.appendChild(h("span",null,n));
+      if(ativo)d.appendChild(h("span","ord-ind",oc.dir<0?"▼":"▲"));
       b.type="button";b.dataset.acao="campo";b.dataset.c=n;b.title='Excluir o campo "'+n+'"';
       d.appendChild(b);x.appendChild(d);tr.appendChild(x);
     });
     tr.appendChild(h("th",null,""));
     th.appendChild(tr);t.appendChild(th);
-    for(k=0;k<fs.length;k++){
+    tabVis=[];
+    for(var q=0;q<fs.length;q++){
+      k=ord?ord[q]:q;
       if(so&&!c.sel.has(k))continue;
       if(mostradas>=MAX){corte=true;break}
+      tabVis.push(k);
       var p=fs[k].properties||{},r=h("tr",(c.sel.has(k)?"sel ":"")+(ed.has(k)?"edit":""));
       r.dataset.i=k;
-      var id=h("td","id",String(k+1));id.title="Clique para selecionar a feição";r.appendChild(id);
+      var id=h("td","id",String(k+1));id.title="Clique para selecionar. Shift: intervalo. Ctrl: soma ou tira da seleção.";r.appendChild(id);
       campos.forEach(function(n){var td=h("td","cel",txt(p[n]));td.dataset.c=n;r.appendChild(td)});
       var dl=h("td"),bx=h("button","del-x","✕");
       bx.type="button";bx.dataset.acao="linha";bx.title="Excluir esta feição";
@@ -5853,11 +5936,18 @@ const POINT_ANCHOR_TO_DIRECTION = {
       else excluirLinha(c,+b.closest("tr").dataset.i);
       return;
     }
+    var thc=e.target.closest("th");
+    if(thc){
+      if(thc.dataset.ord)alternarOrdem(c,thc.dataset.c);
+      else if(thc.dataset.idx)alternarOrdem(c,null);
+      return;
+    }
     var td=e.target.closest("td"),tr=td&&td.parentNode;
-    if(!td||!tr||tr.dataset.i===undefined)return;
+    if(!td||!tr||tr.dataset.i===undefined||td.querySelector("input"))return;
     var i=+tr.dataset.i;
-    if(td.classList.contains("id"))selecionar(c,i,e.shiftKey||e.ctrlKey||e.metaKey);
-    else if(td.classList.contains("cel")&&!td.querySelector("input"))editarCelula(c,td,i,td.dataset.c);
+    // com Shift/Ctrl o clique em qualquer célula seleciona (não abre a edição), como numa lista do Windows
+    if(td.classList.contains("id")||e.shiftKey||e.ctrlKey||e.metaKey)selecaoTabela(c,i,e);
+    else if(td.classList.contains("cel"))editarCelula(c,td,i,td.dataset.c);
   });
   // Barra de ações
   function vetorial(){var c=camadaAtiva();if(!c||c.isRaster){aviso("Selecione uma camada vetorial primeiro.");return null}return c}
