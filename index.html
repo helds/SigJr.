@@ -4512,7 +4512,10 @@ const POINT_ANCHOR_TO_DIRECTION = {
     });
     fe.addEventListener("click",fechar);
     ov.onclick=function(e){if(e.target===ov)fechar()};
-    document.addEventListener("keydown",tecla,true);fe.focus();
+    document.addEventListener("keydown",tecla,true);
+    // O foco vai para o "Fechar", que fica no fim da caixa rolável: sem preventScroll o navegador rolava até lá e o texto abria pelo final.
+    try{fe.focus({preventScroll:true})}catch(x){fe.focus()}
+    box.scrollTop=0;
   }
   // Barra de menu: lista de grupos; novos menus entram só acrescentando itens aqui.
   var MENUS=[

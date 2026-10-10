@@ -407,11 +407,31 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
 #export-dialog .ex-footer{display:flex;justify-content:flex-end;padding:10px 16px;border-top:2px solid var(--linha)}
 #export-dialog .ex-btn{padding:8px 16px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--linha);background:var(--card);color:var(--tinta)}
 #export-dialog .ex-btn:hover{border-color:var(--agua)}
+#modelos-overlay{display:none;position:fixed;inset:0;z-index:9400;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
+#modelos-overlay.show{display:flex}
+#modelos-dialog{display:flex;flex-direction:column;width:1020px;max-width:100%;max-height:calc(100vh - 24px);background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.4);overflow:hidden}
+#modelos-dialog .mdl-header{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 16px;font-weight:700;font-size:18px;border-bottom:2px solid var(--linha)}
+#modelos-dialog .mdl-close{border:0;background:none;color:var(--tinta-2);font-size:26px;line-height:1;width:36px;height:36px;border-radius:8px;cursor:pointer}
+#modelos-dialog .mdl-close:hover{background:var(--agua-claro)}
+#modelos-dialog .mdl-dica{margin:0;padding:10px 16px 0;font-size:14px;color:var(--tinta-2)}
+#modelos-dialog .mdl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;padding:12px 16px;overflow:auto;flex:1;min-height:0}
+#modelos-dialog .mdl-card{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:8px;font:inherit;border:2px solid var(--linha);border-radius:10px;background:var(--card);color:var(--tinta);cursor:pointer}
+#modelos-dialog .mdl-card:hover,#modelos-dialog .mdl-card:focus-visible{border-color:var(--agua)}
+#modelos-dialog .mdl-card[aria-selected="true"]{border-color:var(--agua);box-shadow:0 0 0 2px var(--agua)}
+#modelos-dialog .mdl-card svg{width:100%;height:auto;display:block;border-radius:4px}
+#modelos-dialog .mdl-card b{font-size:14px}
+#modelos-dialog .mdl-card small{font-size:12.5px;color:var(--tinta-2)}
+#modelos-dialog .mdl-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:2px solid var(--linha)}
+#modelos-dialog .mdl-aviso{margin-right:auto;font-size:13px;color:var(--tinta-2)}
+#modelos-dialog .mdl-btn{padding:8px 16px;font:inherit;font-size:14px;font-weight:700;border-radius:8px;cursor:pointer;border:2px solid var(--linha);background:var(--card);color:var(--tinta)}
+#modelos-dialog .mdl-btn:hover:not(:disabled){border-color:var(--agua)}
+#modelos-dialog .mdl-btn.ok{background:var(--agua);border-color:var(--agua);color:var(--papel)}
+#modelos-dialog .mdl-btn:disabled{opacity:.5;cursor:not-allowed}
 
 /* ---------- Tela Layouts (mesmo visual da tela inicial do GisJr) ---------- */
 #lays-ov{display:none;flex:1;min-height:0;flex-direction:column;background:var(--papel);color:var(--tinta);overflow:auto}
 html.hall #lays-ov{display:flex}
-html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-picker-overlay{display:none!important}
+html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #modelos-overlay,html.hall #color-picker-overlay{display:none!important}
 #lays-ov *{box-sizing:border-box}
 #lays-ov .ly-topo{position:relative;flex:none;display:flex;align-items:center;justify-content:center;padding:14px 20px;background:var(--card);border-bottom:2px solid var(--linha)}
 #lays-ov .ly-logo{font-size:26px;font-weight:700;color:var(--agua);letter-spacing:.5px}
@@ -497,6 +517,7 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
   <symbol id="i-imagem" viewBox="0 0 24 24"><path d="M3 5h18v14H3zM3 17l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9.5" r="1.6"/></symbol>
   <symbol id="i-mexer" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></symbol>
   <symbol id="i-lapis" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/></symbol>
+  <symbol id="i-modelos" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 9h16M10 9v11"/></symbol>
   <symbol id="i-layouts" viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></symbol>
   <symbol id="i-desfazer" viewBox="0 0 24 24"><path d="M9 6L4 11l5 5M4 11h10a5 5 0 010 10h-4"/></symbol>
   <symbol id="i-refazer" viewBox="0 0 24 24"><path d="M15 6l5 5-5 5M20 11H10a5 5 0 000 10h4"/></symbol>
@@ -536,6 +557,9 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
   <div class="grupo">
     <button class="b" id="b-desfazer" type="button" disabled title="Desfazer (Ctrl+Z)"><svg><use href="#i-desfazer"/></svg>Desfazer</button>
     <button class="b" id="b-refazer" type="button" disabled title="Refazer (Ctrl+Y)"><svg><use href="#i-refazer"/></svg>Refazer</button>
+  </div>
+  <div class="grupo">
+    <button class="b" id="b-modelos" type="button" title="Modelos de layout: escolha uma folha pronta, já com mapa, legenda, escala e textos no lugar"><svg><use href="#i-modelos"/></svg>Modelos</button>
   </div>
   <div class="grupo">
     <button class="b" data-add="mapa" type="button" title="Colocar o mapa na folha"><svg><use href="#i-mapa"/></svg>Mapa</button>
@@ -632,6 +656,14 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #color-pick
       <button type="button" class="ex-op" id="ex-pdf"><b>PDF</b><span>Abre a janela de impressão; escolha “Salvar como PDF”.</span></button>
     </div>
     <div class="ex-footer"><button type="button" class="ex-btn" id="ex-cancel-btn">Fechar</button></div>
+  </div>
+</div>
+<div id="modelos-overlay">
+  <div id="modelos-dialog" role="dialog" aria-modal="true" aria-labelledby="mdl-titulo">
+    <div class="mdl-header"><span id="mdl-titulo">Modelos de layout</span><button type="button" class="mdl-close" id="mdl-close-btn" aria-label="Fechar">&times;</button></div>
+    <p class="mdl-dica">Escolha um modelo: os itens entram na folha já organizados. Depois é só ajustar a visualização de cada mapa. Clique duas vezes para usar direto.</p>
+    <div class="mdl-grid" id="mdl-grid" role="listbox" aria-label="Modelos de layout"></div>
+    <div class="mdl-footer"><span class="mdl-aviso" id="mdl-aviso" aria-live="polite"></span><button type="button" class="mdl-btn" id="mdl-cancel">Cancelar</button><button type="button" class="mdl-btn ok" id="mdl-ok" disabled>Usar este modelo</button></div>
   </div>
 </div>
 <div id="color-picker-overlay">
@@ -2727,7 +2759,7 @@ document.addEventListener("keydown",function(e){
   if(e.key!=="Delete"&&e.key!=="Backspace")return;
   if(e.ctrlKey||e.metaKey||e.altKey||e.defaultPrevented)return;
   if(emDigitacao(e.target)||document.documentElement.classList.contains("hall"))return;
-  if(document.querySelector("#export-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
+  if(document.querySelector("#export-overlay.show,#modelos-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
   var it=getIt(sel);if(!it||it._lgEdit!=null)return;
   e.preventDefault();apagarItem(it);
 });
@@ -2760,7 +2792,7 @@ document.addEventListener("keydown",function(e){
   if(!(e.ctrlKey||e.metaKey)||e.altKey||e.shiftKey||e.defaultPrevented)return;
   var k=(e.key||"").toLowerCase();if(k!=="c"&&k!=="v")return;
   if(emDigitacao(e.target)||document.documentElement.classList.contains("hall"))return;
-  if(document.querySelector("#export-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
+  if(document.querySelector("#export-overlay.show,#modelos-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
   if(k==="c"){
     if(String(window.getSelection&&window.getSelection()||"").length)return; /* há texto selecionado: deixa o copiar normal do navegador */
     var it=getIt(sel);if(!it||it._lgEdit!=null)return;
@@ -2961,7 +2993,7 @@ document.addEventListener("keydown",function(e){
   var dir=e.code==="BracketRight"||e.key==="]"||e.key==="}",esq=e.code==="BracketLeft"||e.key==="["||e.key==="{";
   if(!dir&&!esq)return;
   if(emDigitacao(e.target)||document.documentElement.classList.contains("hall"))return;
-  if(document.querySelector("#export-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
+  if(document.querySelector("#export-overlay.show,#modelos-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
   if(!selecionados().length)return;
   e.preventDefault();orgOrdem(dir?(e.shiftKey?"top":"raise"):(e.shiftKey?"bottom":"lower"));
 });
@@ -4879,6 +4911,197 @@ $("ex-close-btn").onclick=fecharExport;
 $("ex-cancel-btn").onclick=fecharExport;
 $("export-overlay").addEventListener("pointerdown",function(e){if(e.target===this)fecharExport()});
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&$("export-overlay").classList.contains("show"))fecharExport()});
+/* ---------- Modelos de layout ----------
+   Cada modelo é uma lista de peças no mesmo sistema de coordenadas da prévia (320 × 226; a folha ocupa 3..317 × 3..223).
+   A prévia do modal e a folha de verdade saem da MESMA lista, então o que aparece no modal é o que vai para a folha. */
+var MD_BORDA="#9aa5a0",MD_COR=["#e8765a","#f2b94d","#9a82d6","#4fa38a"];
+function MP(k,x,y,w,h,o){o=o||{};o.k=k;o.x=x;o.y=y;o.w=w;o.h=h;return o}
+function mdTit(x,y,w,h,tam){return MP("t",x,y,w,h,{txt:"Título do mapa",tam:tam||30,neg:1,bx:1,pv:"Título"})}
+function mdFonte(x,y,w,h){return MP("t",x,y,w,h,{txt:"Fonte: (edite aqui)",tam:13,bx:1,pv:"bars",al:"left"})}
+function mdCap(x,y,w,h,t){return MP("t",x,y,w,h,{txt:t,tam:18,bx:1,pv:t})}
+function mdRot(x,y,w,h,t){return MP("t",x,y,w,h,{txt:t,tam:16,bx:1,fundo:1,pv:t})}
+function mdFaixa(x,y,w,h){return MP("b",x,y,w,h,{fill:"#dbe9f6",stroke:"#7aa6d6"})}
+var MODELOS=[
+ {n:"Clássico com painel lateral",d:"Uso geral: mapa grande e legenda ao lado",p:[
+  MP("m",12,12,214,202),mdTit(234,12,74,34,26),MP("l",234,52,74,84),MP("n",238,144,18,34),MP("e",260,152,48,22),mdFonte(234,186,74,28)]},
+ {n:"Mapa em tela cheia",d:"Sem margens, com elementos sobre o mapa",p:[
+  MP("m",12,12,296,202),MP("t",22,22,118,26,{txt:"Título do mapa",tam:28,neg:1,bx:1,fundo:1,pv:"Título"}),MP("n",280,22,20,28,{fundo:1}),MP("l",22,130,72,74),
+  MP("t",102,190,116,16,{txt:"Fonte: (edite aqui)",tam:12,bx:1,fundo:1,pv:"bars",al:"left"}),MP("e",226,190,74,16,{fundo:1})]},
+ {n:"Com mapa de localização",d:"Mostra onde fica a área mapeada",p:[
+  mdTit(12,12,296,26),MP("m",12,44,214,170),MP("m",234,44,74,48),MP("t",234,95,74,15,{txt:"Localização",tam:14,pv:"Localização"}),MP("l",234,114,74,68),MP("n",238,190,16,24),MP("e",258,192,50,20)]},
+ {n:"Comparação lado a lado",d:"Dois mapas do mesmo tema, como antes e depois",p:[
+  mdTit(12,12,296,24),MP("m",12,42,108,128),MP("m",126,42,108,128),mdCap(12,174,108,16,"2015"),mdCap(126,174,108,16,"2025"),
+  MP("l",240,42,68,92),MP("n",242,140,18,30),MP("e",262,146,46,24),mdFonte(12,196,228,18)]},
+ {n:"Painel de quatro mapas",d:"Quatro períodos com uma legenda só",p:[
+  mdTit(12,12,296,22,28),MP("m",12,40,104,84),MP("m",122,40,104,84),MP("m",12,130,104,84),MP("m",122,130,104,84),
+  mdRot(16,44,36,16,"2010"),mdRot(126,44,36,16,"2015"),mdRot(16,134,36,16,"2020"),mdRot(126,134,36,16,"2025"),
+  MP("l",234,40,74,84),MP("n",238,130,18,38),MP("e",258,138,50,24),MP("t",234,174,74,40,{txt:"Fonte: (edite aqui)",tam:13,bx:1,al:"left",va:"top",pv:"bars"})]},
+ {n:"Relatório com cabeçalho",d:"Faixa de título, mapa e texto de apoio",p:[
+  mdFaixa(12,12,296,34),MP("t",20,14,240,30,{txt:"Título do relatório",tam:34,neg:1,al:"left",pv:"Título do relatório"}),MP("ph",268,20,32,18,{lb:"Logo"}),
+  MP("m",12,52,196,162),MP("n",182,58,20,28,{fundo:1}),MP("e",18,190,64,18,{fundo:1}),MP("l",216,52,92,70),
+  MP("t",216,128,92,58,{txt:"Resumo\nEscreva aqui os principais pontos do mapa.",tam:16,bx:1,al:"left",va:"top",pv:"Resumo"}),mdFonte(216,192,92,22)]},
+ {n:"Mapa com quadro de dados",d:"Mapa, gráfico e tabela na mesma folha",p:[
+  mdTit(12,12,296,24),MP("m",12,42,172,172),MP("n",156,48,22,28,{fundo:1}),MP("e",18,190,64,18,{fundo:1}),
+  MP("ph",192,42,116,62,{lb:"Gráfico",ico:"bars"}),MP("ph",192,110,116,40,{lb:"Tabela",ico:"grid"}),MP("l",192,156,116,58)]},
+ {n:"Tríptico com colunas laterais",d:"Mapa ao centro, informações nas laterais",p:[
+  mdTit(12,12,296,22,28),MP("l",12,40,62,88),MP("t",12,134,62,80,{txt:"Notas\nEscreva aqui.",tam:14,bx:1,al:"left",va:"top",pv:"Notas"}),
+  MP("m",80,40,160,174),MP("n",248,44,16,34),MP("e",266,50,42,24),MP("ph",246,86,62,60,{lb:"Imagem",ico:"img"}),
+  MP("t",246,152,62,62,{txt:"Fonte\n(edite aqui)",tam:13,bx:1,al:"left",va:"top",pv:"Fonte"})]},
+ {n:"Mapa com detalhes ampliados",d:"Mapa geral e recortes de áreas importantes",p:[
+  mdTit(12,12,296,22,28),MP("m",12,40,196,174),MP("m",216,40,92,60),mdRot(220,82,52,16,"Detalhe A"),MP("m",216,104,92,60),mdRot(220,146,52,16,"Detalhe B"),
+  MP("h",66,74,26,22),MP("h",124,134,26,22),MP("l",216,168,92,46)]},
+ {n:"Cartaz de apresentação",d:"Título grande e mapa largo para projetar",p:[
+  mdFaixa(12,12,296,40),MP("t",22,14,276,24,{txt:"Título do cartaz",tam:44,neg:1,al:"left",pv:"Título do cartaz"}),MP("t",22,38,200,12,{txt:"Subtítulo (edite aqui)",tam:20,al:"left",pv:"bars"}),
+  MP("m",12,58,296,142),MP("l",20,118,76,74),MP("n",278,64,22,28,{fundo:1}),MP("e",226,176,74,16,{fundo:1}),
+  MP("t",12,203,296,11,{txt:"Fonte: (edite aqui)",tam:12,al:"left",pv:"bars"})]},
+ {n:"Folha técnica com carimbo",d:"Moldura e quadro de informações na base",p:[
+  MP("m",12,12,232,156),MP("n",212,22,22,28,{fundo:1}),MP("l",252,12,56,156),
+  MP("b",12,174,130,40,{nf:1}),MP("b",142,174,56,40,{nf:1}),MP("b",198,174,56,40,{nf:1}),MP("b",254,174,54,40,{nf:1}),
+  MP("t",14,176,126,24,{txt:"Título do mapa",tam:24,neg:1,al:"left",pv:"Título do mapa"}),MP("t",14,200,126,12,{txt:"Fonte: (edite aqui)",tam:12,al:"left",pv:"bars"}),
+  MP("t",144,175,52,13,{txt:"Escala",tam:13,pv:"Escala"}),MP("e",144,188,52,24),
+  MP("t",200,175,52,13,{txt:"Projeção",tam:13,pv:"Projeção"}),MP("t",200,190,52,22,{txt:"SIRGAS 2000",tam:12,pv:"bars"}),
+  MP("t",256,175,50,13,{txt:"Data",tam:13,pv:"Data"}),MP("t",256,190,50,22,{txt:"__/__/____",tam:12,pv:"bars"})]},
+ {n:"Mapa com miniaturas na base",d:"Mapa principal e evolução em miniaturas",p:[
+  mdTit(12,12,296,22,28),MP("m",12,40,224,118),MP("l",244,40,64,82),MP("n",246,128,18,30),MP("e",266,132,42,22),
+  MP("m",12,166,70,48),MP("m",88,166,70,48),MP("m",164,166,70,48),MP("m",240,166,68,48),
+  mdRot(15,197,32,14,"2010"),mdRot(91,197,32,14,"2015"),mdRot(167,197,32,14,"2020"),mdRot(243,197,32,14,"2025")]},
+ {n:"Faixa de informações na base",d:"Mapa grande e os dados em uma faixa embaixo",p:[
+  MP("m",12,12,296,150),MP("b",12,168,296,46,{fill:"#f1f4f2",stroke:MD_BORDA}),
+  MP("t",18,172,92,24,{txt:"Título do mapa",tam:26,neg:1,al:"left",va:"top",pv:"Título do mapa"}),MP("t",18,198,92,14,{txt:"Fonte: (edite aqui)",tam:12,al:"left",pv:"bars"}),
+  MP("l",116,170,96,42),MP("n",218,172,18,38),MP("e",240,180,68,26)]},
+ {n:"Painel de indicadores",d:"Números de destaque acima do mapa",p:[
+  mdTit(12,12,296,22,28),
+  MP("b",12,40,94,34,{nf:1}),MP("b",18,48,4,18,{fill:"#f4a58a",stroke:"#c0502f"}),MP("t",28,43,76,18,{txt:"1.234",tam:30,neg:1,al:"left",pv:"1.234"}),MP("t",28,60,76,12,{txt:"Indicador 1",tam:13,al:"left",pv:"bars"}),
+  MP("b",113,40,94,34,{nf:1}),MP("b",119,48,4,18,{fill:"#f2c26b",stroke:"#b9822a"}),MP("t",129,43,76,18,{txt:"5.678",tam:30,neg:1,al:"left",pv:"5.678"}),MP("t",129,60,76,12,{txt:"Indicador 2",tam:13,al:"left",pv:"bars"}),
+  MP("b",214,40,94,34,{nf:1}),MP("b",220,48,4,18,{fill:"#b7a4e0",stroke:"#6b55b0"}),MP("t",230,43,76,18,{txt:"9.012",tam:30,neg:1,al:"left",pv:"9.012"}),MP("t",230,60,76,12,{txt:"Indicador 3",tam:13,al:"left",pv:"bars"}),
+  MP("m",12,80,214,134),MP("l",234,80,74,76),MP("n",238,162,18,26),MP("e",258,166,50,22),mdFonte(234,194,74,20)]},
+ {n:"Editorial com texto e mapa",d:"Estilo de reportagem ou artigo",p:[
+  MP("t",12,12,108,42,{txt:"Título do mapa",tam:34,neg:1,al:"left",va:"top",pv:"Título do mapa"}),
+  MP("t",12,56,108,70,{txt:"Escreva aqui o texto de apoio: contexto, método e principais resultados do mapa.",tam:16,al:"left",va:"top",pv:"bars"}),
+  MP("l",12,132,108,82),MP("m",128,12,180,202),MP("n",278,18,24,30,{fundo:1}),MP("e",226,194,74,16,{fundo:1})]},
+ {n:"Três mapas em linha",d:"Evolução em três momentos, uma legenda",p:[
+  mdTit(12,12,296,22,28),MP("m",12,40,70,110),MP("m",88,40,70,110),MP("m",164,40,70,110),
+  mdCap(12,154,70,16,"2010"),mdCap(88,154,70,16,"2018"),mdCap(164,154,70,16,"2025"),
+  MP("l",240,40,68,92),MP("n",242,138,18,32),MP("e",262,144,46,22),MP("t",12,176,222,38,{txt:"Fonte: (edite aqui)",tam:14,bx:1,al:"left",va:"top",pv:"bars"})]},
+ {n:"Institucional com logos",d:"Cabeçalho e rodapé para órgãos e empresas",p:[
+  MP("ph",12,12,40,24,{lb:"Logo"}),MP("t",58,12,204,24,{txt:"Título do mapa",tam:32,neg:1,pv:"Título"}),MP("ph",268,12,40,24,{lb:"Logo"}),
+  MP("m",12,42,214,130),MP("l",234,42,74,84),MP("n",238,134,18,36),MP("e",258,142,50,26),
+  MP("b",12,178,296,36,{nf:1}),MP("ph",18,184,36,24,{lb:"Logo"}),MP("ph",60,184,36,24,{lb:"Logo"}),MP("ph",102,184,36,24,{lb:"Logo"}),
+  MP("t",152,182,150,28,{txt:"Fonte e créditos: (edite aqui)",tam:14,al:"left",pv:"bars"})]},
+ {n:"Mapa comentado",d:"Pontos numerados com notas ao lado",p:[
+  mdTit(12,12,296,22,28),MP("m",12,40,206,174),MP("k",78,104,16,16,{n:1}),MP("k",132,136,16,16,{n:2}),MP("k",150,86,16,16,{n:3}),
+  MP("t",226,40,82,72,{txt:"Notas\n1 — (edite aqui)\n2 — (edite aqui)\n3 — (edite aqui)",tam:20,bx:1,al:"left",va:"top",pv:"Notas"}),
+  MP("l",226,118,82,72),MP("n",230,194,16,20),MP("e",250,196,58,16)]}
+];
+
+/* ---- prévia (SVG) ---- */
+function mdBlob(x,y,w,h){var s=Math.min(w/100,h/90)*.78;return'<path d="M10 40C14 14 40 4 62 12C86 20 98 40 88 62C78 84 48 90 28 78C10 68 6 54 10 40Z" transform="translate('+(x+w/2-52*s)+' '+(y+h/2-47*s)+') scale('+s+')" fill="#1e7a4c" fill-opacity=".35"/>'}
+function mdRect(p,fill,stroke,sw,extra){return'<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="2" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||.6)+'"'+(extra||"")+'/>'}
+function mdParte(p){
+  var x=p.x,y=p.y,w=p.w,h=p.h,o="",i;
+  if(p.k==="m")return mdRect(p,"#cde7df","#5f9c88")+mdBlob(x,y,w,h);
+  if(p.k==="l"){
+    var n=Math.max(1,Math.min(4,Math.floor((h-20)/15)));
+    o=mdRect(p,"#fff",MD_BORDA)+'<text x="'+(x+w/2)+'" y="'+(y+11)+'" text-anchor="middle" font-size="10" font-weight="700" fill="#333" font-family="sans-serif">Legenda</text>';
+    for(i=0;i<n;i++){var yy=y+19+i*15;o+='<rect x="'+(x+7)+'" y="'+yy+'" width="9" height="9" fill="'+MD_COR[i]+'" stroke="#555" stroke-width=".4"/><rect x="'+(x+20)+'" y="'+(yy+3)+'" width="'+Math.max(8,w-30)+'" height="3" fill="#cfd6d2"/>'}
+    return o;
+  }
+  if(p.k==="e"){
+    var bw=Math.min(w-8,40)/2,cx=x+w/2,cy=y+h/2;
+    return(p.fundo?mdRect(p,"#fff",MD_BORDA):"")+'<rect x="'+(cx-bw)+'" y="'+(cy-2)+'" width="'+bw+'" height="4" fill="#333"/><rect x="'+cx+'" y="'+(cy-2)+'" width="'+bw+'" height="4" fill="#fff" stroke="#333" stroke-width=".5"/>';
+  }
+  if(p.k==="n"){
+    var s=Math.min(w/12,h/16);
+    return(p.fundo?mdRect(p,"#fff",MD_BORDA):"")+'<path d="M0 -8L5 6L0 3L-5 6Z" transform="translate('+(x+w/2)+' '+(y+h/2)+') scale('+s+')" fill="#333"/>';
+  }
+  if(p.k==="t"){
+    if(p.fundo||p.bx)o=mdRect(p,p.fundo?"#fff":"none",p.bx?MD_BORDA:"none");
+    if(p.pv==="bars"){
+      var bh=3,gap=7,nb=h<18?1:2,y0=y+h/2-(nb-1)*gap/2-bh/2;
+      for(i=0;i<nb;i++)o+='<rect x="'+(x+6)+'" y="'+(y0+i*gap)+'" width="'+Math.max(6,(w-12)*(i?.7:1))+'" height="'+bh+'" fill="#cfd6d2"/>';
+    }else{
+      var tx=p.al==="left"?x+5:(p.al==="right"?x+w-5:x+w/2),an=p.al==="left"?"start":(p.al==="right"?"end":"middle"),fs=Math.max(8,Math.min(13,h*.6));
+      o+='<text x="'+tx+'" y="'+(p.va==="top"?y+fs+3:y+h/2)+'" text-anchor="'+an+'"'+(p.va==="top"?"":' dominant-baseline="central"')+' font-size="'+fs+'" font-weight="'+(p.neg?700:400)+'" fill="#333" font-family="sans-serif">'+esc(p.pv||"")+'</text>';
+    }
+    return o;
+  }
+  if(p.k==="b")return mdRect(p,p.nf?"none":(p.fill||"none"),p.stroke||MD_BORDA);
+  if(p.k==="h")return mdRect(p,"none","#d85a30",1.5);
+  if(p.k==="ph"){
+    o=mdRect(p,"#f5f7f6",MD_BORDA);
+    if(p.ico==="bars"){for(i=0;i<5;i++){var bh2=10+((i*7)%4)*7;o+='<rect x="'+(x+12+i*((w-24)/5))+'" y="'+(y+h-8-bh2)+'" width="'+((w-24)/5-4)+'" height="'+bh2+'" fill="#9a82d6" fill-opacity=".6"/>'}}
+    else if(p.ico==="grid")o+='<path d="M'+x+' '+(y+h*.45)+'H'+(x+w)+'M'+x+' '+(y+h*.72)+'H'+(x+w)+'M'+(x+w*.38)+' '+(y+h*.3)+'V'+(y+h)+'M'+(x+w*.7)+' '+(y+h*.3)+'V'+(y+h)+'" stroke="'+MD_BORDA+'" stroke-width=".6" fill="none"/>';
+    else if(p.ico==="img")o+='<path d="M'+x+' '+y+'L'+(x+w)+' '+(y+h)+'M'+(x+w)+' '+y+'L'+x+' '+(y+h)+'" stroke="'+MD_BORDA+'" stroke-width=".6"/>';
+    o+='<text x="'+(x+w/2)+'" y="'+(p.ico==="bars"||p.ico==="grid"?y+9:y+h/2)+'" text-anchor="middle"'+(p.ico==="bars"||p.ico==="grid"?"":' dominant-baseline="central"')+' font-size="'+(p.ico?9:10)+'" fill="#333" font-family="sans-serif">'+esc(p.lb||"")+'</text>';
+    return o;
+  }
+  if(p.k==="k")return'<circle cx="'+(x+w/2)+'" cy="'+(y+h/2)+'" r="'+(w/2)+'" fill="#f4a58a" stroke="#c0502f" stroke-width=".6"/><text x="'+(x+w/2)+'" y="'+(y+h/2)+'" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="700" fill="#333" font-family="sans-serif">'+p.n+'</text>';
+  return"";
+}
+function mdSvg(m){
+  return'<svg viewBox="0 0 320 226" role="img" aria-label="Prévia: '+esc(m.n)+'"><rect x="3" y="3" width="314" height="220" rx="3" fill="#fff" stroke="'+MD_BORDA+'" stroke-width=".6"/>'+m.p.map(mdParte).join("")+'</svg>';
+}
+
+/* ---- aplica o modelo na folha ---- */
+function mdCria(t,x,y,w,h,extra){
+  var it=Object.assign({id:"i"+prox++,t:t,x:x,y:y},JSON.parse(JSON.stringify(PAD[t])),{w:w,h:h},extra||{});
+  if(t==="escala")padroesEscala(it);
+  itens.push(it);montar(it);return it;
+}
+function mdTexto(x,y,w,h,txt,o){
+  var e={txt:txt,tam:o.tam||16,cor:"#111111",neg:!!o.neg,alin:o.al||"center",valign:o.va||"center"};
+  if(o.bx){e.moldura=true;e.molduraEsp=0.3;e.molduraCor=MD_BORDA;e.molduraRaio=0}
+  if(o.fundo){e.fundo=true;e.fundoCor="#ffffff"}
+  if(o.bg){e.fundo=true;e.fundoCor=o.bg}
+  return mdCria("texto",x,y,w,h,e);
+}
+function mdPeca(p){
+  var x=Math.round((p.x-3)*W/314),y=Math.round((p.y-3)*H/220),w=Math.round(p.w*W/314),h=Math.round(p.h*H/220),fu=p.fundo?{fundo:true,fundoCor:"#ffffff"}:null;
+  if(p.k==="m")mdCria("mapa",x,y,w,h);
+  else if(p.k==="l")mdCria("legenda",x,y,w,h);
+  else if(p.k==="e")mdCria("escala",x,y,w,h,Object.assign({segmentsRight:1,segmentWidthAdjust:{min:15,max:36}},fu||{})); // barra compacta (largura em mm de papel): cabe na caixa do modelo
+  else if(p.k==="n")mdCria("norte",x,y,w,h,fu);
+  else if(p.k==="t")mdTexto(x,y,w,h,p.txt,p);
+  else if(p.k==="b")mdCria("forma",x,y,w,h,{forma:"ret",preenche:!!(p.fill&&!p.nf),preencheCor:p.fill||"#ffffff",contornoCor:p.stroke||MD_BORDA,contornoEsp:0.3});
+  else if(p.k==="h")mdCria("forma",x,y,w,h,{forma:"ret",preenche:false,contornoCor:"#d85a30",contornoEsp:0.8});
+  else if(p.k==="ph")mdTexto(x,y,w,h,p.ico?p.lb+"\n(use uma imagem)":p.lb,{tam:p.ico?16:18,bx:1,bg:"#f5f7f6"});
+  else if(p.k==="k"){mdCria("forma",x,y,w,h,{forma:"circ",preencheCor:"#f4a58a",contornoCor:"#c0502f",contornoEsp:0.5});mdTexto(x,y,w,h,String(p.n),{tam:24,neg:1})}
+}
+function aplicarModelo(i){
+  var m=MODELOS[i];if(!m)return;
+  iniciaHist();
+  itens.splice(0).forEach(function(it){try{if(it._m)it._m.remove()}catch(e){}if(it._el)it._el.remove()});
+  sel=null;selExtra=[];
+  m.p.forEach(function(pc){try{mdPeca(pc)}catch(e){console.error("Modelo:",e)}}); // uma peça com problema não impede as outras
+  marcar();props();atualizaEscalas();try{listaItens()}catch(e){}
+  hist.pausa=Date.now()+900;agendaHist(); // os mapas novos ainda se ajustam: conta como uma só ação (Ctrl+Z desfaz o modelo inteiro)
+  aviso(snap.camadas.length?"Modelo aplicado. Agora ajuste a visualização de cada mapa.":"Modelo aplicado. Ainda não recebi camadas: volte à aba do mapa e adicione uma camada.",3800);
+}
+
+/* ---- modal ---- */
+var mdSel=-1;
+function mdMonta(){
+  var g=$("mdl-grid");if(g.children.length)return;
+  g.innerHTML=MODELOS.map(function(m,i){return'<button type="button" class="mdl-card" role="option" aria-selected="false" data-i="'+i+'">'+mdSvg(m)+'<b>'+(i+1)+' · '+esc(m.n)+'</b><small>'+esc(m.d)+'</small></button>'}).join("");
+}
+function mdEscolhe(i){
+  mdSel=i;
+  [].slice.call($("mdl-grid").children).forEach(function(c,k){c.setAttribute("aria-selected",k===i?"true":"false")});
+  $("mdl-ok").disabled=i<0;
+  $("mdl-aviso").textContent=i<0?"Clique em um modelo para escolher.":("“"+MODELOS[i].n+"”"+(itens.length?": os itens que já estão na folha serão substituídos (dá para voltar com Ctrl+Z).":"."));
+}
+function abrirModelos(){mdMonta();mdEscolhe(-1);$("modelos-overlay").classList.add("show");var c=$("mdl-grid").firstChild;if(c)c.focus()}
+function fecharModelos(){$("modelos-overlay").classList.remove("show");var b=$("b-modelos");if(b)b.focus()}
+function mdUsar(){if(mdSel<0)return;var i=mdSel;fecharModelos();aplicarModelo(i)}
+$("b-modelos").onclick=abrirModelos;
+$("mdl-close-btn").onclick=fecharModelos;
+$("mdl-cancel").onclick=fecharModelos;
+$("mdl-ok").onclick=mdUsar;
+$("modelos-overlay").addEventListener("pointerdown",function(e){if(e.target===this)fecharModelos()});
+$("mdl-grid").addEventListener("click",function(e){var c=e.target.closest(".mdl-card");if(c)mdEscolhe(+c.dataset.i)});
+$("mdl-grid").addEventListener("dblclick",function(e){var c=e.target.closest(".mdl-card");if(c){mdEscolhe(+c.dataset.i);mdUsar()}});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&$("modelos-overlay").classList.contains("show")){e.preventDefault();fecharModelos()}});
+
 
 /* ---------- ajuste de tamanho da folha ---------- */
 /* ---------- zoom e movimento da folha ---------- */
@@ -4951,8 +5174,8 @@ if(window.ResizeObserver)new ResizeObserver(ajustar).observe($("palco"));
     delete ptr[e.pointerId];
     try{palco.releasePointerCapture(e.pointerId)}catch(x){}
     if(!pts().length){
-      /* toque simples no fundo da folha, sem arrastar: desmarca o item (como antes) */
-      if(e.type==="pointerup"&&gesto&&gesto.t==="pan"&&!gesto.moveu&&gesto.alvo===$("pagina")){sel=null;selExtra=[];marcar();props()}
+      /* toque simples no fundo, sem arrastar: desmarca o item. Vale para a parte branca da folha E para a área colorida ao redor dela */
+      if(e.type==="pointerup"&&gesto&&gesto.t==="pan"&&!gesto.moveu&&(gesto.alvo===$("pagina")||gesto.alvo===palco||gesto.alvo===$("caixa"))){sel=null;selExtra=[];marcar();props()}
       gesto=null;palco.classList.remove("panning");
     }else iniciaGesto();
   }
@@ -5649,7 +5872,7 @@ function refazerLay(){
     var k=(e.key||"").toLowerCase();
     if(k!=="z"&&k!=="y")return;
     if(emDigitacao(e.target)||hall)return; // dentro de caixas de texto vale o desfazer do próprio navegador
-    if(document.querySelector("#export-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
+    if(document.querySelector("#export-overlay.show,#modelos-overlay.show,#sair-overlay.show,#grid-dialog-overlay.show,#color-picker-overlay.show"))return;
     e.preventDefault();
     if(k==="y"||e.shiftKey)refazerLay();else desfazerLay();
   });
@@ -5665,6 +5888,7 @@ var PASSOS_TUTORIAL_LAYOUT=[
   {sel:"#salvar",t:"Salvar",x:"O layout <b>só é guardado quando você clica aqui</b>: não existe salvamento automático. Ele precisa ter pelo menos um item."},
   {sel:"#imprimir",t:"Exportar",x:"Gera o layout em <b>PNG</b> (imagem da página inteira, em alta resolução) ou em <b>PDF</b> (abre a impressão; escolha “Salvar como PDF”)."},
   {sel:["#b-desfazer","#b-refazer"],t:"Desfazer e Refazer",x:"Voltam ou repetem as últimas ações na folha. Atalhos: <b>Ctrl+Z</b> e <b>Ctrl+Y</b>."},
+  {sel:"#b-modelos",t:"Modelos",x:"Abre uma galeria de folhas prontas, cada uma com a prévia. Ao escolher, mapa, legenda, escala, seta do Norte e textos entram na folha já organizados: depois é só <b>ajustar a visualização de cada mapa</b>. Se já houver itens na folha, eles são substituídos (dá para voltar com Ctrl+Z)."},
   {sel:'[data-add="mapa"]',t:"Mapa",x:"Coloca na folha o mapa que você montou. Depois, em <b>Propriedades</b>, ajuste a escala, as camadas, a grade de coordenadas e a moldura."},
   {sel:'[data-add="legenda"]',t:"Legenda",x:"Mostra o que cada cor e cada camada quer dizer. Em Propriedades você escolhe as camadas, muda a ordem, edita os rótulos e define o <b>arredondamento de canto</b>."},
   {sel:'[data-add="escala"]',t:"Escala",x:"Barra de escala ligada a um mapa da folha: quanto mede o mapa. Há vários estilos e unidades (metros, quilômetros, milhas…)."},
