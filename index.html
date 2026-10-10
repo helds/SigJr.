@@ -4495,6 +4495,12 @@ const POINT_ANCHOR_TO_DIRECTION = {
       +'<li>Exporta a seleção em shapefile (.zip) e salva o mapa.</li>'
       +'<li>Layout em A4 com mapa, legenda, escala, seta do Norte, textos e imagens.</li></ul>'
       +'<h3>Tecnologias</h3><p>HTML, CSS e JavaScript, com as bibliotecas Leaflet 1.9.4, Leaflet.draw 1.0.4, Turf.js 6.5.0, georaster 1.6.0, georaster-layer-for-leaflet 3.10.0, JSZip 3.10.1, shp.js 6.2.0 e sql.js 1.10.3. Fonte Atkinson Hyperlegible.</p>'
+      +'<h3>Créditos dos mapas de fundo</h3><p>Os mapas de fundo vêm de serviços de terceiros, carregados pela internet, e seguem os termos de uso de cada provedor.</p>'
+      +'<ul><li><b>OpenStreetMap</b>: © contribuidores do <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, com dados sob a licença ODbL. Estilos: Humanitário (HOT) e França (nomes locais), com hospedagem da OSM França; Ciclismo (CyclOSM); Transporte público (ÖPNVKarte, memomaps.de); Topográfico (OpenTopoMap), com dados SRTM e estilo © OpenTopoMap (CC-BY-SA).</li>'
+      +'<li><b>CARTO</b> (Claro e Escuro): © contribuidores do OpenStreetMap © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.</li>'
+      +'<li><b>Esri</b> (satélite, satélite com nomes, Clarity, ruas, topográfico, cinza claro e cinza escuro): Esri, Maxar, Earthstar Geographics e a comunidade GIS.</li>'
+      +'<li><b>Esri National Geographic</b>: National Geographic, Esri, Garmin, HERE, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC.</li>'
+      +'<li><b>Sentinel-2 (EOX)</b>, de 2018 a 2021: Sentinel-2 cloudless © EOX IT Services GmbH (dados Copernicus Sentinel modificados).</li></ul>'
       +'<h3>Inspiração</h3><p>O GisJr. foi inspirado no <a href="https://qgis.org" target="_blank" rel="noopener">QGIS</a>, software livre de SIG. É um projeto independente, sem vínculo com o QGIS.ORG.</p>'
       +'<h3>Licença e como citar</h3><p>Os direitos do GisJr. pertencem aos seus autores. As bibliotecas acima mantêm as próprias licenças de código aberto.</p>'
       +'<p id="sobre-cit" class="sobre-cit"></p>'
@@ -5338,7 +5344,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
   var A_OSM="© contribuidores do <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>",A_ESRI="Esri, Maxar, Earthstar Geographics e a comunidade GIS",A_CARTO=A_OSM+" © <a href='https://carto.com/attributions'>CARTO</a>";
   function esriU(n,b){return"https://server.arcgisonline.com/ArcGIS/rest/services/"+n+"/MapServer/tile/{z}/{y}/{x}"}
   function eoxU(y){return"https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-"+y+"_3857/default/g/{z}/{y}/{x}.jpg"}
-  // u = URL dos tiles, a = crédito, m = zoom máximo real do servidor (acima disso o tile é ampliado), s = subdomínios, o = camada transparente por cima
+  // u = URL dos tiles, a = crédito, m = zoom máximo real do servidor (acima disso o tile é ampliado), s = subdomínios, o = camada transparente por cima. Os créditos (a) também estão escritos em abrirSobre(), em "Créditos dos mapas de fundo": ao acrescentar um fundo novo, atualize lá também
   var FUNDOS={
     "osm":{nome:"OpenStreetMap — Padrão",u:"https://tile.openstreetmap.org/{z}/{x}/{y}.png",a:A_OSM,m:19},
     "osm-hot":{nome:"OpenStreetMap — Humanitário (HOT)",u:"https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",a:A_OSM+", estilo HOT, hospedagem OSM França",m:19,s:"abc"},
@@ -5395,10 +5401,10 @@ const POINT_ANCHOR_TO_DIRECTION = {
       sel.appendChild(og);
     });
     l1.appendChild(sel);box.appendChild(l1);
-    var sub=h("div");box.appendChild(sub);
+    
     var l2=h("label",null,"Estado"),uf=h("select");
     Object.keys(UFS).forEach(function(k){var op=h("option",null,UFS[k]+" ("+k+")");op.value=k;uf.appendChild(op)});
-    l2.appendChild(uf);box.appendChild(l2);
+    l2.appendChild(uf);box.appendChild(l2);var sub=h("div");box.appendChild(sub);
     var lv=h("label",null,"Variação do mapa"),vs=h("select");lv.appendChild(vs);box.appendChild(lv);
     var bt=h("div","dlg-bts"),cancel=h("button","mini","Cancelar"),ok=h("button","mini ok","Adicionar");
     bt.appendChild(cancel);bt.appendChild(ok);box.appendChild(bt);
