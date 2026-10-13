@@ -705,7 +705,7 @@ html.hall .barra,html.hall .area,html.hall #export-overlay,html.hall #modelos-ov
       <div class="cp-menu">
         <button type="button" class="cp-menu-item" id="cp-menu-copy">Copiar</button>
         <button type="button" class="cp-menu-item" id="cp-menu-paste">Colar</button>
-        <button type="button" class="cp-menu-item" id="cp-menu-choose">Escolher…</button>
+        <button type="button" class="cp-menu-item" id="cp-menu-choose">Selecionar</button>
       </div>
     </div>
     <div class="cp-footer">
@@ -1475,6 +1475,11 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       }
 
       const paneName = ensureItemLayerPane(item, layer.id);
+      { // Mesclagem do preenchimento com imagem: vale para a camada toda, no painel (pane) dela
+        const symSrc = (item.lockStyles && item._lockedStyleSrc && item._lockedStyleSrc.get(layer.id)) ? item._lockedStyleSrc.get(layer.id).symbology : layer.symbology;
+        const pnEl = map.getPane(paneName);
+        if (pnEl) pnEl.style.mixBlendMode = layoutBlendFor(symSrc);
+      }
       if (!leafletLayer) {
         // smoothFactor:0 desliga a simplificação (Douglas-Peucker) que o Leaflet faz nas
         // linhas e polígonos conforme o zoom diminui: o layout mostra e exporta a geometria completa.
@@ -1522,6 +1527,115 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
   const LSYM_CAP = { square: 'square', flat: 'butt', round: 'round' };
   const LSYM_JOIN = { bevel: 'bevel', miter: 'miter', round: 'round' };
 
+  /* ---------- Preenchimento com imagem: motor (o mesmo código roda no GisJr e no Layout) ----------
+     O símbolo simples ganha fillStyle:"image" e fillImage:{ id, src, nw, nh, ar, name, mode, base, zx, zy, ox, oy, rot, fx, fy,
+     lock, bgOn, bg, opac, tile, blend }.
+     mode "fit":  a imagem é posicionada em relação à caixa (retângulo envolvente) de CADA feição, num quadro de altura 1 e largura A
+                  (A = largura/altura da caixa). base = tamanho inicial (cover/contain/stretch); zx/zy = zoom sobre esse tamanho;
+                  ox/oy = deslocamento do centro (fração da largura/altura da caixa); rot em graus; fx/fy espelham.
+     mode "tile": repete a imagem (tile px de largura) a partir do canto superior esquerdo da feição.
+     O desenho é um <pattern> SVG por feição, ancorado nas coordenadas do Leaflet e reposicionado a cada redesenho. */
+  var IMG_NS="http://www.w3.org/2000/svg";
+  var BLEND_OPTS=[["normal","Normal"],["multiply","Multiplicar"],["screen","Tela"],["overlay","Sobreposição"],["darken","Escurecer"],["lighten","Clarear"],
+    ["color-dodge","Subexposição de cores"],["color-burn","Superexposição de cores"],["soft-light","Luz suave"],["hard-light","Luz direta"],
+    ["difference","Diferença"],["exclusion","Exclusão"],["hue","Matiz"],["saturation","Saturação"],["color","Cor"],["luminosity","Luminosidade"]];
+  var BLEND_OK={};BLEND_OPTS.forEach(function(b){BLEND_OK[b[0]]=1});
+  function imgOk(f){return !!(f&&f.fillStyle==="image"&&f.fillImage&&f.fillImage.src)}
+  function imgN(v){v=+v;return isFinite(v)?String(Math.round(v*100000)/100000):"0"}
+  function imgHex(c){return /^#[0-9a-f]{6}$/i.test(c)?c:"#ffffff"}
+  // Modo de mesclagem (CSS mix-blend-mode) do símbolo, ou "" quando é Normal / não há imagem.
+  function mesclaDe(f){var b=imgOk(f)?f.fillImage.blend:"";return(b&&b!=="normal"&&BLEND_OK[b])?b:""}
+  // Tamanho-base da imagem no quadro (altura 1, largura A), antes do zoom.
+  function imgBase(cfg,A){
+    var ar=cfg.ar>0?cfg.ar:1,iw,ih;
+    if(cfg.base==="stretch"){iw=A;ih=1}
+    else if(cfg.base==="contain"){iw=Math.min(A,ar);ih=iw/ar}
+    else{iw=Math.max(A,ar);ih=iw/ar}
+    return{iw:iw,ih:ih};
+  }
+  // Posição final da imagem no quadro: centro, largura, altura e giro.
+  function imgPos(cfg,A){
+    var b=imgBase(cfg,A),zx=cfg.zx>0?cfg.zx:1,zy=cfg.zy>0?cfg.zy:1;
+    return{W:b.iw*zx,H:b.ih*zy,cx:A/2+(+cfg.ox||0)*A,cy:.5+(+cfg.oy||0),rot:+cfg.rot||0};
+  }
+  // Conteúdo de um <pattern>. ref = "#id" de um <image> compartilhado (mapa) ou null para embutir a imagem (prévias).
+  function imgInner(cfg,A,ref){
+    var el=ref?'<use href="'+ref+'"/>':'<image x="-.5" y="-.5" width="1" height="1" preserveAspectRatio="none" href="'+cfg.src+'"/>';
+    var op=cfg.opac==null?1:Math.max(0,Math.min(100,+cfg.opac))/100,oa=op<1?' opacity="'+imgN(op)+'"':'',o="",sx=cfg.fx?-1:1,sy=cfg.fy?-1:1;
+    if(cfg.mode==="tile"){
+      if(cfg.bgOn!==false)o+='<rect width="1" height="1" fill="'+imgHex(cfg.bg)+'"/>';
+      return o+'<g'+oa+' transform="translate(.5 .5) scale('+sx+' '+sy+')">'+el+'</g>';
+    }
+    var p=imgPos(cfg,A);
+    if(cfg.bgOn!==false)o+='<rect width="'+imgN(A)+'" height="1" fill="'+imgHex(cfg.bg)+'"/>';
+    return o+'<g'+oa+' transform="translate('+imgN(p.cx)+' '+imgN(p.cy)+') rotate('+imgN(p.rot)+') scale('+imgN(p.W*sx)+' '+imgN(p.H*sy)+')">'+el+'</g>';
+  }
+  // Caixa da feição em pixels do Leaflet (mesmo sistema de coordenadas do SVG da camada).
+  function imgCaixa(map,layer){
+    try{
+      var b=layer.getBounds&&layer.getBounds();if(!b||!b.isValid())return null;
+      var a=map.latLngToLayerPoint(b.getNorthWest()),z=map.latLngToLayerPoint(b.getSouthEast());
+      var w=z.x-a.x,h=z.y-a.y;
+      if(!(w>1e-6)||!(h>1e-6)||w>5e7||h>5e7)return null;
+      return{x:a.x,y:a.y,w:w,h:h};
+    }catch(e){return null}
+  }
+  // Cria/atualiza o <pattern> da feição e liga o caminho a ele. Devolve false quando não dá (cai na cor lisa).
+  function imgAplica(rend,layer){
+    var o=layer.options,cfg=o.fillImage,svg=rend&&rend._container,map=rend&&rend._map,path=layer._path;
+    if(!cfg||!cfg.src||!svg||!map||!path||!map._loaded)return false;
+    var g=imgCaixa(map,layer);if(!g)return false;
+    var defs=svg.querySelector("defs");
+    if(!defs){defs=document.createElementNS(IMG_NS,"defs");svg.insertBefore(defs,svg.firstChild)}
+    var im=rend._gjImg;
+    if(!im||im.parentNode!==defs){ // a imagem entra uma vez só por camada; todos os padrões a reaproveitam com <use>
+      im=document.createElementNS(IMG_NS,"image");im.setAttribute("id","gjim"+L.stamp(rend));
+      im.setAttribute("x","-.5");im.setAttribute("y","-.5");im.setAttribute("width","1");im.setAttribute("height","1");im.setAttribute("preserveAspectRatio","none");
+      defs.appendChild(im);rend._gjImg=im;
+    }
+    if(im.getAttribute("data-i")!==cfg.id){im.setAttribute("href",cfg.src);im.setAttribute("data-i",cfg.id)}
+    var pat=layer._gjPat,tile=cfg.mode==="tile",pid="gjip"+L.stamp(rend)+"_"+L.stamp(layer);
+    if(!pat||pat.parentNode!==defs){
+      pat=document.createElementNS(IMG_NS,"pattern");pat.setAttribute("id",pid);pat.setAttribute("patternUnits","userSpaceOnUse");
+      pat.setAttribute("preserveAspectRatio","none");defs.appendChild(pat);layer._gjPat=pat;pat._k=pat._g=null;
+    }
+    var T=Math.max(4,+cfg.tile||64),ar=cfg.ar>0?cfg.ar:1,A=Math.round(g.w/g.h*1e4)/1e4;
+    var key=[cfg.id,tile?"t":"f",cfg.base,cfg.zx,cfg.zy,cfg.ox,cfg.oy,cfg.rot,cfg.fx?1:0,cfg.fy?1:0,cfg.bgOn===false?0:1,cfg.bg,cfg.opac,ar,tile?0:A].join("|");
+    if(pat._k!==key){
+      pat._k=key;
+      pat.setAttribute("viewBox",tile?"0 0 1 1":"0 0 "+imgN(A)+" 1");
+      pat.innerHTML=imgInner(cfg,A,"#"+im.id);
+    }
+    var gx=tile?[g.x,g.y,T,T/ar]:[g.x,g.y,g.w,g.h],gk=gx.join(",");
+    if(pat._g!==gk){pat._g=gk;pat.setAttribute("x",gx[0]);pat.setAttribute("y",gx[1]);pat.setAttribute("width",gx[2]);pat.setAttribute("height",gx[3])}
+    var ref="url(#"+pid+")";if(path.getAttribute("fill")!==ref)path.setAttribute("fill",ref);
+    return true;
+  }
+  function imgSolta(layer){if(layer._gjPat){if(layer._gjPat.parentNode)layer._gjPat.parentNode.removeChild(layer._gjPat);layer._gjPat=null}}
+  // Leaflet: depois de pintar cada caminho SVG, troca o preenchimento liso pelo padrão da imagem; e o reposiciona a cada redesenho.
+  (function(){
+    if(!window.L||!L.SVG||L.SVG._gjImg)return;L.SVG._gjImg=true;
+    var oU=L.SVG.prototype._updateStyle,oP=L.SVG.prototype._updatePoly,oR=L.SVG.prototype._removePath;
+    L.SVG.prototype._updateStyle=function(layer){
+      oU.call(this,layer);
+      var o=layer.options;
+      if(!o.fillImage)imgSolta(layer);
+      else if(o.fill&&layer._path)imgAplica(this,layer);
+    };
+    if(oP)L.SVG.prototype._updatePoly=function(layer,closed){
+      oP.call(this,layer,closed);
+      var o=layer.options;
+      if(o&&o.fill&&o.fillImage&&layer._path)imgAplica(this,layer);
+    };
+    if(oR)L.SVG.prototype._removePath=function(layer){imgSolta(layer);oR.call(this,layer)};
+  })();
+  // ---- Preenchimento com imagem (vem do símbolo simples do mapa principal) ----
+  function layoutBlendFor(sym) {
+    if (!sym) return '';
+    const f = sym.renderer ? (sym.renderer === 'single' ? sym.single : null) : sym;
+    return mesclaDe(f);
+  }
+
   function layoutStyleForSymbol(shape, fillColorHex, layerOpacityPct) {
     shape = shape || {};
     const opacityPct = shape.opacity !== undefined ? shape.opacity : (layerOpacityPct !== undefined ? layerOpacityPct : 100);
@@ -1534,6 +1648,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       dashArray: LSYM_DASH[shape.strokeStyle] || null,
       lineCap: LSYM_CAP[shape.capStyle] || 'butt',
       lineJoin: LSYM_JOIN[shape.joinStyle] || 'round',
+      fillImage: imgOk(shape) ? shape.fillImage : null, // sempre presente: limpa a imagem quando o estilo muda de volta
     };
   }
 
@@ -3073,8 +3188,10 @@ $("prop").addEventListener("input",function(e){if(e.target.id==="e-c1"||e.target
 
 
 /* ---------- propriedades do item da legenda (Rótulo + Personalizar) ---------- */
-function lgSym(l,ov){return Object.assign({fc:l.isRaster?"#999999":(l.color||"#3388cc"),fs:"solid",sc:"#000000",sw:0.26,ss:"solid"},ov&&ov.sym||{})}
+function lgImgDe(l){var sy=l&&!l.isRaster&&l.symbology;if(!sy)return null;var f=sy.renderer?(sy.renderer==="single"?sy.single:null):sy;return(f&&f.fillStyle==="image"&&f.fillImage&&f.fillImage.src)?f.fillImage:null}
+function lgSym(l,ov){var im=lgImgDe(l);return Object.assign({fc:l.isRaster?"#999999":(l.color||"#3388cc"),fs:im?"image":"solid",img:im?im.src:null,imgbg:im&&im.bgOn!==false?(/^#[0-9a-f]{6}$/i.test(im.bg)?im.bg:"#ffffff"):null,sc:"#000000",sw:0.26,ss:"solid"},ov&&ov.sym||{})}
 function lgFill(y){var c=y.fc,t=y.fs;if(t==="none")return"transparent";if(t==="solid")return c;
+  if(t==="image"&&y.img)return"url('"+y.img+"') center/cover no-repeat"+(y.imgbg?","+y.imgbg:"");
   var g={horizontal:"0deg",vertical:"90deg",bdiag:"45deg",fdiag:"135deg"},r=function(a){return"repeating-linear-gradient("+a+","+c+","+c+" 2px,transparent 2px,transparent 6px)"};
   return g[t]?r(g[t]):t==="cross"?r("0deg")+","+r("90deg"):c}
 function lgBord(y){if(y.ss==="none")return"0";return Math.max(1,Math.round(y.sw*3.78))+"px "+({solid:"solid",dash:"dashed",dot:"dotted"}[y.ss]||"solid")+" "+y.sc}
@@ -3085,7 +3202,7 @@ function painelLegItem(it,l){
   h+='<h3>Rótulo</h3><div class="pl"><label for="lg-rot">Texto que aparece na legenda</label><textarea id="lg-rot" rows="3">'+esc(lb)+'</textarea></div>';
   h+='<div class="pl"><label for="lg-tam">Tamanho da letra deste item (px)</label><input type="number" id="lg-tam" min="6" max="120" step="1" placeholder="igual ao da legenda" value="'+(ov.tam||"")+'"></div>';
   h+='<h3>Personalizar o símbolo</h3>'+(lgClasses(l)?'<p class="vazio" style="margin:0 0 8px">As cores e os textos das classes vêm da simbologia do mapa.</p>':'<div class="lin"><label for="lg-fc">Cor de dentro</label><input type="color" id="lg-fc" value="'+lgHex(y.fc)+'"></div>');
-  h+='<div class="pl"><label for="lg-fs">Jeito de pintar</label><select id="lg-fs">'+[["solid","Cheio"],["none","Sem pintura"],["horizontal","Listras deitadas"],["vertical","Listras em pé"],["cross","Quadriculado"],["bdiag","Diagonal /"],["fdiag","Diagonal \\"]].map(function(x){return opt(x[0],x[1],y.fs)}).join("")+'</select></div>';
+  h+='<div class="pl"><label for="lg-fs">Jeito de pintar</label><select id="lg-fs">'+(y.fs==="image"?[["image","Imagem do mapa"]]:[]).concat([["solid","Cheio"],["none","Sem pintura"],["horizontal","Listras deitadas"],["vertical","Listras em pé"],["cross","Quadriculado"],["bdiag","Diagonal /"],["fdiag","Diagonal \\"]]).map(function(x){return opt(x[0],x[1],y.fs)}).join("")+'</select></div>';
   h+='<div class="lin"><label for="lg-sc">Cor do contorno</label><input type="color" id="lg-sc" value="'+lgHex(y.sc)+'"></div>';
   h+='<div class="pl"><label for="lg-sw">Espessura do contorno (mm)</label><input type="number" id="lg-sw" min="0" step="0.1" value="'+y.sw+'"></div>';
   h+='<div class="pl"><label for="lg-ss">Tipo do contorno</label><select id="lg-ss">'+[["solid","Linha cheia"],["dash","Tracejada"],["dot","Pontilhada"],["none","Sem contorno"]].map(function(x){return opt(x[0],x[1],y.ss)}).join("")+'</select></div>';
@@ -5528,8 +5645,24 @@ let cpOverlay, cpNative, cpHex, cpWheelBox, cpWheelCanvas, cpWheelHandle;
         aviso('Não foi possível ler a área de transferência.');
       }
     });
-    document.getElementById('cp-menu-choose').addEventListener('click', (e) => {
+    // "Escolher…": conta-gotas que capta a cor de qualquer ponto da tela (Chrome, Edge, Opera).
+    // Em navegadores sem a API (Firefox, Safari) continua abrindo o seletor de cor do sistema.
+    const cpChoose = document.getElementById('cp-menu-choose');
+    const cpTemEyeDropper = typeof window.EyeDropper === 'function';
+    if (cpTemEyeDropper) {
+      cpChoose.textContent = 'Selecionar';
+      cpChoose.title = 'Clique aqui e depois em qualquer ponto da tela para pegar a cor dele';
+    }
+    cpChoose.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (cpTemEyeDropper) {
+        new EyeDropper().open().then((r) => {
+          if (!r || !r.sRGBHex || !cpTarget) return;
+          cpSetColorFromHex(r.sRGBHex.toLowerCase());
+          aviso('Cor captada: ' + r.sRGBHex.toUpperCase() + '.');
+        }).catch(() => {}); // Esc ou clique fora: nada muda
+        return;
+      }
       cpNative.value = cpDraft;
       cpNative.click();
     });

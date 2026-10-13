@@ -1619,6 +1619,50 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
 #res-regua .rr-lin{display:flex;justify-content:space-between;gap:18px;padding:1px 0}
 #res-regua .rr-lin b{font-variant-numeric:tabular-nums}
 </style>
+<style id="img-fill-css">
+/* ---- Preenchimento com imagem: bloco do painel e editor de posição ---- */
+.lp-oculto{display:none!important}
+#lp-img[hidden],#lp-img [hidden],#ie[hidden]{display:none!important}
+#lp-img{margin:0 0 12px;padding:12px;border:2px solid var(--linha);border-radius:10px;background:var(--papel)}
+.lp-sub-t{font-weight:700;color:var(--agua);margin:0 0 10px}
+.lp-img-topo{display:flex;gap:12px;align-items:center;margin:0 0 12px}
+.lp-img-thumb{flex:none;width:84px;height:64px;border-radius:8px;border:2px solid var(--linha);background:#e9e9e9 center/cover no-repeat}
+.lp-img-info{min-width:0;flex:1}
+.lp-img-info b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lp-img-info small{display:block;color:var(--tinta-2);margin:0 0 6px}
+.lp-img-info .lp-bts{margin:0}
+.lp-seg{display:flex;border:2px solid var(--linha);border-radius:8px;overflow:hidden;min-width:0}
+.lp-seg button{flex:1;border:0;background:var(--bg-campo);padding:6px 10px;font-size:15px;color:var(--tinta)}
+.lp-seg button+button{border-left:2px solid var(--linha)}
+.lp-seg button:hover{background:var(--agua-claro)}
+.lp-seg button[aria-pressed="true"]{background:var(--agua);color:var(--papel)}
+#lp-img button:disabled,#lp-img select:disabled,#lp-img input:disabled{opacity:.5;cursor:default}
+#ie{position:fixed;inset:0;z-index:4800;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:10px}
+#ie-janela{width:min(800px,100%);max-height:100%;display:flex;flex-direction:column;background:var(--card);color:var(--tinta);border:2px solid var(--agua);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.5);overflow:hidden}
+#ie-barra{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--agua);color:#fff;font-weight:700}
+#ie-tit{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ie-corpo{padding:12px;overflow:auto;min-height:0;display:flex;flex-direction:column;gap:10px}
+.ie-ferr,.ie-ctrl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.ie-ctrl label{display:flex;align-items:center;gap:8px}
+.ie-ctrl input[type=range]{width:170px;min-width:0}
+.ie-ctrl output{min-width:3.6em}
+.ie-ctrl input[type=number]{width:78px;font:inherit;padding:5px 6px;border:2px solid var(--linha);border-radius:8px;background:var(--bg-campo);color:var(--tinta)}
+.ie-ctrl input[type=color]{width:44px;height:34px;padding:2px;border:2px solid var(--linha);border-radius:6px;background:var(--bg-campo)}
+.ie-ctrl input[type=checkbox]{width:18px;height:18px;accent-color:var(--agua)}
+.ie-ferr .mini[aria-pressed="true"]{background:var(--agua);color:var(--papel);border-color:var(--agua)}
+#ie-palco{display:block;width:100%;height:auto;max-height:54vh;border:2px solid var(--linha);border-radius:8px;touch-action:none;user-select:none;-webkit-user-select:none;background:var(--bg-campo)}
+#ie-palco:focus-visible{outline:3px solid var(--sol);outline-offset:2px}
+#ie-palco .ie-nop{pointer-events:none}
+#ie-box{fill:none;stroke:var(--agua);stroke-width:1.6;pointer-events:none}
+#ie-rl{stroke:var(--agua);stroke-width:1.6;pointer-events:none}
+#ie-hit{fill:transparent;cursor:move}
+.ie-hd{fill:#fff;stroke:var(--agua);stroke-width:2}
+.ie-gd{stroke:var(--sol);stroke-width:1.4;stroke-dasharray:5 4;pointer-events:none}
+#ie-dica{margin:0;color:var(--tinta-2);font-size:14px}
+.ie-nav{display:flex;align-items:center;gap:10px}
+#ie .lp-rodape .mini{padding:8px 16px;font-size:16px}
+@media (max-width:640px){#ie{padding:0}#ie-janela{border-radius:0;height:100%}}
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1775,6 +1819,30 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
         <div id="lp-simples">
           <div class="lp-linha"><label for="lp-cor">Cor de preenchimento</label><input type="color" id="lp-cor"></div>
           <div class="lp-linha"><label id="lp-fill-l">Estilo do preenchimento</label><div class="sym-style-dropdown" id="lp-fill-dd" role="button" tabindex="0" aria-haspopup="listbox" aria-labelledby="lp-fill-l"><span class="sym-style-preview" id="lp-fill-pv"></span><span class="sym-style-dropdown-label" id="lp-fill-lb"></span><span class="sym-style-dropdown-arrow">▾</span></div></div>
+          <div id="lp-img" hidden>
+          <div class="lp-sub-t">Preenchimento com imagem</div>
+          <p class="lp-nota" id="lp-img-nota" hidden>Esta camada não tem polígonos. A imagem só preenche polígonos; linhas e pontos continuam com a cor lisa.</p>
+          <div class="lp-img-topo">
+            <div class="lp-img-thumb" id="lp-img-thumb" aria-hidden="true"></div>
+            <div class="lp-img-info">
+              <b id="lp-img-nome"></b><small id="lp-img-dim"></small>
+              <div class="lp-bts"><button type="button" class="mini" id="lp-img-esc">Escolher imagem…</button><button type="button" class="mini perigo" id="lp-img-rem">Remover</button></div>
+            </div>
+          </div>
+          <input type="file" id="lp-img-file" accept="image/*" hidden>
+          <div class="lp-linha"><label for="lp-img-modo">Aplicação</label><select id="lp-img-modo"><option value="fit">Ajustar ao shape</option><option value="tile">Repetir (mosaico)</option></select></div>
+          <div id="lp-img-fit">
+            <div class="lp-bts"><button type="button" class="mini ok" id="lp-img-ed">Posicionar e redimensionar…</button></div>
+            <div class="lp-linha"><label id="lp-img-qf-l">Ajuste rápido</label><div class="lp-seg" id="lp-img-qf" role="group" aria-labelledby="lp-img-qf-l"><button type="button" data-base="cover">Preencher</button><button type="button" data-base="contain">Conter</button><button type="button" data-base="stretch">Esticar</button></div></div>
+          </div>
+          <div id="lp-img-tile" hidden>
+            <div class="lp-linha"><label for="lp-img-tam">Tamanho do ladrilho</label><input type="range" id="lp-img-tam" min="8" max="400" step="1"><output id="lp-img-tam-v" for="lp-img-tam"></output></div>
+          </div>
+          <div class="lp-linha lp-chk"><label for="lp-img-bgon">Cor de fundo (onde a imagem não cobre)</label><input type="checkbox" id="lp-img-bgon"><input type="color" id="lp-img-bg" aria-label="Cor de fundo"></div>
+          <div class="lp-linha"><label for="lp-img-opac">Opacidade da imagem</label><input type="range" id="lp-img-opac" min="0" max="100" step="1"><output id="lp-img-opac-v" for="lp-img-opac"></output></div>
+          <div class="lp-linha"><label for="lp-img-blend">Mesclagem</label><select id="lp-img-blend"></select></div>
+          <p class="lp-nota" style="margin:0">A mesclagem mistura a camada com o que está por baixo dela no mapa. O contorno usa as opções logo abaixo.</p>
+        </div>
           <div class="lp-linha"><label for="lp-opac">Opacidade</label><input type="range" id="lp-opac" min="0" max="100" step="1"><output id="lp-opac-v" for="lp-opac"></output></div>
           <div class="lp-linha"><label for="lp-corc">Cor do contorno</label><input type="color" id="lp-corc"></div>
           <div class="lp-linha"><label for="lp-esp">Espessura do contorno (mm)</label><input type="number" id="lp-esp" min="0" max="20" step="0.05"></div>
@@ -2006,6 +2074,55 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
       <button type="button" class="mini" id="lp-cancelar">Cancelar</button>
       <button type="button" class="mini" id="lp-aplicar">Aplicar</button>
       <button type="button" class="mini ok" id="lp-ok">OK</button>
+    </div>
+  </div>
+</div>
+<div id="ie" hidden>
+  <div id="ie-janela" role="dialog" aria-modal="true" aria-labelledby="ie-tit">
+    <div id="ie-barra"><span id="ie-tit">Posicionar a imagem no shape</span><button type="button" class="lp-x" id="ie-x" aria-label="Fechar sem aplicar">✕</button></div>
+    <div id="ie-corpo">
+      <div class="ie-ferr">
+        <div class="lp-seg" id="ie-qf" role="group" aria-label="Ajuste rápido"><button type="button" data-base="cover">Preencher</button><button type="button" data-base="contain">Conter</button><button type="button" data-base="stretch">Esticar</button></div>
+        <button type="button" class="mini" id="ie-g90">↻ Girar 90°</button>
+        <button type="button" class="mini" id="ie-fh" aria-pressed="false" aria-label="Espelhar na horizontal">Espelhar ↔</button>
+        <button type="button" class="mini" id="ie-fv" aria-pressed="false" aria-label="Espelhar na vertical">Espelhar ↕</button>
+        <button type="button" class="mini" id="ie-cen">Centralizar</button>
+      </div>
+      <svg id="ie-palco" viewBox="0 0 640 420" tabindex="0" role="application" aria-label="Área de posicionamento da imagem. Arraste para mover. Setas movem, mais e menos dão zoom.">
+        <defs>
+          <pattern id="ie-chk" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#f3f3f3"/><rect width="8" height="8" fill="#dcdcdc"/><rect x="8" y="8" width="8" height="8" fill="#dcdcdc"/></pattern>
+          <clipPath id="ie-clip"><path id="ie-clip-p" clip-rule="evenodd" d=""/></clipPath>
+          <image id="ie-img" x="-.5" y="-.5" width="1" height="1" preserveAspectRatio="none"/>
+        </defs>
+        <rect class="ie-nop" width="640" height="420" fill="url(#ie-chk)"/>
+        <g class="ie-nop" id="ie-gh" opacity=".32"><use href="#ie-img"/></g>
+        <g class="ie-nop" clip-path="url(#ie-clip)"><rect id="ie-bgr" width="640" height="420" fill="#ffffff"/><g id="ie-in-g"><g id="ie-in"><use href="#ie-img"/></g></g></g>
+        <path class="ie-nop" id="ie-o1" fill="none" stroke="#fff" stroke-width="4.5" stroke-linejoin="round" d=""/>
+        <path class="ie-nop" id="ie-o2" fill="none" stroke="#1e7a4c" stroke-width="2" stroke-linejoin="round" d=""/>
+        <line class="ie-gd" id="ie-gv" x1="320" y1="0" x2="320" y2="420" style="display:none"/>
+        <line class="ie-gd" id="ie-gh2" x1="0" y1="210" x2="640" y2="210" style="display:none"/>
+        <g id="ie-fr">
+          <rect id="ie-hit" data-h="move"/>
+          <rect id="ie-box"/>
+          <line id="ie-rl"/>
+          <circle class="ie-hd" id="ie-h-nw" data-h="nw"/><circle class="ie-hd" id="ie-h-ne" data-h="ne"/><circle class="ie-hd" id="ie-h-se" data-h="se"/><circle class="ie-hd" id="ie-h-sw" data-h="sw"/>
+          <circle class="ie-hd" id="ie-h-n" data-h="n"/><circle class="ie-hd" id="ie-h-e" data-h="e"/><circle class="ie-hd" id="ie-h-s" data-h="s"/><circle class="ie-hd" id="ie-h-w" data-h="w"/>
+          <g id="ie-h-rot" data-h="rot" style="cursor:grab"><circle class="ie-hd" data-h="rot"/><text data-h="rot" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#1e7a4c" style="pointer-events:none">↻</text></g>
+        </g>
+      </svg>
+      <p id="ie-dica">Arraste a imagem para movê-la, os cantos para redimensionar e a alça redonda para girar. A roda do mouse (ou dois dedos) dá zoom. A parte fora do shape aparece esmaecida.</p>
+      <div class="ie-ctrl">
+        <label for="ie-zoom">Zoom <input type="range" id="ie-zoom" min="5" max="800" step="1"><output id="ie-zoom-v" for="ie-zoom"></output></label>
+        <label for="ie-ang">Ângulo <input type="number" id="ie-ang" min="-180" max="180" step="1"> °</label>
+        <label for="ie-lock"><input type="checkbox" id="ie-lock"> Manter proporção</label>
+        <label for="ie-bgon"><input type="checkbox" id="ie-bgon"> Fundo <input type="color" id="ie-bg" aria-label="Cor de fundo"></label>
+      </div>
+      <div class="ie-nav" id="ie-nav" hidden><button type="button" class="mini" id="ie-prev" aria-label="Feição anterior">◀</button><span id="ie-fn"></span><button type="button" class="mini" id="ie-next" aria-label="Próxima feição">▶</button></div>
+    </div>
+    <div class="lp-rodape">
+      <button type="button" class="mini" id="ie-redef" style="margin-right:auto">Redefinir</button>
+      <button type="button" class="mini" id="ie-cancel">Cancelar</button>
+      <button type="button" class="mini ok" id="ie-ok">Concluir</button>
     </div>
   </div>
 </div>
@@ -2269,6 +2386,7 @@ function excluirMapa(id){
   // ---- Tipos de preenchimento / traço / união (nomes e valores iguais aos do index) ----
   var FILL_STYLE_OPTIONS=[
     {value:"solid",label:"Sólido",pattern:"solid"},
+    {value:"image",label:"Imagem…",pattern:"image",soSimples:true},
     {value:"none",label:"Sem pincel",pattern:"none"},
     {value:"horizontal",label:"Horizontal",pattern:"horizontal"},
     {value:"vertical",label:"Vertical",pattern:"vertical"},
@@ -2317,7 +2435,110 @@ function excluirMapa(id){
     else{var s=Math.sqrt(16*C),b=(4-s)/2;body='<rect x="'+b+'" y="'+b+'" width="'+s+'" height="'+s+'" fill="'+col+'"/>'}
     return o+'width="4" height="4">'+body+'</pattern>';
   }
-  function temPadrao(st){return !!st&&st!=="solid"&&st!=="none"}
+  function temPadrao(st){return !!st&&st!=="solid"&&st!=="none"&&st!=="image"}
+  /* ---------- Preenchimento com imagem: motor (o mesmo código roda no GisJr e no Layout) ----------
+     O símbolo simples ganha fillStyle:"image" e fillImage:{ id, src, nw, nh, ar, name, mode, base, zx, zy, ox, oy, rot, fx, fy,
+     lock, bgOn, bg, opac, tile, blend }.
+     mode "fit":  a imagem é posicionada em relação à caixa (retângulo envolvente) de CADA feição, num quadro de altura 1 e largura A
+                  (A = largura/altura da caixa). base = tamanho inicial (cover/contain/stretch); zx/zy = zoom sobre esse tamanho;
+                  ox/oy = deslocamento do centro (fração da largura/altura da caixa); rot em graus; fx/fy espelham.
+     mode "tile": repete a imagem (tile px de largura) a partir do canto superior esquerdo da feição.
+     O desenho é um <pattern> SVG por feição, ancorado nas coordenadas do Leaflet e reposicionado a cada redesenho. */
+  var IMG_NS="http://www.w3.org/2000/svg";
+  var BLEND_OPTS=[["normal","Normal"],["multiply","Multiplicar"],["screen","Tela"],["overlay","Sobreposição"],["darken","Escurecer"],["lighten","Clarear"],
+    ["color-dodge","Subexposição de cores"],["color-burn","Superexposição de cores"],["soft-light","Luz suave"],["hard-light","Luz direta"],
+    ["difference","Diferença"],["exclusion","Exclusão"],["hue","Matiz"],["saturation","Saturação"],["color","Cor"],["luminosity","Luminosidade"]];
+  var BLEND_OK={};BLEND_OPTS.forEach(function(b){BLEND_OK[b[0]]=1});
+  function imgOk(f){return !!(f&&f.fillStyle==="image"&&f.fillImage&&f.fillImage.src)}
+  function imgN(v){v=+v;return isFinite(v)?String(Math.round(v*100000)/100000):"0"}
+  function imgHex(c){return /^#[0-9a-f]{6}$/i.test(c)?c:"#ffffff"}
+  // Modo de mesclagem (CSS mix-blend-mode) do símbolo, ou "" quando é Normal / não há imagem.
+  function mesclaDe(f){var b=imgOk(f)?f.fillImage.blend:"";return(b&&b!=="normal"&&BLEND_OK[b])?b:""}
+  // Tamanho-base da imagem no quadro (altura 1, largura A), antes do zoom.
+  function imgBase(cfg,A){
+    var ar=cfg.ar>0?cfg.ar:1,iw,ih;
+    if(cfg.base==="stretch"){iw=A;ih=1}
+    else if(cfg.base==="contain"){iw=Math.min(A,ar);ih=iw/ar}
+    else{iw=Math.max(A,ar);ih=iw/ar}
+    return{iw:iw,ih:ih};
+  }
+  // Posição final da imagem no quadro: centro, largura, altura e giro.
+  function imgPos(cfg,A){
+    var b=imgBase(cfg,A),zx=cfg.zx>0?cfg.zx:1,zy=cfg.zy>0?cfg.zy:1;
+    return{W:b.iw*zx,H:b.ih*zy,cx:A/2+(+cfg.ox||0)*A,cy:.5+(+cfg.oy||0),rot:+cfg.rot||0};
+  }
+  // Conteúdo de um <pattern>. ref = "#id" de um <image> compartilhado (mapa) ou null para embutir a imagem (prévias).
+  function imgInner(cfg,A,ref){
+    var el=ref?'<use href="'+ref+'"/>':'<image x="-.5" y="-.5" width="1" height="1" preserveAspectRatio="none" href="'+cfg.src+'"/>';
+    var op=cfg.opac==null?1:Math.max(0,Math.min(100,+cfg.opac))/100,oa=op<1?' opacity="'+imgN(op)+'"':'',o="",sx=cfg.fx?-1:1,sy=cfg.fy?-1:1;
+    if(cfg.mode==="tile"){
+      if(cfg.bgOn!==false)o+='<rect width="1" height="1" fill="'+imgHex(cfg.bg)+'"/>';
+      return o+'<g'+oa+' transform="translate(.5 .5) scale('+sx+' '+sy+')">'+el+'</g>';
+    }
+    var p=imgPos(cfg,A);
+    if(cfg.bgOn!==false)o+='<rect width="'+imgN(A)+'" height="1" fill="'+imgHex(cfg.bg)+'"/>';
+    return o+'<g'+oa+' transform="translate('+imgN(p.cx)+' '+imgN(p.cy)+') rotate('+imgN(p.rot)+') scale('+imgN(p.W*sx)+' '+imgN(p.H*sy)+')">'+el+'</g>';
+  }
+  // Caixa da feição em pixels do Leaflet (mesmo sistema de coordenadas do SVG da camada).
+  function imgCaixa(map,layer){
+    try{
+      var b=layer.getBounds&&layer.getBounds();if(!b||!b.isValid())return null;
+      var a=map.latLngToLayerPoint(b.getNorthWest()),z=map.latLngToLayerPoint(b.getSouthEast());
+      var w=z.x-a.x,h=z.y-a.y;
+      if(!(w>1e-6)||!(h>1e-6)||w>5e7||h>5e7)return null;
+      return{x:a.x,y:a.y,w:w,h:h};
+    }catch(e){return null}
+  }
+  // Cria/atualiza o <pattern> da feição e liga o caminho a ele. Devolve false quando não dá (cai na cor lisa).
+  function imgAplica(rend,layer){
+    var o=layer.options,cfg=o.fillImage,svg=rend&&rend._container,map=rend&&rend._map,path=layer._path;
+    if(!cfg||!cfg.src||!svg||!map||!path||!map._loaded)return false;
+    var g=imgCaixa(map,layer);if(!g)return false;
+    var defs=svg.querySelector("defs");
+    if(!defs){defs=document.createElementNS(IMG_NS,"defs");svg.insertBefore(defs,svg.firstChild)}
+    var im=rend._gjImg;
+    if(!im||im.parentNode!==defs){ // a imagem entra uma vez só por camada; todos os padrões a reaproveitam com <use>
+      im=document.createElementNS(IMG_NS,"image");im.setAttribute("id","gjim"+L.stamp(rend));
+      im.setAttribute("x","-.5");im.setAttribute("y","-.5");im.setAttribute("width","1");im.setAttribute("height","1");im.setAttribute("preserveAspectRatio","none");
+      defs.appendChild(im);rend._gjImg=im;
+    }
+    if(im.getAttribute("data-i")!==cfg.id){im.setAttribute("href",cfg.src);im.setAttribute("data-i",cfg.id)}
+    var pat=layer._gjPat,tile=cfg.mode==="tile",pid="gjip"+L.stamp(rend)+"_"+L.stamp(layer);
+    if(!pat||pat.parentNode!==defs){
+      pat=document.createElementNS(IMG_NS,"pattern");pat.setAttribute("id",pid);pat.setAttribute("patternUnits","userSpaceOnUse");
+      pat.setAttribute("preserveAspectRatio","none");defs.appendChild(pat);layer._gjPat=pat;pat._k=pat._g=null;
+    }
+    var T=Math.max(4,+cfg.tile||64),ar=cfg.ar>0?cfg.ar:1,A=Math.round(g.w/g.h*1e4)/1e4;
+    var key=[cfg.id,tile?"t":"f",cfg.base,cfg.zx,cfg.zy,cfg.ox,cfg.oy,cfg.rot,cfg.fx?1:0,cfg.fy?1:0,cfg.bgOn===false?0:1,cfg.bg,cfg.opac,ar,tile?0:A].join("|");
+    if(pat._k!==key){
+      pat._k=key;
+      pat.setAttribute("viewBox",tile?"0 0 1 1":"0 0 "+imgN(A)+" 1");
+      pat.innerHTML=imgInner(cfg,A,"#"+im.id);
+    }
+    var gx=tile?[g.x,g.y,T,T/ar]:[g.x,g.y,g.w,g.h],gk=gx.join(",");
+    if(pat._g!==gk){pat._g=gk;pat.setAttribute("x",gx[0]);pat.setAttribute("y",gx[1]);pat.setAttribute("width",gx[2]);pat.setAttribute("height",gx[3])}
+    var ref="url(#"+pid+")";if(path.getAttribute("fill")!==ref)path.setAttribute("fill",ref);
+    return true;
+  }
+  function imgSolta(layer){if(layer._gjPat){if(layer._gjPat.parentNode)layer._gjPat.parentNode.removeChild(layer._gjPat);layer._gjPat=null}}
+  // Leaflet: depois de pintar cada caminho SVG, troca o preenchimento liso pelo padrão da imagem; e o reposiciona a cada redesenho.
+  (function(){
+    if(!window.L||!L.SVG||L.SVG._gjImg)return;L.SVG._gjImg=true;
+    var oU=L.SVG.prototype._updateStyle,oP=L.SVG.prototype._updatePoly,oR=L.SVG.prototype._removePath;
+    L.SVG.prototype._updateStyle=function(layer){
+      oU.call(this,layer);
+      var o=layer.options;
+      if(!o.fillImage)imgSolta(layer);
+      else if(o.fill&&layer._path)imgAplica(this,layer);
+    };
+    if(oP)L.SVG.prototype._updatePoly=function(layer,closed){
+      oP.call(this,layer,closed);
+      var o=layer.options;
+      if(o&&o.fill&&o.fillImage&&layer._path)imgAplica(this,layer);
+    };
+    if(oR)L.SVG.prototype._removePath=function(layer){imgSolta(layer);oR.call(this,layer)};
+  })();
+
 
   // Leaflet: depois de pintar cada caminho SVG, troca o preenchimento liso por url(#padrão) quando a camada tem hachura.
   (function(){
@@ -2342,6 +2563,7 @@ function excluirMapa(id){
     switch(p){
       case"solid":return{backgroundColor:"#000",backgroundImage:"none"};
       case"none":return{backgroundColor:"#fff",backgroundImage:"none"};
+      case"image":return{backgroundColor:"#fff",backgroundImage:"linear-gradient(135deg,#8fd0ee 0 45%,#5aa469 45% 100%)",backgroundSize:"auto"};
       case"horizontal":return{backgroundColor:"#fff",backgroundImage:"repeating-linear-gradient(0deg,#000 0 1px,transparent 1px 5px)"};
       case"vertical":return{backgroundColor:"#fff",backgroundImage:"repeating-linear-gradient(90deg,#000 0 1px,transparent 1px 5px)"};
       case"cross":return{backgroundColor:"#fff",backgroundImage:"repeating-linear-gradient(0deg,#000 0 1px,transparent 1px 5px),repeating-linear-gradient(90deg,#000 0 1px,transparent 1px 5px)"};
@@ -2374,9 +2596,12 @@ function excluirMapa(id){
     el.style.background="repeating-linear-gradient(90deg,"+st.join(",")+")";
   }
   // Prévia da janela: um retângulo em SVG, que mostra de verdade preenchimento, traço e união.
-  function svgPrevia(hex,opac,corc,esp,fs,ss,js){
+  function svgPrevia(hex,opac,corc,esp,fs,ss,js,fi){
     var px=Math.min(6,Math.max(1,Math.round(esp/0.26))),fill,defs="";
     if(fs==="none")fill="none";
+    else if(fs==="image"&&fi&&fi.src){
+      var tl=fi.mode==="tile",pw=tl?Math.min(26,Math.max(6,(fi.tile||64)/4)):62,ph=tl?pw/(fi.ar>0?fi.ar:1):26,pa=Math.round(pw/ph*1e4)/1e4;
+      defs='<defs><pattern id="pv-img" patternUnits="userSpaceOnUse" x="5" y="4" width="'+pw+'" height="'+ph+'" viewBox="0 0 '+(tl?"1 1":imgN(pa)+" 1")+'" preserveAspectRatio="none">'+imgInner(fi,pa,null)+'</pattern></defs>';fill="url(#pv-img)"}
     else if(temPadrao(fs)){defs="<defs>"+padraoSvg(fs,hex,"pv-pat")+"</defs>";fill="url(#pv-pat)"}
     else fill=hex;
     var da=VSYM_DASH_ARRAY_MAP[ss];
@@ -2402,7 +2627,7 @@ function excluirMapa(id){
   function abrirDD(pfx,kind,alvo,onPick){
     var d=ESTILO_DD[kind],dd=byId(pfx+kind+"-dd"),pop=byId(d.pop),atual=alvo()[d.key];
     fecharDDs();pop.innerHTML="";
-    d.opts.forEach(function(o){
+    d.opts.filter(function(o){return!(o.soSimples&&pfx!=="lp-")}).forEach(function(o){
       var row=h("div","style-list-row"+(o.value===atual?" selected":""));
       row.setAttribute("role","option");
       if(kind==="fill"){var sw=h("span","style-list-swatch");applyFillPatternToEl(sw,o.pattern);row.appendChild(sw)}
@@ -2432,12 +2657,13 @@ function excluirMapa(id){
       dashArray:VSYM_DASH_ARRAY_MAP[f.strokeStyle]||null,
       lineCap:VSYM_LINE_CAP_MAP[f.capStyle]||"butt",
       lineJoin:VSYM_LINE_JOIN_MAP[f.joinStyle]||"bevel",
-      fillPattern:temPadrao(f.fillStyle)?f.fillStyle:null
+      fillPattern:temPadrao(f.fillStyle)?f.fillStyle:null,
+      fillImage:imgOk(f)?f.fillImage:null
     };
   }
   // A seleção (amarelo) sempre vale por cima de qualquer simbologia, como no original (resolveVectorFeatureStyle).
   // Seleção, "sem símbolos" etc. nunca usam hachura: garante que o padrão anterior não "gruda" no setStyle do Leaflet.
-  function estilo(c,sel,f){var s=estilo0(c,sel,f);if(s.fillPattern===undefined)s.fillPattern=null;return s}
+  function estilo(c,sel,f){var s=estilo0(c,sel,f);if(s.fillPattern===undefined)s.fillPattern=null;if(s.fillImage===undefined)s.fillImage=null;return s}
   function estilo0(c,sel,f){
     if(sel)return{color:"#000000",weight:1,fillOpacity:1,fillColor:"#ffff00",opacity:1,dashArray:null};
     var sym=c.symbology;
@@ -2472,7 +2698,7 @@ function excluirMapa(id){
   function camadaTemHachura(c){
     var sym=c.symbology;if(!sym||sym.renderer==="none")return false;
     var f=(sym.renderer==="categorized"||sym.renderer==="graduated")?(sym[sym.renderer]&&sym[sym.renderer].symbol):sym.single;
-    return !!(f&&temPadrao(f.fillStyle));
+    return !!(f&&(temPadrao(f.fillStyle)||imgOk(f))); // hachura e imagem só existem em SVG
   }
   function usaCanvas(c){return !c.isRaster&&camadaGrande(c)&&!camadaTemHachura(c)}
   function soltaRenderer(c){if(c._rend){try{map.removeLayer(c._rend)}catch(e){}c._rend=null}}
@@ -2510,10 +2736,12 @@ function excluirMapa(id){
       }
     };
     if(rend)opcoes.renderer=rend;
+    aplicarMesclagem(c);
     return L.geoJSON(c.geojson,opcoes);
   }
   function restilizar(c){if(c.isRaster)return;
-    if(c.leaf&&typeof c._canvas==="boolean"&&usaCanvas(c)!==c._canvas){trocarRenderizador(c);return} // hachura ligada/desligada em camada grande
+    if(c.leaf&&typeof c._canvas==="boolean"&&usaCanvas(c)!==c._canvas){trocarRenderizador(c);return}
+    aplicarMesclagem(c); // hachura ligada/desligada em camada grande
     var ix=new Map();c.geojson.features.forEach(function(f,i){ix.set(f,i)});c.leaf.eachLayer(function(l){if(l.setStyle)l.setStyle(estilo(c,c.sel.has(ix.get(l.feature)),l.feature))});marcarTabela(c)}
   function limparSel(){camadas.forEach(function(c){if(c.sel.size){c.sel.clear();restilizar(c)}})}
   // Clique simples: seleciona só esta. Shift/Ctrl/Cmd + clique: soma (ou tira) da seleção.
@@ -6719,27 +6947,29 @@ const POINT_ANCHOR_TO_DIRECTION = {
     var p=byId("lp-prev"),d=propDraft;
     if(d.renderer==="none"){p.innerHTML="";p.style.background="transparent";p.style.border="2px dashed #5d665f";p.style.opacity="1";return}
     p.style.background="transparent";p.style.border="0";
-    p.innerHTML=svgPrevia(d.cor,d.opac,d.corc,d.esp,d.fillStyle,d.strokeStyle,d.joinStyle);
+    p.innerHTML=svgPrevia(d.cor,d.opac,d.corc,d.esp,d.fillStyle,d.strokeStyle,d.joinStyle,d.fillImage);
   }
   // Mostra no mapa, sem gravar na camada, o que está na janela (símbolo simples). Só vale de verdade ao Aplicar/OK.
   function previaMapaProp(){
     var c=camadaPorId(propId),d=propDraft;
     if(!c||c.isRaster||!c.leaf||d.renderer!=="single")return;
-    var forma=Object.assign({},formaBase(c),{opacity:d.opac,strokeColor:d.corc,strokeWidth:d.esp,fillStyle:d.fillStyle,strokeStyle:d.strokeStyle,joinStyle:d.joinStyle});
+    var forma=Object.assign({},formaBase(c),{opacity:d.opac,strokeColor:d.corc,strokeWidth:d.esp,fillStyle:d.fillStyle,strokeStyle:d.strokeStyle,joinStyle:d.joinStyle,fillImage:d.fillImage});
     var ix=new Map();c.geojson.features.forEach(function(f,i){ix.set(f,i)});
     c.leaf.eachLayer(function(l){
       if(!l.setStyle)return;
       var s=c.sel.has(ix.get(l.feature))?estilo(c,true,l.feature):estiloDoSimbolo(forma,d.cor);
       if(s.fillPattern===undefined)s.fillPattern=null;
+      if(s.fillImage===undefined)s.fillImage=null;
       l.setStyle(s);
     });
+    aplicarMesclagem(c,mesclaDe(forma));
     propPrevia=true;
   }
   function mostrarCamposProp(){
     var nenhum=propDraft.renderer==="none";
     var r=propDraft.renderer,cg=r==="categorized"||r==="graduated";
     byId("lp-simples").hidden=r!=="single";byId("lp-nota-nenhum").hidden=!nenhum;
-    byId("lp-cat").hidden=r!=="categorized";byId("lp-grad").hidden=r!=="graduated";byId("lp-base").hidden=!cg;document.querySelector(".lp-prev").hidden=cg;
+    byId("lp-cat").hidden=r!=="categorized";byId("lp-grad").hidden=r!=="graduated";byId("lp-base").hidden=!cg;document.querySelector(".lp-prev").hidden=cg;syncImg();
   }
   function abrirPropriedades(c,aba,manter){
     if(!map||!c)return;
@@ -6750,6 +6980,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     else{byId("aba-rot").hidden=false;
     f=formaBase(c);sym=c.symbology;
     propDraft={renderer:(sym&&{none:1,categorized:1,graduated:1}[sym.renderer])?sym.renderer:"single",cor:hex6(c.color),opac:f.opacity==null?100:f.opacity,corc:hex6(f.strokeColor),esp:f.strokeWidth==null?0.26:f.strokeWidth,fillStyle:f.fillStyle||"solid",strokeStyle:f.strokeStyle||"solid",joinStyle:f.joinStyle||"bevel"};
+    propDraft.fillImage=f.fillImage?Object.assign({},f.fillImage):null;
     byId("lp-tipo").value=propDraft.renderer;
     fecharDDs();pintarTodosDD("lp-",propDraft);
     byId("lp-cor").value=propDraft.cor;
@@ -6820,6 +7051,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     if(propTocado.corc)forma.strokeColor=propDraft.corc;
     if(propTocado.esp)forma.strokeWidth=propDraft.esp;
     if(propTocado.fillStyle)forma.fillStyle=propDraft.fillStyle;
+    if(propTocado.fillImage)forma.fillImage=propDraft.fillImage?Object.assign({},propDraft.fillImage):null;
     if(propTocado.strokeStyle)forma.strokeStyle=propDraft.strokeStyle;
     if(propTocado.joinStyle)forma.joinStyle=propDraft.joinStyle;
     var corAntes=c.color;
@@ -6866,7 +7098,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     });
     ["fill","stroke","join"].forEach(function(k){
       var dd=byId("lp-"+k+"-dd");
-      var abre=function(e){e.stopPropagation();abrirDD("lp-",k,function(){return propDraft},function(key){propTocado[key]=true;sincEspessura("lp-",propDraft);previaProp()})};
+      var abre=function(e){e.stopPropagation();abrirDD("lp-",k,function(){return propDraft},function(key){propTocado[key]=true;sincEspessura("lp-",propDraft);previaProp();if(key==="fillStyle")aoTrocarPreench()})};
       dd.addEventListener("click",abre);
       dd.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "||e.key==="ArrowDown"){e.preventDefault();abre(e)}else if(e.key==="Escape")fecharDDs()});
     });
@@ -6909,7 +7141,333 @@ const POINT_ANCHOR_TO_DIRECTION = {
     });
   })();
 
-  /* ---------- D6–D9: Categorizado, Graduado e rampas (funções copiadas do index.html original) ---------- */
+    /* ---------- Preenchimento com imagem: painel da aba Simbologia + editor de posição (estilo Canva) ---------- */
+  var IMG_FILL_MAX=1600; // maior lado (px) da imagem guardada: mantém o projeto leve
+  function mesclagemDe(c){
+    var sy=c.symbology;
+    if(!sy||sy.renderer==="none"||sy.renderer==="categorized"||sy.renderer==="graduated")return"";
+    return mesclaDe(sy.single);
+  }
+  // A mesclagem vale para a camada toda: é aplicada ao painel (pane) dela, para misturar com as camadas e o mapa-base de baixo.
+  function aplicarMesclagem(c,forcar){
+    if(!map||!c||c.isRaster)return;
+    var p=map.getPane("p"+c.id);
+    if(p)p.style.mixBlendMode=forcar!==undefined?forcar:mesclagemDe(c);
+  }
+  function fmtBytes(n){n=+n||0;return n>=1048576?(n/1048576).toLocaleString("pt-BR",{maximumFractionDigits:1})+" MB":Math.max(1,Math.round(n/1024))+" KB"}
+  function polisDe(c){
+    var fs=c.geojson.features;
+    if(c._polis&&c._polisN===fs.length)return c._polis;
+    var r=[];fs.forEach(function(f,i){var g=f&&f.geometry;if(g&&(g.type==="Polygon"||g.type==="MultiPolygon"))r.push(i)});
+    c._polis=r;c._polisN=fs.length;return r;
+  }
+  // Lê o arquivo, reduz (maior lado = IMG_FILL_MAX) e devolve data URL: JPEG se for opaca, PNG/WebP se tiver transparência.
+  function imgLer(file){
+    return new Promise(function(ok,erro){
+      var nome=(file&&file.name)||"";
+      if(!file||!(/^image\//i.test(file.type||"")||/\.(png|jpe?g|gif|webp|bmp|svg|avif)$/i.test(nome))){erro(new Error("tipo"));return}
+      if(file.size>80*1048576){erro(new Error("grande"));return}
+      var url=URL.createObjectURL(file),im=new Image(),svg=/svg/i.test(file.type||"")||/\.svg$/i.test(nome);
+      im.onload=function(){
+        try{
+          var nw=im.naturalWidth||0,nh=im.naturalHeight||0;if(!nw||!nh){nw=nh=1024}
+          var s=Math.min(svg?4:1,IMG_FILL_MAX/Math.max(nw,nh)),cw=Math.max(1,Math.round(nw*s)),ch=Math.max(1,Math.round(nh*s));
+          var cv=document.createElement("canvas");cv.width=cw;cv.height=ch;
+          var cx=cv.getContext("2d");cx.imageSmoothingQuality="high";cx.drawImage(im,0,0,cw,ch);
+          var tr=false,dt=cx.getImageData(0,0,cw,ch).data;
+          for(var i=3;i<dt.length;i+=28){if(dt[i]<250){tr=true;break}}
+          var out=tr?cv.toDataURL("image/png"):cv.toDataURL("image/jpeg",.88);
+          if(tr&&out.length>1800000){var w=cv.toDataURL("image/webp",.85);if(w.indexOf("data:image/webp")===0&&w.length<out.length)out=w}
+          ok({src:out,nw:cw,nh:ch,ar:cw/ch,name:nome||"imagem",bytes:Math.round(out.length*.75)});
+        }catch(e){erro(e)}finally{URL.revokeObjectURL(url)}
+      };
+      im.onerror=function(){URL.revokeObjectURL(url);erro(new Error("leitura"))};
+      im.src=url;
+    });
+  }
+  function imgCfgNovo(info,bg){
+    return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),src:info.src,nw:info.nw,nh:info.nh,ar:info.ar,name:info.name,bytes:info.bytes,
+      mode:"fit",base:"cover",zx:1,zy:1,ox:0,oy:0,rot:0,fx:false,fy:false,lock:true,bgOn:true,bg:bg||"#ffffff",opac:100,tile:64,blend:"normal"};
+  }
+  function imgPreset(cfg,b){cfg.base=b;cfg.zx=1;cfg.zy=1;cfg.ox=0;cfg.oy=0;cfg.rot=0}
+  // Algo mudou na imagem: atualiza as prévias (janela e mapa). Só vale de verdade ao Aplicar/OK.
+  function imgMudou(){propTocado.fillImage=true;previaProp();previaMapaProp();syncImg()}
+  function aoTrocarPreench(){
+    syncImg();previaMapaProp();
+    var d=propDraft;
+    if(d.fillStyle==="image"&&!(d.fillImage&&d.fillImage.src))byId("lp-img-file").click(); // já abre a escolha do arquivo
+  }
+  function syncImg(){
+    var d=propDraft,on=d.renderer==="single"&&d.fillStyle==="image",cfg=d.fillImage,tem=!!(cfg&&cfg.src);
+    byId("lp-img").hidden=!on;
+    byId("lp-cor").parentNode.classList.toggle("lp-oculto",on&&tem); // com imagem, a "cor de preenchimento" é só o fundo (abaixo)
+    if(!on)return;
+    var c=camadaPorId(propId);
+    byId("lp-img-nota").hidden=!c||polisDe(c).length>0;
+    byId("lp-img-thumb").style.backgroundImage=tem?'url("'+cfg.src+'")':"none";
+    byId("lp-img-nome").textContent=tem?(cfg.name||"imagem"):"Nenhuma imagem escolhida";
+    byId("lp-img-dim").textContent=tem?cfg.nw+" × "+cfg.nh+" px · "+fmtBytes(cfg.bytes||String(cfg.src).length*.75):"Escolha um arquivo do seu computador";
+    byId("lp-img-esc").textContent=tem?"Trocar imagem…":"Escolher imagem…";
+    ["lp-img-rem","lp-img-ed","lp-img-modo","lp-img-tam","lp-img-bgon","lp-img-opac","lp-img-blend"].forEach(function(i){byId(i).disabled=!tem});
+    byId("lp-img-bg").disabled=!tem||!(cfg&&cfg.bgOn!==false);
+    Array.prototype.forEach.call(byId("lp-img-qf").children,function(b){b.disabled=!tem});
+    if(!tem)return;
+    var tile=cfg.mode==="tile";
+    byId("lp-img-modo").value=tile?"tile":"fit";
+    byId("lp-img-fit").hidden=tile;byId("lp-img-tile").hidden=!tile;
+    byId("lp-img-tam").value=cfg.tile||64;byId("lp-img-tam-v").textContent=(cfg.tile||64)+" px";
+    byId("lp-img-bgon").checked=cfg.bgOn!==false;byId("lp-img-bg").value=imgHex(cfg.bg);
+    byId("lp-img-opac").value=cfg.opac==null?100:cfg.opac;byId("lp-img-opac-v").textContent=Math.round(cfg.opac==null?100:cfg.opac)+" %";
+    byId("lp-img-blend").value=BLEND_OK[cfg.blend]?cfg.blend:"normal";
+    Array.prototype.forEach.call(byId("lp-img-qf").children,function(b){
+      b.setAttribute("aria-pressed",(cfg.base||"cover")===b.dataset.base&&cfg.zx===1&&cfg.zy===1&&!cfg.ox&&!cfg.oy&&!cfg.rot?"true":"false");
+    });
+  }
+  function imgEscolher(file){
+    imgLer(file).then(function(info){
+      var d=propDraft,ant=d.fillImage,novo=imgCfgNovo(info,ant&&ant.bg?ant.bg:hex6(d.cor));
+      if(ant)["mode","bgOn","bg","opac","tile","blend","lock"].forEach(function(k){if(ant[k]!==undefined)novo[k]=ant[k]});
+      d.fillImage=novo;
+      if(d.fillStyle!=="image"){d.fillStyle="image";propTocado.fillStyle=true;pintarTodosDD("lp-",d)}
+      imgMudou();
+      aviso("Imagem aplicada. Use \"Posicionar e redimensionar…\" para ajustar.");
+    }).catch(function(e){
+      var m=e&&e.message;
+      aviso(m==="tipo"?"Escolha um arquivo de imagem (JPG, PNG, WebP, GIF ou SVG).":m==="grande"?"Esse arquivo é grande demais (máximo de 80 MB).":"Não consegui abrir essa imagem.");
+    });
+  }
+  (function(){
+    byId("lp-img-blend").innerHTML=BLEND_OPTS.map(function(b){return'<option value="'+b[0]+'">'+b[1]+'</option>'}).join("");
+    byId("lp-img-esc").addEventListener("click",function(){byId("lp-img-file").click()});
+    byId("lp-img-file").addEventListener("change",function(){var f=this.files&&this.files[0];this.value="";if(f)imgEscolher(f)});
+    byId("lp-img-rem").addEventListener("click",function(){
+      propDraft.fillImage=null;propDraft.fillStyle="solid";propTocado.fillStyle=true;pintarTodosDD("lp-",propDraft);imgMudou();
+    });
+    byId("lp-img-modo").addEventListener("change",function(){propDraft.fillImage.mode=this.value;imgMudou()});
+    byId("lp-img-tam").addEventListener("input",function(){propDraft.fillImage.tile=+this.value;imgMudou()});
+    byId("lp-img-bgon").addEventListener("change",function(){propDraft.fillImage.bgOn=this.checked;imgMudou()});
+    byId("lp-img-bg").addEventListener("input",function(){propDraft.fillImage.bg=this.value;imgMudou()});
+    byId("lp-img-opac").addEventListener("input",function(){propDraft.fillImage.opac=+this.value;imgMudou()});
+    byId("lp-img-blend").addEventListener("change",function(){propDraft.fillImage.blend=this.value;imgMudou()});
+    byId("lp-img-qf").addEventListener("click",function(e){var b=e.target.closest("button[data-base]");if(b&&propDraft.fillImage){imgPreset(propDraft.fillImage,b.dataset.base);imgMudou()}});
+    byId("lp-img-ed").addEventListener("click",ieAbrir);
+  })();
+
+  /* ---- Editor de posição: a imagem inteira aparece esmaecida (também fora do shape) e vale de verdade só dentro dele ---- */
+  var IE_W=640,IE_H=420,IE_P=64;
+  var ie={c:null,cfg:null,lista:[],pos:0,A:1,K:1,X0:0,Y0:0,opener:null,ptrs:new Map(),drag:null,sx:false,sy:false};
+  var IE_ANG={e:0,se:45,s:90,sw:135,w:180,nw:225,n:270,ne:315};
+  function ieP(ev){var s=byId("ie-palco"),m=s.getScreenCTM();if(!m)return{x:0,y:0};var pt=s.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;var q=pt.matrixTransform(m.inverse());return{x:q.x,y:q.y}}
+  function ieU(){var m=byId("ie-palco").getScreenCTM();return m&&m.a>0?1/m.a:1} // unidades do palco por pixel da tela
+  function ieEst(){
+    var c=ie.cfg,b=imgBase(c,ie.A),k=ie.K;
+    return{W:b.iw*(c.zx>0?c.zx:1)*k,H:b.ih*(c.zy>0?c.zy:1)*k,cx:ie.X0+(ie.A/2+(+c.ox||0)*ie.A)*k,cy:ie.Y0+(.5+(+c.oy||0))*k,rot:+c.rot||0};
+  }
+  function ieLim(E){
+    var b=imgBase(ie.cfg,ie.A),k=ie.K;
+    E.W=Math.max(6,b.iw*k*.02,Math.min(b.iw*k*40,E.W));E.H=Math.max(6,b.ih*k*.02,Math.min(b.ih*k*40,E.H));return E;
+  }
+  function ieGrava(E){
+    E=ieLim(E);var c=ie.cfg,b=imgBase(c,ie.A),k=ie.K;
+    c.zx=E.W/k/b.iw;c.zy=E.H/k/b.ih;c.ox=((E.cx-ie.X0)/k-ie.A/2)/ie.A;c.oy=(E.cy-ie.Y0)/k-.5;c.rot=E.rot;
+    ieRender();
+  }
+  function ieCursor(h,rot){var a=(((IE_ANG[h]+rot)%180)+180)%180;return["ew-resize","nwse-resize","ns-resize","nesw-resize"][Math.round(a/45)%4]}
+  function ieRender(){
+    var c=ie.cfg,E=ieEst(),sx=c.fx?-1:1,sy=c.fy?-1:1,u=ieU(),hs=(window.matchMedia&&matchMedia("(pointer:coarse)").matches?13:8.5)*u;
+    var t="translate("+imgN(E.cx)+" "+imgN(E.cy)+") rotate("+imgN(E.rot)+") scale("+imgN(E.W*sx)+" "+imgN(E.H*sy)+")";
+    byId("ie-gh").setAttribute("transform",t);byId("ie-in").setAttribute("transform",t);
+    byId("ie-in-g").setAttribute("opacity",(c.opac==null?100:c.opac)/100);
+    var bg=byId("ie-bgr");bg.setAttribute("fill",imgHex(c.bg));bg.style.display=c.bgOn===false?"none":"";
+    var fr=byId("ie-fr"),w2=E.W/2,h2=E.H/2;
+    fr.setAttribute("transform","translate("+imgN(E.cx)+" "+imgN(E.cy)+") rotate("+imgN(E.rot)+")");
+    ["ie-box","ie-hit"].forEach(function(i){var r=byId(i);r.setAttribute("x",imgN(-w2));r.setAttribute("y",imgN(-h2));r.setAttribute("width",imgN(E.W));r.setAttribute("height",imgN(E.H))});
+    var pos={nw:[-w2,-h2],n:[0,-h2],ne:[w2,-h2],e:[w2,0],se:[w2,h2],s:[0,h2],sw:[-w2,h2],w:[-w2,0]};
+    Object.keys(pos).forEach(function(k){
+      var el=byId("ie-h-"+k),side=k.length===1;
+      el.setAttribute("cx",imgN(pos[k][0]));el.setAttribute("cy",imgN(pos[k][1]));el.setAttribute("r",imgN(side?hs*.78:hs));
+      el.style.display=(side&&c.lock!==false)?"none":"";el.style.cursor=ieCursor(k,E.rot);
+    });
+    var ry=-h2-30*u,rg=byId("ie-h-rot"),rc=rg.querySelector("circle"),rt=rg.querySelector("text");
+    rc.setAttribute("cx",0);rc.setAttribute("cy",imgN(ry));rc.setAttribute("r",imgN(hs));
+    rt.setAttribute("x",0);rt.setAttribute("y",imgN(ry));rt.setAttribute("font-size",imgN(hs*1.3));
+    var rl=byId("ie-rl");rl.setAttribute("x1",0);rl.setAttribute("y1",imgN(-h2));rl.setAttribute("x2",0);rl.setAttribute("y2",imgN(ry+hs));
+    byId("ie-gv").style.display=ie.sx?"":"none";byId("ie-gh2").style.display=ie.sy?"":"none";
+    // controles
+    byId("ie-zoom").value=Math.round(Math.min(800,Math.max(5,c.zx*100)));byId("ie-zoom-v").textContent=Math.round(c.zx*100)+" %";
+    var an=byId("ie-ang");if(document.activeElement!==an)an.value=Math.round(E.rot*10)/10;
+    Array.prototype.forEach.call(byId("ie-qf").children,function(b){
+      b.setAttribute("aria-pressed",c.base===b.dataset.base&&Math.abs(c.zx-1)<.001&&Math.abs(c.zy-1)<.001&&Math.abs(c.ox)<.001&&Math.abs(c.oy)<.001&&Math.abs(c.rot)<.01?"true":"false");
+    });
+    byId("ie-fh").setAttribute("aria-pressed",c.fx?"true":"false");byId("ie-fv").setAttribute("aria-pressed",c.fy?"true":"false");
+    byId("ie-lock").checked=c.lock!==false;byId("ie-bgon").checked=c.bgOn!==false;byId("ie-bg").value=imgHex(c.bg);byId("ie-bg").disabled=c.bgOn===false;
+  }
+  // Monta o contorno da feição de prévia (projeção Web Mercator, a mesma do mapa) no palco.
+  function ieFeicao(pos){
+    ie.pos=(pos+ie.lista.length)%ie.lista.length;
+    var g=ie.c.geojson.features[ie.lista[ie.pos]].geometry,polys=g.type==="Polygon"?[g.coordinates]:g.coordinates;
+    var P=L.Projection.SphericalMercator,rings=[],x0=1/0,x1=-1/0,y0=1/0,y1=-1/0;
+    polys.forEach(function(pg){pg.forEach(function(r){
+      var pts=[];
+      r.forEach(function(p){
+        if(!isFinite(p[0])||!isFinite(p[1]))return;
+        var q=P.project(L.latLng(p[1],p[0]));pts.push(q.x,q.y);
+        if(q.x<x0)x0=q.x;if(q.x>x1)x1=q.x;if(q.y<y0)y0=q.y;if(q.y>y1)y1=q.y;
+      });
+      rings.push(pts);
+    })});
+    var H=y1-y0,W=x1-x0;
+    if(!(H>0)||!(W>0)){byId("ie-fn").textContent="Feição sem área";return}
+    ie.A=W/H;ie.K=Math.min((IE_W-2*IE_P)/ie.A,IE_H-2*IE_P);ie.X0=(IE_W-ie.A*ie.K)/2;ie.Y0=(IE_H-ie.K)/2;
+    var d=[];
+    rings.forEach(function(pts){
+      var out=[],lx=null,ly=null,n=pts.length;
+      for(var i=0;i<n;i+=2){
+        var sx=ie.X0+(pts[i]-x0)/H*ie.K,sy=ie.Y0+(y1-pts[i+1])/H*ie.K;
+        if(lx===null||Math.abs(sx-lx)+Math.abs(sy-ly)>=.6||i>=n-2){out.push(Math.round(sx*10)/10+","+Math.round(sy*10)/10);lx=sx;ly=sy}
+      }
+      if(out.length>=3)d.push("M"+out.join("L")+"Z");
+    });
+    var ds=d.join("");
+    ["ie-clip-p","ie-o1","ie-o2"].forEach(function(i){byId(i).setAttribute("d",ds)});
+    byId("ie-gv").setAttribute("x1",IE_W/2);byId("ie-gv").setAttribute("x2",IE_W/2);byId("ie-gh2").setAttribute("y1",IE_H/2);byId("ie-gh2").setAttribute("y2",IE_H/2);
+    byId("ie-nav").hidden=ie.lista.length<2;
+    byId("ie-fn").textContent=ie.lista.length>1?"Feição "+(ie.pos+1)+" de "+ie.lista.length+" (o ajuste vale para todas, proporcional ao tamanho de cada uma)":"";
+    ieRender();
+  }
+  function ieAbrir(){
+    var c=camadaPorId(propId),d=propDraft;
+    if(!c||!d.fillImage||!d.fillImage.src)return;
+    c._polis=null;var pol=polisDe(c);
+    if(!pol.length){aviso("Esta camada não tem polígonos para receber a imagem.");return}
+    ie.c=c;ie.cfg=Object.assign({},d.fillImage);ie.lista=pol;ie.drag=null;ie.ptrs.clear();ie.sx=ie.sy=false;
+    var sel=null;c.sel.forEach(function(i){if(sel==null&&pol.indexOf(i)>=0)sel=i});
+    ie.opener=document.activeElement;
+    byId("ie-img").setAttribute("href",ie.cfg.src);
+    byId("ie").hidden=false;
+    ieFeicao(sel!=null?pol.indexOf(sel):0);
+    byId("ie-palco").focus({preventScroll:true});
+  }
+  function ieFechar(ok){
+    if(byId("ie").hidden)return;
+    if(ok&&propDraft.fillImage){
+      ["base","zx","zy","ox","oy","rot","fx","fy","lock","bgOn","bg"].forEach(function(k){propDraft.fillImage[k]=ie.cfg[k]});
+      imgMudou();
+    }
+    byId("ie").hidden=true;ie.drag=null;ie.ptrs.clear();byId("ie-img").removeAttribute("href");
+    if(ie.opener&&document.body.contains(ie.opener)){try{ie.opener.focus()}catch(e){}}
+    ie.opener=null;
+  }
+  function ieMove(p,d,ev){
+    var E=Object.assign({},d.e0,{cx:d.e0.cx+p.x-d.p0.x,cy:d.e0.cy+p.y-d.p0.y});
+    ie.sx=ie.sy=false;
+    if(!ev.altKey){ // encaixa o centro da imagem no centro do shape (Alt desliga)
+      var mx=ie.X0+ie.A*ie.K/2,my=ie.Y0+ie.K/2,th=3*ieU();
+      if(Math.abs(E.cx-mx)<th){E.cx=mx;ie.sx=true}
+      if(Math.abs(E.cy-my)<th){E.cy=my;ie.sy=true}
+    }
+    return E;
+  }
+  function ieSize(p,d){
+    var e0=d.e0,th=e0.rot*Math.PI/180,co=Math.cos(th),si=Math.sin(th);
+    var sg={nw:[-1,-1],n:[0,-1],ne:[1,-1],e:[1,0],se:[1,1],s:[0,1],sw:[-1,1],w:[-1,0]}[d.h],sx=sg[0],sy=sg[1];
+    // âncora = canto (ou lado) oposto ao puxado; fica parada, como no Canva
+    var ax=e0.cx+(-sx*e0.W/2)*co-(-sy*e0.H/2)*si,ay=e0.cy+(-sx*e0.W/2)*si+(-sy*e0.H/2)*co;
+    var dx=p.x-ax,dy=p.y-ay,lx=dx*co+dy*si,ly=-dx*si+dy*co,W=e0.W,H=e0.H;
+    if(sx&&sy){
+      if(ie.cfg.lock!==false){var s=Math.max(.03,(lx*sx*e0.W+ly*sy*e0.H)/(e0.W*e0.W+e0.H*e0.H));W=e0.W*s;H=e0.H*s}
+      else{W=lx*sx;H=ly*sy}
+    }else if(sx)W=lx*sx;else H=ly*sy;
+    var Q=ieLim({W:W,H:H});W=Q.W;H=Q.H;
+    return{W:W,H:H,cx:ax+(sx*W/2)*co-(sy*H/2)*si,cy:ay+(sx*W/2)*si+(sy*H/2)*co,rot:e0.rot};
+  }
+  function ieRot(p,d,ev){
+    var a=Math.atan2(p.y-d.e0.cy,p.x-d.e0.cx)*180/Math.PI+90;
+    if(ev.shiftKey)a=Math.round(a/15)*15;else{var n=Math.round(a/45)*45;if(Math.abs(a-n)<3)a=n}
+    return Object.assign({},d.e0,{rot:((a+180)%360+360)%360-180});
+  }
+  function ieDown(ev){
+    if(ev.pointerType==="mouse"&&ev.button!==0)return;
+    var s=byId("ie-palco"),p=ieP(ev),el=ev.target.closest&&ev.target.closest("[data-h]"),h=el?el.getAttribute("data-h"):null;
+    if(ie.ptrs.size===0&&!h)return; // clicou fora da imagem
+    ie.ptrs.set(ev.pointerId,p);
+    try{s.setPointerCapture(ev.pointerId)}catch(x){}
+    if(ie.ptrs.size===2){
+      var a=Array.from(ie.ptrs.values());
+      ie.drag={k:"pinch",d0:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1,a0:Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x),m0:{x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2},e0:ieEst()};
+    }else if(ie.ptrs.size===1)ie.drag={k:h==="move"?"move":h==="rot"?"rot":"size",h:h,p0:p,e0:ieEst()};
+    ev.preventDefault();s.focus({preventScroll:true});
+  }
+  function iePtr(ev){
+    if(!ie.ptrs.has(ev.pointerId)||!ie.drag)return;
+    var p=ieP(ev),d=ie.drag;ie.ptrs.set(ev.pointerId,p);
+    if(d.k==="pinch"){
+      if(ie.ptrs.size<2)return;
+      var a=Array.from(ie.ptrs.values()),dist=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1,ang=Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x),m={x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2};
+      var f=dist/d.d0,da=ang-d.a0,vx=d.e0.cx-d.m0.x,vy=d.e0.cy-d.m0.y,co=Math.cos(da),si=Math.sin(da);
+      ieGrava({W:d.e0.W*f,H:d.e0.H*f,cx:m.x+f*(vx*co-vy*si),cy:m.y+f*(vx*si+vy*co),rot:d.e0.rot+da*180/Math.PI});
+      return;
+    }
+    ieGrava(d.k==="move"?ieMove(p,d,ev):d.k==="rot"?ieRot(p,d,ev):ieSize(p,d));
+  }
+  function ieUp(ev){
+    ie.ptrs.delete(ev.pointerId);
+    if(ie.ptrs.size===0){ie.drag=null;ie.sx=ie.sy=false;ieRender()}else if(ie.ptrs.size===1)ie.drag=null; // soltou um dedo: evita saltos
+  }
+  function ieWheel(ev){
+    ev.preventDefault();
+    var p=ieP(ev),E=ieEst(),f=Math.exp(-ev.deltaY*(ev.ctrlKey?.01:ev.deltaMode===1?.05:.0016));
+    f=Math.max(.5,Math.min(2,f));
+    ieGrava({W:E.W*f,H:E.H*f,cx:p.x+(E.cx-p.x)*f,cy:p.y+(E.cy-p.y)*f,rot:E.rot});
+  }
+  function ieKey(ev){
+    var E=ieEst(),st=(ev.shiftKey?5:1)*ie.K*.01,ok=true;
+    switch(ev.key){
+      case"ArrowLeft":E.cx-=st;break;case"ArrowRight":E.cx+=st;break;case"ArrowUp":E.cy-=st;break;case"ArrowDown":E.cy+=st;break;
+      case"+":case"=":E.W*=1.05;E.H*=1.05;break;
+      case"-":case"_":E.W/=1.05;E.H/=1.05;break;
+      default:ok=false;
+    }
+    if(ok){ev.preventDefault();ieGrava(E)}
+  }
+  (function(){
+    var s=byId("ie-palco");
+    s.addEventListener("pointerdown",ieDown);s.addEventListener("pointermove",iePtr);
+    s.addEventListener("pointerup",ieUp);s.addEventListener("pointercancel",ieUp);
+    s.addEventListener("wheel",ieWheel,{passive:false});s.addEventListener("keydown",ieKey);
+    byId("ie-qf").addEventListener("click",function(e){var b=e.target.closest("button[data-base]");if(b){imgPreset(ie.cfg,b.dataset.base);ieRender()}});
+    byId("ie-g90").addEventListener("click",function(){var E=ieEst();E.rot=(((E.rot+90+180)%360)+360)%360-180;ieGrava(E)});
+    byId("ie-fh").addEventListener("click",function(){ie.cfg.fx=!ie.cfg.fx;ieRender()});
+    byId("ie-fv").addEventListener("click",function(){ie.cfg.fy=!ie.cfg.fy;ieRender()});
+    byId("ie-cen").addEventListener("click",function(){ie.cfg.ox=0;ie.cfg.oy=0;ieRender()});
+    byId("ie-zoom").addEventListener("input",function(){var E=ieEst(),f=(+this.value/100)/(ie.cfg.zx||1);E.W*=f;E.H*=f;ieGrava(E)});
+    byId("ie-ang").addEventListener("input",function(){var v=parseFloat(String(this.value).replace(",","."));if(isFinite(v)){var E=ieEst();E.rot=Math.max(-180,Math.min(180,v));ieGrava(E)}});
+    byId("ie-lock").addEventListener("change",function(){ie.cfg.lock=this.checked;ieRender()});
+    byId("ie-bgon").addEventListener("change",function(){ie.cfg.bgOn=this.checked;ieRender()});
+    byId("ie-bg").addEventListener("input",function(){ie.cfg.bg=this.value;ieRender()});
+    byId("ie-prev").addEventListener("click",function(){ieFeicao(ie.pos-1)});
+    byId("ie-next").addEventListener("click",function(){ieFeicao(ie.pos+1)});
+    byId("ie-redef").addEventListener("click",function(){imgPreset(ie.cfg,"cover");ie.cfg.fx=false;ie.cfg.fy=false;ieRender()});
+    byId("ie-cancel").addEventListener("click",function(){ieFechar(false)});
+    byId("ie-x").addEventListener("click",function(){ieFechar(false)});
+    byId("ie-ok").addEventListener("click",function(){ieFechar(true)});
+    byId("ie").addEventListener("pointerdown",function(e){if(e.target===this)ieFechar(false)});
+    window.addEventListener("resize",function(){if(!byId("ie").hidden)ieRender()});
+    // Esc fecha só o editor (captura antes do Esc que fecha a janela de propriedades); Tab fica dentro do editor.
+    document.addEventListener("keydown",function(e){
+      if(byId("ie").hidden)return;
+      if(e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();ieFechar(false);return}
+      if(e.key==="Tab"){
+        var f=Array.prototype.filter.call(byId("ie").querySelectorAll("button,input,[tabindex='0']"),function(x){return!x.disabled&&x.offsetParent!==null&&!x.closest("[hidden]")});
+        if(!f.length)return;
+        var i=f.indexOf(document.activeElement);
+        if(e.shiftKey&&i<=0){e.preventDefault();f[f.length-1].focus()}
+        else if(!e.shiftKey&&(i===f.length-1||i<0)){e.preventDefault();f[0].focus()}
+      }
+    },true);
+  })();
+
+/* ---------- D6–D9: Categorizado, Graduado e rampas (funções copiadas do index.html original) ---------- */
   function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
   function hsvToHex(h, s, v) {
     // h em graus [0,360); s e v normalizados [0,1]
@@ -7921,7 +8479,7 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
       <div class="cp-menu">
         <button type="button" class="cp-menu-item" id="cp-menu-copy">Copiar</button>
         <button type="button" class="cp-menu-item" id="cp-menu-paste">Colar</button>
-        <button type="button" class="cp-menu-item" id="cp-menu-choose">Escolher…</button>
+        <button type="button" class="cp-menu-item" id="cp-menu-choose">Selecionar</button>
       </div>
     </div>
     <div class="cp-footer">
@@ -8161,8 +8719,20 @@ input[type=checkbox],input[type=radio],input[type=range],input[type=color],input
       else toast('Nada de válido na área de transferência.');
     }catch(err){toast('Não foi possível ler a área de transferência.')}
   });
-  document.getElementById('cp-menu-choose').addEventListener('click',function(e){
+  // "Escolher…": conta-gotas que capta a cor de qualquer ponto da tela (Chrome, Edge, Opera).
+  // Em navegadores sem a API (Firefox, Safari) continua abrindo o seletor de cor do sistema.
+  var cpChoose=document.getElementById('cp-menu-choose'),cpTemEyeDropper=typeof window.EyeDropper==='function';
+  if(cpTemEyeDropper){cpChoose.textContent='Selecionar';cpChoose.title='Clique aqui e depois em qualquer ponto da tela para pegar a cor dele'}
+  cpChoose.addEventListener('click',function(e){
     e.stopPropagation();
+    if(cpTemEyeDropper){
+      new EyeDropper().open().then(function(r){
+        if(!r||!r.sRGBHex||!cpTarget)return;
+        setColorFromHex(r.sRGBHex.toLowerCase());
+        toast('Cor captada: '+r.sRGBHex.toUpperCase()+'.');
+      }).catch(function(){}); // Esc ou clique fora: nada muda
+      return;
+    }
     cpNative.value=cpDraft;
     cpNative.click();
   });
