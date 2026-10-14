@@ -1400,7 +1400,7 @@ body.arrastando-corpo,body.arrastando-corpo *{cursor:grabbing!important;user-sel
   .lbl-pos-grid button.active .lbl-pos-dot { background: var(--accent); }
 
   /* ---------- Seletor de cor: janela modal (Fechar / Aplicar) ---------- */
-  #color-picker-overlay{display:none;position:fixed;inset:0;z-index:4700;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
+  #color-picker-overlay{display:none;position:fixed;inset:0;z-index:4900;/* acima do editor de imagem (#ie, 4800) */background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:12px}
   #color-picker-overlay.show{display:flex}
   /* seletor de cor: janela flutuante e arrastável, sem fundo escuro e sem bloquear o resto da tela */
   #color-picker-overlay{background:transparent!important;pointer-events:none;padding:0!important;display:none!important}
@@ -4682,7 +4682,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
   var PASSOS_TUTORIAL_MAPA=[
     {t:"Bem-vindo ao GisJr!",x:"Este tutorial rápido mostra como montar um mapa: de <b>adicionar camadas</b> até o que <b>cada ferramenta</b> faz. Use <b>Próximo</b> (ou a seta → do teclado). Para sair, clique em <b>Pular tutorial</b> ou aperte Esc."},
     {sel:"#menubar",t:"Barra de menus",pos:"baixo",x:"<b>Visualizar</b>: mover o mapa, ver tudo e voltar ou avançar entre vistas. <b>Desenhar feições</b>: ponto, linha, polígono, círculo, retângulo e elipse. <b>Vetor</b>: geoprocessamento (buffer, recortar, dissolver, união, interseção…). <b>Tema</b>: muda as cores do site. Em <b>Ajuda</b> você abre este tutorial de novo."},
-    {sel:"#add-cam",t:"1. Adicionar uma camada",pos:"dir",x:"Tudo começa aqui. Clique em <b>Adicionar</b> e escolha entre as <b>malhas do IBGE</b> (Brasil, regiões ou estados), os <b>mapas virtuais de fundo</b> (OpenStreetMap, Esri, EOX) ou um <b>arquivo do seu computador</b> (.zip de shapefile, .gpkg ou .tif). Também dá para arrastar o arquivo e soltar na tela."},
+    {sel:"#add-cam",t:"1. Adicionar uma camada",pos:"dir",x:"Tudo começa aqui. Clique em <b>Adicionar</b> e escolha entre as <b>malhas do IBGE</b> (Brasil, regiões ou estados), os <b>países do mundo</b>, os <b>mapas virtuais de fundo</b> (OpenStreetMap, Esri, EOX) ou um <b>arquivo do seu computador</b> (.zip de shapefile, .gpkg ou .tif). Também dá para arrastar o arquivo e soltar na tela."},
     {sel:"aside.camadas",t:"2. A lista de camadas",pos:"dir",x:"Cada camada adicionada aparece aqui, com um controle para <b>mostrar ou ocultar</b>. A alça de pontinhos permite <b>arrastar para mudar a ordem</b>: a camada de cima fica por cima no mapa. Clique com o <b>botão direito</b> (ou toque longo no celular) para abrir o menu da camada: <b>Propriedades</b> (cores, simbologia categorizada ou graduada e rótulos), tabela de atributos, aproximar, renomear, duplicar, copiar e colar estilo, agrupar, exportar e remover."},
     {sel:"#rem-cam",t:"Remover camadas",pos:"dir",x:"Escolha uma ou mais camadas na lista (segure Ctrl ou Shift para escolher várias) e clique em <b>Remover</b> para tirá-las do mapa."},
     {sel:"#map",t:"3. A área do mapa",x:"É aqui que o mapa aparece. <b>Arraste</b> para mover e use a <b>roda do mouse</b> (ou o gesto de pinça) para aproximar e afastar. Enquanto não houver camadas, ela fica vazia."},
@@ -4725,6 +4725,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
       +'<li>Exporta a seleção em shapefile (.zip) e salva o mapa.</li>'
       +'<li>Layout em A4 com mapa, legenda, escala, seta do Norte, textos e imagens.</li></ul>'
       +'<h3>Tecnologias</h3><p>HTML, CSS e JavaScript, com as bibliotecas Leaflet 1.9.4, Leaflet.draw 1.0.4, Turf.js 6.5.0, georaster 1.6.0, georaster-layer-for-leaflet 3.10.0, JSZip 3.10.1, shp.js 6.2.0 e sql.js 1.10.3. Fonte Atkinson Hyperlegible.</p>'
+      +'<h3>Malhas do mundo</h3><p>Os limites dos países (escala 1:10 milhões) vêm do <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>, em domínio público.</p>'
       +'<h3>Créditos dos mapas de fundo</h3><p>Os mapas de fundo vêm de serviços de terceiros, carregados pela internet, e seguem os termos de uso de cada provedor.</p>'
       +'<ul><li><b>OpenStreetMap</b>: © contribuidores do <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, com dados sob a licença ODbL. Estilos: Humanitário (HOT) e França (nomes locais), com hospedagem da OSM França; Ciclismo (CyclOSM); Transporte público (ÖPNVKarte, memomaps.de); Topográfico (OpenTopoMap), com dados SRTM e estilo © OpenTopoMap (CC-BY-SA).</li>'
       +'<li><b>CARTO</b> (Claro e Escuro): © contribuidores do OpenStreetMap © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.</li>'
@@ -5558,19 +5559,22 @@ const POINT_ANCHOR_TO_DIRECTION = {
 
   /* ---------- Modal "Adicionar camada": malhas do IBGE (zips hospedados no repositório) ou arquivo do computador ----------
      Estrutura esperada (relativa ao index.html):
-       zips/BR_Pais_2025.zip | BR_UF_2025 (1).zip | BR_Regioes_2025.zip | estados/SP_UF_2025.zip | municipios/SP_Municipios_2025.zip */
+       zips/BR_Pais_2025.zip | BR_UF_2025 (1).zip | BR_Regioes_2025.zip | estados/SP_UF_2025.zip | municipios/SP_Municipios_2025.zip
+       zips/mundo/ne_10m_admin_0_countries.zip (países do mundo, Natural Earth 1:10m, lagos preenchidos)
+       zips/mundo/ne_10m_admin_0_countries_lakes.zip (o mesmo, com o vazio dos Grandes Lagos) */
   var ZIPS_BASE="zips/";
   var UFS={AC:"Acre",AL:"Alagoas",AP:"Amapá",AM:"Amazonas",BA:"Bahia",CE:"Ceará",DF:"Distrito Federal",ES:"Espírito Santo",GO:"Goiás",MA:"Maranhão",MT:"Mato Grosso",MS:"Mato Grosso do Sul",MG:"Minas Gerais",PA:"Pará",PB:"Paraíba",PR:"Paraná",PE:"Pernambuco",PI:"Piauí",RJ:"Rio de Janeiro",RN:"Rio Grande do Norte",RS:"Rio Grande do Sul",RO:"Rondônia",RR:"Roraima",SC:"Santa Catarina",SP:"São Paulo",SE:"Sergipe",TO:"Tocantins"};
   var OPCOES={
     brasil:{rot:"Brasil",sub:[["sem","Sem estados"],["com","Com estados"]]},
     regioes:{rot:"Grandes regiões"},
     estados:{rot:"Estados",sub:[["sem","Sem municípios"],["com","Com municípios"]]},
+    mundo:{rot:"Países do mundo",sub:[["sem","Países inteiros"],["lagos","Países sem as áreas de lagos"]]},
     osm:{rot:"OpenStreetMap",fundo:true,vars:["osm","osm-hot","osm-topo","osm-cyclo","osm-fr","osm-transp","osm-claro","osm-escuro"]},
     esri:{rot:"Esri (satélite e mapas)",fundo:true,vars:["esri","esri-rotulos","esri-clarity","esri-ruas","esri-topo","esri-natgeo","esri-claro","esri-escuro"]},
     eox:{rot:"Satélite — Sentinel-2 (EOX)",fundo:true,vars:["eox","eox2020","eox2019","eox2018"]},
     arquivo:{rot:"Arquivo do meu computador (.zip, .gpkg, .tif)"}
   };
-  var GRUPOS_ADD=[["Malhas do IBGE",["brasil","regioes","estados"]],["Mapas virtuais (mapa de fundo)",["osm","esri","eox"]],["Do meu computador",["arquivo"]]];
+  var GRUPOS_ADD=[["Malhas do IBGE",["brasil","regioes","estados"]],["Malhas do mundo (Natural Earth)",["mundo"]],["Mapas virtuais (mapa de fundo)",["osm","esri","eox"]],["Do meu computador",["arquivo"]]];
   var A_OSM="© contribuidores do <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>",A_ESRI="Esri, Maxar, Earthstar Geographics e a comunidade GIS",A_CARTO=A_OSM+" © <a href='https://carto.com/attributions'>CARTO</a>";
   function esriU(n,b){return"https://server.arcgisonline.com/ArcGIS/rest/services/"+n+"/MapServer/tile/{z}/{y}/{x}"}
   function eoxU(y){return"https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-"+y+"_3857/default/g/{z}/{y}/{x}.jpg"}
@@ -5664,6 +5668,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
       if(OPCOES[n].fundo){fechar();definirFundo(vs.value);return}
       if(n==="brasil"){arq=t==="sem"?"BR_Pais_2025":"BR_UF_2025 (1)";nome=t==="sem"?"Brasil":"Brasil_Estados"}
       else if(n==="regioes"){arq="BR_Regioes_2025";nome="Grandes_Regioes"}
+      else if(n==="mundo"){arq="mundo/ne_10m_admin_0_countries"+(t==="lagos"?"_lakes":"");nome=t==="lagos"?"Paises_do_Mundo_Lagos":"Paises_do_Mundo"}
       else if(t==="sem"){arq="estados/"+u+"_UF_2025";nome=u}
       else{arq="municipios/"+u+"_Municipios_2025";nome=u+"_Municipios"}
       fechar();aviso("Carregando malha...");
@@ -7456,6 +7461,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     // Esc fecha só o editor (captura antes do Esc que fecha a janela de propriedades); Tab fica dentro do editor.
     document.addEventListener("keydown",function(e){
       if(byId("ie").hidden)return;
+      if(byId("color-picker-overlay").classList.contains("show"))return; // seletor de cor aberto por cima: Esc e Tab são dele
       if(e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();ieFechar(false);return}
       if(e.key==="Tab"){
         var f=Array.prototype.filter.call(byId("ie").querySelectorAll("button,input,[tabindex='0']"),function(x){return!x.disabled&&x.offsetParent!==null&&!x.closest("[hidden]")});
