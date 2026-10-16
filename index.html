@@ -2337,7 +2337,7 @@ function excluirMapa(id){
     aviso("Mapa \""+nomePendente+"\" criado. Ele só é guardado quando você adicionar a primeira camada.",4500);
   });
   document.getElementById("salvar").addEventListener("click",salvarMapa);
-  var tt;function aviso(t){var e=document.getElementById("aviso-t");e.textContent=t;e.hidden=false;clearTimeout(tt);tt=setTimeout(function(){e.hidden=true},2800)}
+  var tt;function aviso(t,ms){var e=document.getElementById("aviso-t");e.textContent=t;e.hidden=false;clearTimeout(tt);tt=setTimeout(function(){e.hidden=true},ms||2800)}
   /* ================= Mapa e ferramentas (baseado no index.html) ================= */
   function byId(i){return document.getElementById(i)}
   var mapEl=byId("map"),map=null,camadas=[],ativaId=null,proxId=1;
@@ -6571,15 +6571,21 @@ const POINT_ANCHOR_TO_DIRECTION = {
     if(novas.length){ajustar(novas);aposMudar(false,true)}
     var nLay=0,laysPj=Array.isArray(pj.layouts)?pj.layouts.filter(function(x){return x&&x.dados&&Array.isArray(x.dados.itens)&&x.dados.itens.length}):[];
     if(laysPj.length)nLay=await importarLayouts(laysPj,zip,idmap,pj.projectName);
-    aviso("Projeto importado: "+novas.length+" camada(s)"+(nLay?" e "+nLay+" layout(s)":"")+"."+(pul?" ("+pul+" mapa base ou raster sem arquivo, não importada(s))":""));
+    var faltouLay=laysPj.length-nLay;
+    aviso("Projeto importado: "+novas.length+" camada(s)"+(nLay?" e "+nLay+" layout(s)":"")+"."+(pul?" ("+pul+" mapa base ou raster sem arquivo, não importada(s))":"")+
+      (faltouLay>0?" ATENÇÃO: "+faltouLay+" layout(s) do arquivo NÃO foram importados (espaço do navegador cheio ou o mapa não pôde ser gravado).":""),faltouLay>0?9000:undefined);
   }
   // Layouts do projeto exportado: voltam para a lista de layouts deste mapa, com o que estava congelado em cada um.
   async function importarLayouts(lays,zip,idmap,nomeProj){
-    for(var w=0;w<40&&atual==null&&criandoPend;w++)await new Promise(function(r){setTimeout(r,100)});
+    /* Mapas grandes demoram para gravar: espera o mapa pendente terminar, sem limite de tempo. Com limite, os layouts iam parar
+       num segundo mapa criado aqui, e o mapa que a pessoa está usando ficava sem layouts. */
+    while(atual==null&&criandoPend)await new Promise(function(r){setTimeout(r,100)});
     if(atual==null){ // o mapa ainda não foi gravado: grava agora, porque os layouts ficam guardados pelo id do mapa
       if(mapaVazio())return 0;
+      criandoPend=true; // o autosave não cria outro mapa ao mesmo tempo
       var mNovo={id:novoId(),t:nomePendente||nomeProj||"Mapa sem título",d:"",dt:"SIRGAS 2000"};
       try{await gravar(mNovo);atual=mNovo.id;nomePendente=null}catch(e){console.error(e);return 0}
+      finally{criandoPend=false}
     }
     var rm=function(v){return Array.isArray(v)?v.map(function(x){return idmap[x]!=null?idmap[x]:x}):v};
     var lista=[];try{lista=JSON.parse(localStorage.getItem("mapinha:layouts:"+atual)||"[]")}catch(e){}
