@@ -158,16 +158,43 @@ body.arrastando-corpo,body.arrastando-corpo *{cursor:grabbing!important;user-sel
 #res-regua.show{display:block}
 #tab-attr{position:absolute;left:0;right:0;bottom:0;height:42%;z-index:1200;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;background:var(--card);border-top:2px solid var(--linha);box-shadow:0 -4px 14px rgba(0,0,0,.18);text-align:left}
 #tab-attr[hidden]{display:none}
+/* redimensionar: barra no topo (arraste), botões retrair/expandir e ampliar; altura lembrada entre as sessões */
+#tab-grip{flex:none;position:relative;height:14px;cursor:ns-resize;touch-action:none;background:var(--bg-suave);border-bottom:1px solid var(--linha);outline:none}
+#tab-grip::before{content:"";position:absolute;left:0;right:0;top:-8px;height:10px} /* área de toque maior, acima da barra */
+#tab-grip::after{content:"";position:absolute;left:50%;top:5px;width:48px;height:4px;margin-left:-24px;border-radius:2px;background:var(--borda)}
+#tab-grip:hover::after,#tab-grip:focus-visible::after,#tab-attr.arrastando #tab-grip::after{background:var(--agua)}
+#tab-grip:focus-visible{box-shadow:inset 0 0 0 2px var(--agua)}
+#tab-attr.arrastando{user-select:none;transition:none}
+#tab-attr:not(.arrastando){transition:height .18s ease}
+#tab-cab .mini.ico{display:inline-flex;align-items:center;justify-content:center;padding:4px 8px}
+#tab-cab .mini.ico svg{width:16px;height:16px;display:block;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+#tab-min svg{transition:transform .18s}
+#tab-attr.recolhida #tab-min svg{transform:rotate(180deg)}
+#tab-attr.recolhida{height:auto!important}
+#tab-attr.recolhida #tab-barra,#tab-attr.recolhida #tab-corpo{display:none}
+#tab-attr.recolhida #tab-cab{border-bottom:0}
+@media (prefers-reduced-motion:reduce){#tab-attr:not(.arrastando){transition:none}#tab-min svg{transition:none}}
 #tab-cab{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:6px 10px;border-bottom:2px solid var(--linha);font-size:14px}
 #tab-tit{flex:1;min-width:160px;font-weight:700}
 #tab-cab label{display:flex;align-items:center;gap:6px;margin:0}
 #tab-corpo{flex:1;min-height:0;overflow:auto}
 #tab-corpo table{border-collapse:collapse;font-size:14px;width:max-content;min-width:100%}
-#tab-corpo th,#tab-corpo td{padding:4px 10px;border-bottom:1px solid var(--linha);white-space:nowrap;text-align:left}
+#tab-corpo th,#tab-corpo td{padding:4px 10px;border-bottom:1px solid var(--linha);border-right:1px solid var(--borda);white-space:nowrap;text-align:left}
+#tab-corpo th:first-child,#tab-corpo td.id{background:var(--agua-claro)}
+#tab-corpo th:first-child{border-right-color:var(--borda-2)}
+#tab-corpo td.id{border-right-color:var(--borda-2)}
 #tab-corpo th{position:sticky;top:0;background:var(--bg-suave);z-index:1}
 #tab-corpo th.ordenavel{cursor:pointer}
 #tab-corpo th.ordenavel:hover{filter:brightness(.95)}
-#tab-corpo th .ord-ind{font-size:11px;opacity:.8}
+#tab-corpo th.ord-on{box-shadow:inset 0 -3px 0 var(--agua)}
+#tab-corpo .tri-box{display:inline-flex;flex-direction:column;gap:0;margin-left:auto}
+#tab-corpo .tri{border:0;background:none;padding:1px 4px;font-size:10px;line-height:1.1;color:var(--tinta-2);opacity:.55;cursor:pointer;border-radius:3px}
+#tab-corpo .tri:hover{opacity:1;background:var(--bg-hover)}
+#tab-corpo .tri.on{color:#fff;background:var(--agua);opacity:1}
+.dlg-lista{max-height:260px;overflow:auto;border:2px solid var(--linha);border-radius:8px;background:var(--bg-campo);padding:6px 10px 2px;margin:0 0 12px}
+.dlg-lista label.rd{margin:0;padding:5px 0;cursor:pointer;word-break:break-word}
+.dlg-lista label.rd.todas{border-bottom:1px solid var(--linha);margin-bottom:2px;padding-bottom:7px;font-weight:700}
+.dlg-erro{color:#c0392b;font-size:14px;margin:0 0 10px}
 #tab-corpo td.n{color:var(--tinta-2)}
 #tab-corpo tr[data-i]{cursor:pointer}
 #tab-corpo tr.sel td{background:rgba(242,163,58,.35)}
@@ -176,6 +203,17 @@ body.arrastando-corpo,body.arrastando-corpo *{cursor:grabbing!important;user-sel
 #tab-badge[hidden]{display:none}
 #tab-barra{display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px;border-bottom:2px solid var(--linha);background:var(--bg-suave)}
 #tab-barra .mini{padding:4px 10px;font-size:13px}
+/* os botões ficam numa linha só (computador, tablet e celular); se passarem da largura, aparece a barra de rolagem horizontal */
+#tab-barra{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+#tab-barra .mini{flex:none;white-space:nowrap}
+/* Chrome, Edge e Safari (inclusive Android e Mac, que escondem a barra padrão): barra sempre visível */
+#tab-barra::-webkit-scrollbar{height:12px}
+#tab-barra::-webkit-scrollbar-track{background:var(--bg-suave)}
+#tab-barra::-webkit-scrollbar-thumb{background:var(--borda-2);border-radius:6px;border:2px solid var(--bg-suave)}
+#tab-barra::-webkit-scrollbar-thumb:hover{background:var(--tinta-2)}
+/* Firefox */
+@supports not selector(::-webkit-scrollbar){#tab-barra{scrollbar-width:thin;scrollbar-color:var(--borda-2) var(--bg-suave)}}
+
 #tab-corpo td.id{cursor:pointer;text-align:center;text-decoration:underline dotted var(--borda-2);text-underline-offset:2px}
 #tab-corpo td.cel{cursor:cell;min-width:60px}
 #tab-corpo tr.edit td{background:rgba(255,230,120,.22)}
@@ -1741,9 +1779,9 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
   <div class="barra">
     <div class="grupo">
       <button class="b" data-ir="inicio"><svg><use href="#i-home"/></svg>Início</button>
-      <button class="b" id="b-abrir" title="Abrir um arquivo .zip, .gpkg ou .tif"><svg><use href="#i-abrir"/></svg>Abrir</button>
+      <button class="b" id="b-abrir" title="Abrir um arquivo .zip (shapefile, projeto ou layout), .gpkg ou .tif"><svg><use href="#i-abrir"/></svg>Abrir</button>
       <button class="b" id="salvar" title="Salvar o mapa"><svg><use href="#i-salvar"/></svg>Salvar</button>
-      <button class="b dest" id="baixar" disabled title="Exportar o projeto inteiro em um arquivo .zip"><svg><use href="#i-zip"/></svg>Exportar zip</button>
+      <button class="b dest" id="baixar" disabled title="Exportar o projeto em um arquivo .zip (se houver layouts, baixa também um .zip só com eles)"><svg><use href="#i-zip"/></svg>Exportar zip</button>
       <button class="b dest" id="b-layout" title="Montar o layout para imprimir"><svg><use href="#i-layout"/></svg>Layout</button>
     </div>
     <div class="grupo">
@@ -1781,10 +1819,13 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
       <p class="vazio" id="vazio-mapa">O mapa está vazio. Adicione uma camada para começar.</p>
       <div id="res-regua" role="status"></div>
       <div id="tab-attr" hidden>
+        <div id="tab-grip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Redimensionar a tabela" title="Arraste para mudar a altura (duplo clique: retrair/expandir)"></div>
         <div id="tab-cab">
           <span id="tab-tit">Tabela de atributos</span>
           <span id="tab-badge" hidden>Alterações não exportadas</span>
           <label><input type="checkbox" id="tab-so"> Só selecionadas</label>
+          <button class="mini ico" id="tab-max" type="button" aria-label="Ampliar a tabela" title="Ampliar / restaurar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+          <button class="mini ico" id="tab-min" type="button" aria-label="Retrair a tabela" aria-expanded="true" title="Retrair / expandir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
           <button class="mini" id="tab-x" type="button" aria-label="Fechar a tabela">✕</button>
         </div>
         <div id="tab-barra">
@@ -1792,7 +1833,8 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
           <button class="mini" id="t-inv" type="button">Inverter seleção</button>
           <button class="mini" id="t-desel" type="button">Desselecionar</button>
           <button class="mini" id="t-zoom" type="button">Zoom na seleção</button>
-          <button class="mini" id="t-campo" type="button">Adicionar campo</button>
+          <button class="mini" id="t-campo" type="button">Adicionar coluna</button>
+          <button class="mini" id="t-delcol" type="button">Excluir coluna</button>
           <button class="mini perigo" id="t-del" type="button">Excluir selecionadas</button>
         </div>
         <div id="tab-corpo"></div>
@@ -2132,7 +2174,7 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
 <div id="modal-overlay"><div id="modal-box"><div id="modal-title"></div><div id="modal-body"></div><div id="modal-actions"><button id="modal-cancel">Cancelar</button><button class="primary" id="modal-confirm">Aplicar</button></div></div></div>
 <div id="dlg" hidden></div>
 <div id="aviso-t" role="status" hidden></div>
-<div id="drop-ov" hidden><div class="drop-box"><b>Solte o(s) arquivo(s) aqui</b><small>Arquivos .zip (shapefile ou projeto do GisJr), .gpkg ou .tif/.tiff</small></div></div>
+<div id="drop-ov" hidden><div class="drop-box"><b>Solte o(s) arquivo(s) aqui</b><small>Arquivos .zip (shapefile, projeto ou layout do GisJr), .gpkg ou .tif/.tiff</small></div></div>
 
 <script>
 (function(){
@@ -4687,14 +4729,14 @@ const POINT_ANCHOR_TO_DIRECTION = {
     {sel:"#rem-cam",t:"Remover camadas",pos:"dir",x:"Escolha uma ou mais camadas na lista (segure Ctrl ou Shift para escolher várias) e clique em <b>Remover</b> para tirá-las do mapa."},
     {sel:"#map",t:"3. A área do mapa",x:"É aqui que o mapa aparece. <b>Arraste</b> para mover e use a <b>roda do mouse</b> (ou o gesto de pinça) para aproximar e afastar. Enquanto não houver camadas, ela fica vazia."},
     {sel:'#mapa .barra [data-ir="inicio"]',t:"Início",x:"Volta à tela inicial, onde ficam os seus mapas já criados. Se houver alterações ainda não exportadas, o site avisa antes de sair."},
-    {sel:"#b-abrir",t:"Abrir",x:"Abre um arquivo <b>.zip</b> (shapefile), <b>.gpkg</b> ou <b>.tif</b> do seu computador e coloca como camada. É o mesmo que Adicionar › Do meu computador."},
+    {sel:"#b-abrir",t:"Abrir",x:"Abre um arquivo <b>.zip</b> (shapefile, projeto ou <b>layout exportado</b>), <b>.gpkg</b> ou <b>.tif</b> do seu computador. Shapefile, gpkg e tif entram como camada; um .zip de layouts entra na lista de layouts do mapa aberto (abra antes o .zip do projeto, ou deixe as camadas no mapa)."},
     {sel:"#salvar",t:"Salvar",x:"Guarda o mapa neste navegador. Depois do primeiro salvamento, as mudanças passam a ser guardadas sozinhas. O mapa fica na lista <b>Mapas já criados</b>, no Início."},
-    {sel:"#baixar",t:"Exportar zip",x:"Gera um arquivo <b>.zip</b> com o projeto inteiro. É a forma de guardar uma cópia fora do navegador. Só fica ativo quando existe pelo menos uma camada."},
+    {sel:"#baixar",t:"Exportar zip",x:"Gera um arquivo <b>.zip</b> com o projeto (camadas, simbologia e rótulos). É a forma de guardar uma cópia fora do navegador. Se o mapa tiver layouts salvos, baixa junto um <b>segundo .zip só com os layouts</b> (<i>nome.layouts.zip</i>, com um arquivo .json e as imagens soltas). Só fica ativo quando existe pelo menos uma camada."},
     {sel:"#b-layout",t:"Layout",x:"Abre, em outra aba, a tela para <b>montar o mapa para imprimir</b>: mapa, legenda, escala, seta do Norte, textos e imagens numa folha A4. Precisa de pelo menos uma camada."},
     {sel:["#b-aprox","#b-afast"],t:"Aproximar e Afastar",x:"Clique em um dos botões e depois no mapa para dar zoom mais perto ou mais longe."},
     {sel:["#b-desfazer","#b-refazer"],t:"Desfazer e Refazer",x:"Voltam ou repetem as últimas ações no mapa. Atalhos: <b>Ctrl+Z</b> e <b>Ctrl+Y</b>."},
     {sel:"#b-regua",t:"Régua",x:"Mede distâncias: clique nos pontos do mapa e o resultado aparece na tela. Fica ativa quando há camadas."},
-    {sel:"#b-tabela",t:"Tabela de atributos",x:"Abre a tabela da <b>camada ativa</b>. Nela você seleciona linhas, inverte a seleção, dá zoom na seleção, adiciona campos e exclui feições."},
+    {sel:"#b-tabela",t:"Tabela de atributos",x:"Abre a tabela da <b>camada ativa</b>. Nela você seleciona linhas, inverte a seleção, dá zoom na seleção, adiciona e exclui colunas e exclui feições."},
     {sel:"#b-calc",t:"Calcular",x:"<b>Calculadora de campo</b>: cria ou atualiza um campo da tabela a partir de uma expressão, como na calculadora de campo do QGIS."},
     {sel:"#b-id",t:"Identificar feição",x:"Clique numa feição do mapa para ver todos os atributos dela. Clique de novo no botão para sair desse modo."},
     {sel:"#b-selec",t:"Selecionar feição",x:"Clique nas feições do mapa para selecioná-las (elas ficam amarelas). Segure Shift ou Ctrl para escolher várias. Clique de novo no botão para sair."},
@@ -5417,6 +5459,18 @@ const POINT_ANCHOR_TO_DIRECTION = {
       box.appendChild(h("h2",null,o.titulo));
       if(o.msg)box.appendChild(h("p",null,o.msg));
       if(o.campo){inp=h("input");inp.value=o.valor||"";inp.setAttribute("aria-label",o.titulo);box.appendChild(inp)}
+      var checks=[],erro=null,vazio=(o.campo||o.lista)?null:false;
+      if(o.lista){ /* várias opções marcáveis: devolve a lista das marcadas (ou null se cancelar) */
+        var lst=h("div","dlg-lista"),lt=h("label","rd todas"),tc=h("input");
+        lst.setAttribute("role","group");lst.setAttribute("aria-label",o.titulo);
+        tc.type="checkbox";lt.appendChild(tc);lt.appendChild(h("span",null,"Selecionar todas"));lst.appendChild(lt);
+        o.lista.forEach(function(nm){var l=h("label","rd"),cb=h("input");cb.type="checkbox";cb.value=nm;l.appendChild(cb);l.appendChild(h("span",null,nm));lst.appendChild(l);checks.push(cb)});
+        var sync=function(){var n=checks.filter(function(c){return c.checked}).length;tc.checked=n===checks.length&&n>0;tc.indeterminate=n>0&&n<checks.length;if(erro)erro.hidden=true};
+        tc.addEventListener("change",function(){checks.forEach(function(c){c.checked=tc.checked});sync()});
+        checks.forEach(function(c){c.addEventListener("change",sync)});
+        box.appendChild(lst);
+        erro=h("p","dlg-erro");erro.hidden=true;erro.setAttribute("role","alert");box.appendChild(erro);
+      }
       var bt=h("div","dlg-bts"),cancel=h("button","mini","Cancelar"),ok=h("button","mini "+(o.perigo?"sim":"ok"),o.ok||"OK");
       bt.appendChild(cancel);bt.appendChild(ok);box.appendChild(bt);
       ov.innerHTML="";ov.appendChild(box);ov.hidden=false;
@@ -5427,14 +5481,21 @@ const POINT_ANCHOR_TO_DIRECTION = {
         res(v);
       }
       function tecla(e){
-        if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fechar(o.campo?null:false)}
+        if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fechar(vazio)}
         else if(e.key==="Enter"&&e.target!==cancel){e.preventDefault();e.stopPropagation();ok.click()}
       }
-      cancel.addEventListener("click",function(){fechar(o.campo?null:false)});
-      ok.addEventListener("click",function(){fechar(o.campo?inp.value:true)});
-      ov.onclick=function(e){if(e.target===ov)fechar(o.campo?null:false)};
+      cancel.addEventListener("click",function(){fechar(vazio)});
+      ok.addEventListener("click",function(){
+        if(o.lista){
+          var v=checks.filter(function(c){return c.checked}).map(function(c){return c.value});
+          if(!v.length){erro.textContent=o.vazioMsg||"Marque pelo menos uma opção.";erro.hidden=false;return}
+          fechar(v);return;
+        }
+        fechar(o.campo?inp.value:true);
+      });
+      ov.onclick=function(e){if(e.target===ov)fechar(vazio)};
       document.addEventListener("keydown",tecla,true);
-      (inp||ok).focus();if(inp)inp.select();
+      (inp||checks[0]||ok).focus();if(inp)inp.select();
     });
   }
   // Nome já em uso: pergunta outro nome (null = cancelou).
@@ -5821,11 +5882,11 @@ const POINT_ANCHOR_TO_DIRECTION = {
   function reatribuirGv(){camadas.forEach(function(c){var r=hist.E&&hist.E.cam[c.id];if(r)c._gv=r.gv})}
   function desfazer(){
     if(!map||hist.i<=0)return;fecharPropriedades();
-    hist.E=aplicarE(hist.E,hist.pilha[hist.i-1],false);hist.i--;reconstruir(paraFoto(hist.E));reatribuirGv();naoExportado=true;agendarAutosave();aviso("Ação desfeita.");
+    hist.E=aplicarE(hist.E,hist.pilha[hist.i-1],false);hist.i--;reconstruir(paraFoto(hist.E));reatribuirGv();tabForcaRender();naoExportado=true;agendarAutosave();aviso("Ação desfeita.");
   }
   function refazer(){
     if(!map||hist.i<0||hist.i>=hist.pilha.length)return;fecharPropriedades();
-    hist.E=aplicarE(hist.E,hist.pilha[hist.i],true);hist.i++;reconstruir(paraFoto(hist.E));reatribuirGv();naoExportado=true;agendarAutosave();aviso("Ação refeita.");
+    hist.E=aplicarE(hist.E,hist.pilha[hist.i],true);hist.i++;reconstruir(paraFoto(hist.E));reatribuirGv();tabForcaRender();naoExportado=true;agendarAutosave();aviso("Ação refeita.");
   }
   byId("b-desfazer").addEventListener("click",desfazer);
   byId("b-refazer").addEventListener("click",refazer);
@@ -6031,6 +6092,14 @@ const POINT_ANCHOR_TO_DIRECTION = {
     tabOrd[c.id]=(o&&o.campo===campo)?{campo:campo,dir:-o.dir}:{campo:campo,dir:1};
     byId("tab-corpo").scrollTop=0;renderTabela();
   }
+  // Triângulos do título: ▲ crescente, ▼ decrescente; clicar no que já está ativo tira a ordenação.
+  function definirOrdem(c,campo,dir){
+    var o=tabOrd[c.id];
+    if(o&&o.campo===campo&&o.dir===dir)delete tabOrd[c.id];else tabOrd[c.id]={campo:campo,dir:dir};
+    var corpo=byId("tab-corpo");corpo.scrollTop=0;renderTabela();
+    var bs=corpo.querySelectorAll("button[data-sort]"); /* devolve o foco ao triângulo clicado (a tabela é redesenhada) */
+    for(var i=0;i<bs.length;i++)if(bs[i].dataset.sort===(dir>0?"asc":"desc")&&(bs[i].hasAttribute("data-c")?bs[i].dataset.c:null)===campo){bs[i].focus();break}
+  }
   // Seleção de linhas como no Windows: clique = só esta | Ctrl = soma/tira | Shift = do último clique até esta | Ctrl+Shift = soma o intervalo
   function selecaoTabela(c,i,e){
     var shift=e.shiftKey,ctrl=e.ctrlKey||e.metaKey;
@@ -6066,19 +6135,30 @@ const POINT_ANCHOR_TO_DIRECTION = {
     var fs=c.geojson.features,so=byId("tab-so").checked,MAX=1500,campos=tabCampos(c),ed=edSet(c);
     var t=h("table"),th=h("thead"),tr=h("tr"),tb=h("tbody"),mostradas=0,corte=false,k;
     var ord=tabOrdem(c,campos),oc=tabOrd[c.id],desc0=!!(oc&&oc.campo===null&&oc.dir<0);
-    var th0=h("th","ordenavel");
-    th0.appendChild(h("span",null,"#"));if(desc0)th0.appendChild(h("span","ord-ind"," ▼"));
+    /* triângulos ▲ ▼ no lugar do ✕: o que está ativo fica verde (e o título ganha um traço embaixo) */
+    function triangulos(campo,nome){
+      var box=h("span","tri-box"),o=(oc&&oc.campo===campo)?oc:null;
+      [["asc","▲","crescente"],["desc","▼","decrescente"]].forEach(function(t){
+        var on=!!o&&o.dir===(t[0]==="asc"?1:-1),b=h("button","tri"+(on?" on":""),t[1]);
+        b.type="button";b.dataset.sort=t[0];if(campo!==null)b.dataset.c=campo;
+        b.setAttribute("aria-pressed",on?"true":"false");
+        b.setAttribute("aria-label","Ordenar "+nome+" em ordem "+t[2]);
+        b.title=on?"Ordenado em ordem "+t[2]+" (clique para tirar a ordenação)":"Ordem "+t[2];
+        box.appendChild(b);
+      });
+      return box;
+    }
+    var th0=h("th","ordenavel"+(oc&&oc.campo===null?" ord-on":"")),d0=h("div","th-in");
+    d0.appendChild(h("span",null,"#"));d0.appendChild(triangulos(null,"a ordem original"));th0.appendChild(d0);
     th0.dataset.idx="1";th0.title="Ordem original (clique de novo para inverter)";
-    th0.setAttribute("aria-sort",desc0?"descending":"none");
+    th0.setAttribute("aria-sort",oc&&oc.campo===null?(oc.dir<0?"descending":"ascending"):"none");
     tr.appendChild(th0);
     campos.forEach(function(n){
-      var x=h("th","ordenavel"),d=h("div","th-in"),b=h("button","del-x","✕"),ativo=!!(oc&&oc.campo===n);
+      var ativo=!!(oc&&oc.campo===n),x=h("th","ordenavel"+(ativo?" ord-on":"")),d=h("div","th-in");
       x.dataset.ord="1";x.dataset.c=n;x.title="Clique para ordenar de A a Z (de novo: Z a A)";
       x.setAttribute("aria-sort",ativo?(oc.dir<0?"descending":"ascending"):"none");
-      d.appendChild(h("span",null,n));
-      if(ativo)d.appendChild(h("span","ord-ind",oc.dir<0?"▼":"▲"));
-      b.type="button";b.dataset.acao="campo";b.dataset.c=n;b.title='Excluir o campo "'+n+'"';
-      d.appendChild(b);x.appendChild(d);tr.appendChild(x);
+      d.appendChild(h("span",null,n));d.appendChild(triangulos(n,'"'+n+'"'));
+      x.appendChild(d);tr.appendChild(x);
     });
     tr.appendChild(h("th",null,""));
     th.appendChild(tr);t.appendChild(th);
@@ -6103,6 +6183,8 @@ const POINT_ANCHOR_TO_DIRECTION = {
     tabTitulo(c);corpo.scrollTop=ini;corpo.scrollLeft=esq;
     tabSig=c.id+":"+fs.length+":"+c.name;
   }
+  // Desfazer/Refazer mudam valores e colunas sem mudar o nome nem o número de feições: aí a tabela precisa ser redesenhada de qualquer jeito.
+  function tabForcaRender(){if(tabEl&&!tabEl.hidden){tabSig="";renderTabela()}}
   // Re-desenha só se a camada ativa, o nome ou o número de feições mudou.
   function atualizarTabela(){
     if(!tabEl||tabEl.hidden)return;
@@ -6139,22 +6221,27 @@ const POINT_ANCHOR_TO_DIRECTION = {
     });
     inp.addEventListener("blur",function(){fim(true)});
   }
-  async function adicionarCampo(){
+  async function adicionarCampo(){ /* "campo" = coluna da tabela */
     var c=camadaAtiva();
     if(!c||c.isRaster){aviso("Selecione uma camada vetorial primeiro.");return}
-    var nome=await dialogo({titulo:"Adicionar campo",msg:"Nome do novo campo:",campo:true,valor:"",ok:"Adicionar"});
+    var nome=await dialogo({titulo:"Adicionar coluna",msg:"Nome da nova coluna:",campo:true,valor:"",ok:"Adicionar"});
     if(nome===null)return;
     nome=nome.trim();
-    if(!nome){aviso("Digite um nome para o campo.");return}
-    if(tabCampos(c).indexOf(nome)>-1){aviso('Já existe um campo chamado "'+nome+'".');return}
+    if(!nome){aviso("Digite um nome para a coluna.");return}
+    if(tabCampos(c).indexOf(nome)>-1){aviso('Já existe uma coluna chamada "'+nome+'".');return}
     c.geojson.features.forEach(function(f){(f.properties=f.properties||{})[nome]=null});
-    atualizarFeicoes(c);aviso('Campo "'+nome+'" adicionado.');
+    atualizarFeicoes(c);aviso('Coluna "'+nome+'" adicionada.');
   }
-  async function excluirCampo(c,nome){
-    var ok=await dialogo({titulo:"Excluir campo",msg:'Excluir o campo "'+nome+'" de todas as feições? Você pode voltar atrás em Desfazer.',ok:"Excluir",perigo:true});
-    if(!ok)return;
-    c.geojson.features.forEach(function(f){if(f.properties)delete f.properties[nome]});
-    atualizarFeicoes(c);aviso('Campo "'+nome+'" excluído.');
+  /* Excluir coluna: lista as colunas existentes, dá para marcar várias; tudo vira uma única ação em Desfazer */
+  async function excluirColunas(){
+    var c=vetorial();if(!c)return;
+    var campos=tabCampos(c);
+    if(!campos.length){aviso("Esta camada não tem colunas para excluir.");return}
+    var sel=await dialogo({titulo:"Excluir coluna",msg:"Marque as colunas que você quer excluir de todas as feições. Você pode voltar atrás em Desfazer.",lista:campos,vazioMsg:"Marque pelo menos uma coluna.",ok:"Excluir",perigo:true});
+    if(!sel||!sel.length)return;
+    c.geojson.features.forEach(function(f){if(f.properties)sel.forEach(function(n){delete f.properties[n]})});
+    atualizarFeicoes(c);
+    aviso(sel.length===1?'Coluna "'+sel[0]+'" excluída.':sel.length+" colunas excluídas.");
   }
   function excluirLinha(c,i){
     c.geojson.features.splice(i,1);
@@ -6162,9 +6249,78 @@ const POINT_ANCHOR_TO_DIRECTION = {
     delete tabEd[c.id];
     atualizarFeicoes(c);aviso("Feição excluída. Use Desfazer para voltar atrás.");
   }
+  /* ---------- Altura da tabela ----------
+     Arraste a barra do topo; Setas ↑/↓ (com a barra em foco) mudam de 24 em 24 px; duplo clique ou o botão ▾ retrai/expande;
+     o botão de cantos amplia (e restaura). Arrastar até quase o fim retrai. A altura e o "retraída" ficam guardados no navegador. */
+  var TAB_KEY="mapinha:tab-attr-ui",tabUI={h:null,rec:false},tabAntes=null;
+  try{var tu=JSON.parse(localStorage.getItem(TAB_KEY));if(tu&&typeof tu==="object"){if(+tu.h>0)tabUI.h=+tu.h;tabUI.rec=!!tu.rec}}catch(e){}
+  /* altura mínima: cabeçalho + barra de ações + ~3 linhas (o corpo precisa de espaço para o título das colunas e algumas linhas) */
+  function tabMinH(){var g=byId("tab-grip").offsetHeight,c=byId("tab-cab").offsetHeight,b=byId("tab-barra").offsetHeight;return Math.max(200,g+c+b+110)}
+  function tabAreaH(){return tabEl.parentNode.clientHeight||600}
+  function tabMaxH(){return Math.max(tabMinH(),Math.round(tabAreaH()*0.92))}
+  function tabAltura(){var h=tabUI.h==null?Math.round(tabAreaH()*0.42):tabUI.h;return Math.max(tabMinH(),Math.min(tabMaxH(),h))}
+  function tabGuarda(){try{localStorage.setItem(TAB_KEY,JSON.stringify({h:tabUI.h,rec:tabUI.rec}))}catch(e){}}
+  function tabAplica(){
+    if(tabEl.hidden)return;
+    var h=tabAltura(),g=byId("tab-grip"),mn=byId("tab-min"),mx=byId("tab-max"),cheia=!tabUI.rec&&h>=tabMaxH()-4;
+    tabEl.style.height=tabUI.rec?"":h+"px";
+    tabEl.classList.toggle("recolhida",tabUI.rec);
+    mn.setAttribute("aria-expanded",tabUI.rec?"false":"true");
+    mn.setAttribute("aria-label",tabUI.rec?"Expandir a tabela":"Retrair a tabela");
+    mx.setAttribute("aria-label",cheia?"Restaurar o tamanho da tabela":"Ampliar a tabela");
+    g.setAttribute("aria-valuemin",String(tabMinH()));g.setAttribute("aria-valuemax",String(tabMaxH()));g.setAttribute("aria-valuenow",String(tabUI.rec?0:h));
+  }
+  function tabRetrai(v){tabUI.rec=v;tabAplica();tabGuarda()}
+  byId("tab-min").addEventListener("click",function(){tabRetrai(!tabUI.rec)});
+  byId("tab-max").addEventListener("click",function(){
+    var cheia=!tabUI.rec&&tabAltura()>=tabMaxH()-4;
+    if(cheia){tabUI.h=tabAntes!=null?tabAntes:null}
+    else{tabAntes=tabUI.rec?tabUI.h:tabAltura();tabUI.h=tabMaxH()}
+    tabUI.rec=false;tabAplica();tabGuarda();
+  });
+  (function(){
+    var g=byId("tab-grip"),y0=0,h0=0,raw=0,hIni=null;
+    g.addEventListener("pointerdown",function(e){
+      if(e.button!==undefined&&e.button!==0)return;
+      e.preventDefault();
+      y0=e.clientY;h0=tabUI.rec?0:tabEl.offsetHeight;raw=h0;hIni=tabUI.rec?tabUI.h:h0; /* altura de antes do arrasto: é a que volta depois de retrair */
+      try{g.setPointerCapture(e.pointerId)}catch(x){}
+      tabEl.classList.add("arrastando");
+    });
+    g.addEventListener("pointermove",function(e){
+      if(!tabEl.classList.contains("arrastando"))return;
+      raw=h0+(y0-e.clientY);
+      if(raw<tabMinH()-50){ /* puxou para baixo até quase sumir: pré-visualiza a tabela retraída */
+        if(!tabUI.rec){tabUI.rec=true;tabUI.h=hIni;tabEl.style.height="";tabEl.classList.add("recolhida")}
+        return;
+      }
+      if(tabUI.rec){tabUI.rec=false;tabEl.classList.remove("recolhida")}
+      tabUI.h=Math.max(tabMinH(),Math.min(tabMaxH(),Math.round(raw)));
+      tabEl.style.height=tabUI.h+"px";
+    });
+    function fim(e){
+      if(!tabEl.classList.contains("arrastando"))return;
+      tabEl.classList.remove("arrastando");
+      try{g.releasePointerCapture(e.pointerId)}catch(x){}
+      tabAplica();tabGuarda();
+    }
+    g.addEventListener("pointerup",fim);g.addEventListener("pointercancel",fim);
+    g.addEventListener("dblclick",function(){tabRetrai(!tabUI.rec)});
+    g.addEventListener("keydown",function(e){
+      var k=e.key,h=tabUI.rec?0:tabAltura();
+      if(k==="ArrowUp"){e.preventDefault();if(tabUI.rec)tabUI.rec=false;else tabUI.h=Math.min(tabMaxH(),Math.max(tabMinH(),h+24))}
+      else if(k==="ArrowDown"){e.preventDefault();if(tabUI.rec)return;if(h-24<tabMinH()){tabUI.rec=true}else tabUI.h=h-24}
+      else if(k==="Home"){e.preventDefault();tabUI.rec=true}
+      else if(k==="End"){e.preventDefault();tabUI.rec=false;tabUI.h=tabMaxH()}
+      else if(k==="Enter"||k===" "){e.preventDefault();tabUI.rec=!tabUI.rec}
+      else return;
+      tabAplica();tabGuarda();
+    });
+  })();
+  window.addEventListener("resize",tabAplica);
   function mostrarTabela(v){
     tabEl.hidden=!v;byId("b-tabela").classList.toggle("active",v);
-    if(v)renderTabela();
+    if(v){tabAplica();renderTabela()}
   }
   byId("b-tabela").addEventListener("click",function(){
     if(tabEl.hidden&&!camadas.length){aviso("Adicione uma camada primeiro.");return}
@@ -6174,10 +6330,11 @@ const POINT_ANCHOR_TO_DIRECTION = {
   byId("tab-so").addEventListener("change",renderTabela);
   byId("tab-corpo").addEventListener("click",function(e){
     var c=camadaAtiva();if(!c)return;
+    var tri=e.target.closest("button[data-sort]");
+    if(tri){definirOrdem(c,tri.hasAttribute("data-c")?tri.dataset.c:null,tri.dataset.sort==="asc"?1:-1);return}
     var b=e.target.closest("button[data-acao]");
     if(b){
-      if(b.dataset.acao==="campo")excluirCampo(c,b.dataset.c);
-      else excluirLinha(c,+b.closest("tr").dataset.i);
+      if(b.dataset.acao==="linha")excluirLinha(c,+b.closest("tr").dataset.i);
       return;
     }
     var thc=e.target.closest("th");
@@ -6207,6 +6364,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
   byId("t-desel").addEventListener("click",function(){byId("b-desselec").click()});
   byId("t-zoom").addEventListener("click",function(){var c=vetorial();if(c)aproximarSelecao(c)});
   byId("t-campo").addEventListener("click",adicionarCampo);
+  byId("t-delcol").addEventListener("click",excluirColunas);
   byId("t-del").addEventListener("click",function(){byId("b-remover").click()});
 
   /* ---------- Calculadora de campo: cria ou atualiza um campo a partir de uma expressão (estilo QGIS) ----------
@@ -6540,8 +6698,8 @@ const POINT_ANCHOR_TO_DIRECTION = {
     if(!window.L||!window.JSZip){aviso("As bibliotecas do mapa não carregaram — verifique sua conexão.");return}
     garantirMapa();
     try{
-      var buf=await f.arrayBuffer(),zip=await JSZip.loadAsync(buf),pj=achar(zip,"projeto.json");
-      if(pj)await importarProjeto(pj,zip);else await importarShape(f,buf,zip);
+      var buf=await f.arrayBuffer(),zip=await JSZip.loadAsync(buf),pj=achar(zip,"projeto.json"),lj=zip.file("layouts.json")||zip.file("layout.json");
+      if(pj)await importarProjeto(pj,zip);else if(lj)await importarLayoutZip(zip);else await importarShape(f,buf,zip);
     }catch(err){console.error(err);aviso("Erro ao ler \""+f.name+"\": "+err.message)}
   }
   // Projeto exportado por "Exportar zip": acrescenta as camadas ao mapa atual.
@@ -6613,6 +6771,58 @@ const POINT_ANCHOR_TO_DIRECTION = {
     try{localStorage.setItem("mapinha:layouts:"+atual,JSON.stringify(lista))}catch(e){console.error(e)}
     return feitos;
   }
+  /* ---------- Layout exportado à parte (.zip com layout.json + imagens/ + congelado.json) ---------- */
+  var EXT_MIME={png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp",gif:"image/gif",svg:"image/svg+xml"};
+  // cada "@zip:caminho" volta a ser um data-URL lido do arquivo do zip
+  async function poeImagens(obj,zip){
+    var cams={},faltou=0,urls={};
+    (function varre(x){
+      if(typeof x==="string"){if(x.indexOf("@zip:")===0)cams[x.slice(5)]=1}
+      else if(Array.isArray(x))x.forEach(varre);
+      else if(x&&typeof x==="object")for(var q in x)varre(x[q]);
+    })(obj);
+    for(var c in cams){
+      var ent=zip.file(c);
+      if(!ent){faltou++;urls[c]="";continue}
+      var ext=(c.split(".").pop()||"").toLowerCase();
+      urls[c]="data:"+(EXT_MIME[ext]||"application/octet-stream")+";base64,"+await ent.async("base64");
+    }
+    function troca(x){
+      if(typeof x==="string")return x.indexOf("@zip:")===0?urls[x.slice(5)]:x;
+      if(Array.isArray(x))return x.map(troca);
+      if(x&&typeof x==="object"){var o={};for(var q in x)o[q]=troca(x[q]);return o}
+      return x;
+    }
+    return{dados:troca(obj),faltou:faltou};
+  }
+  async function importarLayoutZip(zip){
+    var e2=zip.file("layouts.json"),e1=zip.file("layout.json"),j;
+    try{j=JSON.parse(await (e2||e1).async("text"))}
+    catch(e){aviso("Não foi possível ler o .json de layouts dentro do .zip — arquivo corrompido?");return}
+    /* formato novo (layouts.json, vários layouts) ou antigo (layout.json, um só) */
+    var lista=e2?(j&&j.layouts||[]):[{nome:j&&j.nome,prox:j&&j.prox,itens:j&&j.itens,congelado:j&&j.congelado}];
+    lista=lista.filter(function(x){return x&&Array.isArray(x.itens)&&x.itens.length});
+    if(!lista.length){aviso("Este .zip não tem nenhum layout com itens.");return}
+    if(!camadas.length){aviso("Abra (ou adicione) as camadas do mapa antes de importar os layouts.",6000);return}
+    var idmap={},usadas={},faltou=0;
+    /* as camadas dos layouts são ligadas às deste mapa pelo nome */
+    ((j&&j.camadas)||[]).forEach(function(o){
+      var c=camadas.filter(function(x){return !usadas[x.id]&&x.name===o.name})[0];
+      if(c){usadas[c.id]=1;idmap[o.id]=c.id}
+    });
+    var lays=[];
+    for(var i=0;i<lista.length;i++){
+      var x=lista[i],im=await poeImagens(x.itens,zip),its=im.dados;faltou+=im.faltou;
+      var pr=+x.prox||1;its.forEach(function(it){var n=parseInt(String(it.id).replace(/\D/g,""),10);if(n>=pr)pr=n+1});
+      var nome=String(x.nome||"Layout").slice(0,60);
+      lays.push({nome:nome,dados:{nome:nome,prox:pr,itens:its},congelado:x.congelado||null});
+    }
+    var n=await importarLayouts(lays,zip,idmap,lays[0].nome);
+    if(n===lays.length)aviso(n+(n>1?" layouts importados":" layout importado")+". Abra o Layout para vê-los."+(faltou?" ATENÇÃO: "+faltou+" imagem(ns) não estava(m) no .zip.":""),faltou?9000:5000);
+    else if(n)aviso("ATENÇÃO: só "+n+" de "+lays.length+" layouts foram importados (espaço do navegador cheio?).",9000);
+    else aviso("ATENÇÃO: nenhum layout foi importado (espaço do navegador cheio ou o mapa não pôde ser gravado).",9000);
+  }
+
   // Shapefile dentro do .zip (.shp, .shx, .dbf e, se houver, .prj/.cpg).
   async function importarShape(f,buf,zip){
     if(typeof shp==="undefined"){aviso("A biblioteca de shapefile não carregou — verifique sua conexão.");return}
@@ -6872,30 +7082,64 @@ const POINT_ANCHOR_TO_DIRECTION = {
         var rc=rasterCache.get(c.id);l.isRaster=true;l.opacity=c.opacity;l.originalFileName=c.originalFileName;
         if(rc&&rc.b64){var fn=i+"_"+c.originalFileName;zip.file("rasters/"+fn,rc.b64,{base64:true});l.rasterFile="rasters/"+fn}
       });
-      /* Layouts salvos deste mapa (tela Layout) + o que estava congelado em cada um (Travar camadas / Travar cores) */
-      var layoutsExp=[];
-      try{
-        if(atual){
-          var lstL=JSON.parse(localStorage.getItem("mapinha:layouts:"+atual)||"[]");
-          for(var lx=0;lx<lstL.length;lx++){
-            var eL=lstL[lx],rawL=localStorage.getItem("mapinha:layout:"+atual+":"+eL.id);
-            if(rawL==null)continue;
-            var entL={id:eL.id,nome:eL.nome,d:eL.d,n:eL.n,dados:JSON.parse(rawL),congelado:null},congL=null;
-            try{congL=await idbLer("congelado:"+atual+":"+eL.id)}catch(xe){console.error(xe)}
-            if(congL){entL.congelado="layouts/"+eL.id+".congelado.json";zip.file(entL.congelado,JSON.stringify(congL))}
-            layoutsExp.push(entL);
-          }
-        }
-      }catch(xe){console.error(xe)}
-      zip.file("projeto.json",JSON.stringify({version:1,exportedAt:new Date().toISOString(),projectName:nome,project:ser,layouts:layoutsExp}));
+      /* Os layouts não vão dentro deste .zip: saem num segundo arquivo (nome.layouts.zip), logo abaixo. */
+      zip.file("projeto.json",JSON.stringify({version:1,exportedAt:new Date().toISOString(),projectName:nome,project:ser}));
       var blob=await zip.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:4}});
-      var a=document.createElement("a");
-      a.href=URL.createObjectURL(blob);
-      a.download=nome.replace(/[\\/:*?"<>|]+/g,"_")+".zip";
-      document.body.appendChild(a);a.click();a.remove();
-      setTimeout(function(){URL.revokeObjectURL(a.href)},1500);
-      naoExportado=false;marcarBadge();aviso("Projeto exportado como \""+a.download+"\".");
+      var base=nome.replace(/[\\/:*?"<>|]+/g,"_"),a={download:base+".zip"};
+      baixarBlob(blob,a.download);
+      naoExportado=false;marcarBadge();
+      var msg="Projeto exportado como \""+a.download+"\".";
+      if(temLayoutsSalvos(atual)){
+        try{
+          var bl=await blobLayouts(nome);
+          if(bl){
+            await new Promise(function(r){setTimeout(r,700)}); /* dá um respiro entre os dois downloads */
+            baixarBlob(bl,base+".layouts.zip");
+            msg="Exportados: \""+a.download+"\" (projeto) e \""+base+".layouts.zip\" (layouts).";
+          }
+        }catch(e2){console.error(e2);msg+=" ATENÇÃO: não foi possível gerar o .zip dos layouts: "+e2.message}
+      }
+      aviso(msg,7000);
     }catch(err){console.error(err);aviso("Erro ao exportar o projeto: "+err.message)}
+  }
+  /* ---------- Layouts do mapa em um .zip só (nome.layouts.zip) ----------
+       layouts.json   → camadas (id + nome) e a lista de layouts: nome, itens (imagens trocadas por caminhos) e arquivo do congelado
+       imagens/       → cada imagem dos layouts como arquivo (png, jpg…; a mesma imagem vai uma vez só)
+       congelados/N.json → camadas/cores travadas de cada layout (só se houver) */
+  function criaTiraImagens(zip){
+    var feitos={},n=0;
+    return function v(x){
+      if(typeof x==="string"){
+        var m=x.length>200&&/^data:([a-z0-9.+\-]+\/[a-z0-9.+\-]+);base64,/i.exec(x);
+        if(!m)return x;
+        if(feitos[x])return feitos[x];
+        var mime=m[1].toLowerCase(),ext=mime==="image/jpeg"?"jpg":mime==="image/svg+xml"?"svg":((mime.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"")||"bin"),
+            cam="imagens/img-"+("00"+(++n)).slice(-3)+"."+ext;
+        zip.file(cam,x.slice(m[0].length),{base64:true});
+        return(feitos[x]="@zip:"+cam);
+      }
+      if(Array.isArray(x))return x.map(v);
+      if(x&&typeof x==="object"){var o={};for(var q in x)o[q]=v(x[q]);return o}
+      return x;
+    };
+  }
+  async function blobLayouts(nomeMapa){
+    var lst=[];
+    try{lst=JSON.parse(localStorage.getItem("mapinha:layouts:"+atual)||"[]")}catch(e){}
+    if(!Array.isArray(lst)||!lst.length)return null;
+    var zip=new JSZip(),tira=criaTiraImagens(zip),out=[];
+    for(var i=0;i<lst.length;i++){
+      var e=lst[i],d=null;
+      try{d=JSON.parse(localStorage.getItem("mapinha:layout:"+atual+":"+e.id))}catch(x){}
+      if(!d||!Array.isArray(d.itens)||!d.itens.length)continue;
+      var cam=null;
+      try{var cg=await idbLer("congelado:"+atual+":"+e.id);if(cg){cam="congelados/"+(out.length+1)+".json";zip.file(cam,JSON.stringify(cg))}}catch(x){console.error(x)}
+      out.push({nome:e.nome||d.nome||"Layout",prox:d.prox||1,itens:tira(d.itens),congelado:cam});
+    }
+    if(!out.length)return null;
+    zip.file("layouts.json",JSON.stringify({formato:"gisjr-layouts",versao:2,exportadoEm:new Date().toISOString(),mapa:nomeMapa,
+      camadas:camadas.map(function(c){return{id:c.id,name:c.name}}),layouts:out}));
+    return zip.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:6}});
   }
   byId("baixar").addEventListener("click",exportarZip);
 
@@ -8336,6 +8580,8 @@ function initCG(c){
   async function importarArquivos(lista){
     var fs=Array.from(lista||[]),i;
     if(!fs.length)return;
+    /* o .zip de layouts vai por último: ele precisa das camadas do projeto já abertas */
+    fs.sort(function(a,b){var la=/\.layouts?\.zip$/i.test(a.name)?1:0,lb=/\.layouts?\.zip$/i.test(b.name)?1:0;return la-lb});
     if(importando){aviso("Aguarde: os arquivos anteriores ainda estão sendo importados.");return}
     importando=true;
     try{
@@ -8345,7 +8591,7 @@ function initCG(c){
         if(/\.zip$/i.test(nm))await abrirZip(fs[i]);
         else if(/\.gpkg$/i.test(nm))await abrirGpkg(fs[i]);
         else if(/\.tiff?$/i.test(nm))await abrirTif(fs[i]);
-        else aviso("\""+nm+"\" ignorado: formatos aceitos são .zip (shapefile ou projeto), .gpkg e .tif/.tiff.");
+        else aviso("\""+nm+"\" ignorado: formatos aceitos são .zip (shapefile, projeto ou layout), .gpkg e .tif/.tiff.");
       }
     }finally{importando=false}
   }
