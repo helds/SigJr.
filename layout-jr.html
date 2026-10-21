@@ -806,10 +806,10 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
     {k:"eqearthbr",g:"Mundo",nome:"Equal Earth centrada no Brasil",curto:"Equal Earth BR",cod:"meridiano central 54°W",def:"+proj=eqearth +lon_0=-54 +ellps=WGS84 +units=m +no_defs",nota:"A mesma Equal Earth, com o meridiano central no Brasil: menos distorção de forma por aqui."}
   ];
   (function(){
-    for(var z=18;z<=25;z++)PROJ_LISTA.push({k:"utm"+z+"s",g:"UTM SIRGAS 2000 — hemisfério Sul",nome:"UTM zona "+z+"S",curto:"UTM "+z+"S",cod:"EPSG:"+(31978+z-18),zona:z,sul:true,def:"+proj=utm +zone="+z+" +south "+GRS80,nota:"Mantém os ângulos e quase não distorce distâncias na zona (6° de largura): a melhor para mapas locais."});
-    for(var n=18;n<=22;n++)PROJ_LISTA.push({k:"utm"+n+"n",g:"UTM SIRGAS 2000 — hemisfério Norte",nome:"UTM zona "+n+"N",curto:"UTM "+n+"N",cod:"EPSG:"+(31972+n-18),zona:n,sul:false,def:"+proj=utm +zone="+n+" "+GRS80,nota:"Mantém os ângulos e quase não distorce distâncias na zona (6° de largura)."});
     PROJ_LISTA.push({k:"5880",g:"Brasil inteiro",nome:"Policônica do Brasil",curto:"Policônica BR",cod:"EPSG:5880",def:"+proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 "+GRS80,nota:"Oficial para o país todo: equilibra as distorções de forma e de área."});
     PROJ_LISTA.push({k:"aea",g:"Brasil inteiro",nome:"Albers de área igual (Brasil)",curto:"Albers BR",cod:"IBGE",def:"+proj=aea +lat_0=-12 +lon_0=-54 +lat_1=-2 +lat_2=-22 +x_0=0 +y_0=0 "+GRS80,nota:"Preserva as áreas: boa para comparar tamanhos no país todo."});
+    for(var z=18;z<=25;z++)PROJ_LISTA.push({k:"utm"+z+"s",g:"UTM SIRGAS 2000 — hemisfério Sul",nome:"UTM zona "+z+"S",curto:"UTM "+z+"S",cod:"EPSG:"+(31978+z-18),zona:z,sul:true,def:"+proj=utm +zone="+z+" +south "+GRS80,nota:"Mantém os ângulos e quase não distorce distâncias na zona (6° de largura): a melhor para mapas locais."});
+    for(var n=18;n<=22;n++)PROJ_LISTA.push({k:"utm"+n+"n",g:"UTM SIRGAS 2000 — hemisfério Norte",nome:"UTM zona "+n+"N",curto:"UTM "+n+"N",cod:"EPSG:"+(31972+n-18),zona:n,sul:false,def:"+proj=utm +zone="+n+" "+GRS80,nota:"Mantém os ângulos e quase não distorce distâncias na zona (6° de largura)."});
   })();
   var layoutProj="3857";
   function projDe(k){for(var i=0;i<PROJ_LISTA.length;i++)if(PROJ_LISTA[i].k===k)return PROJ_LISTA[i];return null}
