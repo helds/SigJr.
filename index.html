@@ -2310,12 +2310,19 @@ function miniatura(cs){
     return out.join("");
   }catch(e){return""}
 }
+// Nome da projeção para o cartão da tela inicial (ex.: "UTM 24S (EPSG:31984)", "Web Mercator (EPSG:3857)").
+function rotuloProj(k){
+  var p=(typeof projDe==="function")?projDe(k):null;
+  if(!p)return "Web Mercator (EPSG:3857)";
+  return p.curto+(/^EPSG:/.test(p.cod||"")?" ("+p.cod+")":"");
+}
 // Grava o mapa (dados + índice). Tudo é copiado agora, antes de qualquer troca de mapa.
 function gravar(m){
   var snap=tirarFoto(),th=miniatura(camadas),n=camadas.length+(fundo?1:0);
   return idbSalvar(m.id,snap).then(function(){
     if(m._apagado){idbApagar(m.id).catch(function(){});return} // foi apagado enquanto gravava: não deixa reaparecer
     m.d=new Date().toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});m.thumb=th;m.n=n;
+    m.proj=snap.proj||"3857";m.dt=rotuloProj(m.proj); // o cartão da tela inicial mostra a projeção do mapa
     if(mapas.indexOf(m)<0)mapas.unshift(m);
     gravarIndice();render();
   });
@@ -2353,6 +2360,7 @@ async function abrirMapa(id){
   ir("mapa");rasterCache.clear();
   try{await prepararRasters(snap)}catch(err){console.error(err);aviso("Erro ao ler um raster deste mapa.")}
   carregarFoto(snap);atual=id;
+  if(m){var pk0=snap.proj||"3857",dt0=rotuloProj(pk0);if(m.proj!==pk0||m.dt!==dt0){m.proj=pk0;m.dt=dt0;gravarIndice();render()}}
   aviso("Mapa \""+(m?m.t:"")+"\" aberto.");
 }
 function excluirMapa(id){
@@ -8984,7 +8992,7 @@ function initCG(c){
         if(c.isRaster){var rc=rasterCache.get(c.id),b=rc&&rc.b64;if(b&&(completo||rasterEnviado[c.id]!==b)){o.originalFileBase64=b;rasterEnviado[c.id]=b}}
         return o;
       }),
-      ativaId:ativaId,fundo:fu,view:v
+      ativaId:ativaId,fundo:fu,view:v,proj:projAtual
     };
   }
   // Versão antiga (com cópia completa), só como reserva se a leve falhar.
@@ -8998,7 +9006,8 @@ function initCG(c){
       }),
       ativaId:s.ativaId,
       fundo:s.fundo||null,
-      view:s.view||null
+      view:s.view||null,
+      proj:s.proj||projAtual
     };
   }
   function enviarLayout(completo){

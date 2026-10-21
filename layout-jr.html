@@ -14,6 +14,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://unpkg.com/georaster@1.6.0/dist/georaster.browser.bundle.min.js"></script>
 <script src="https://unpkg.com/georaster-layer-for-leaflet@3.10.0/dist/georaster-layer-for-leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/proj4@2.22.0/dist/proj4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js"></script>
 <style>
 :root{
   --agua:#1e7a4c; --agua-claro:#e6ece0; --mar:#dcebf6; --sol:#f2a33a;
@@ -792,6 +794,174 @@ var mapProjectState = { projectCrs: 'EPSG:4326', layers: [] };
 var hasReceivedSnapshot = false;
 var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reenvia quando muda)
 
+/* ---------- Projeção do mapa (a mesma escolhida no GisJr) ----------
+   O snapshot do mapa traz a chave da projeção (snap.proj). Cada item de mapa do layout usa o mesmo CRS do mapa principal,
+   com a mesma convenção de zoom (zoom 0 = 156543 m/px), então escala 1:N e zoom continuam valendo.
+   Mapa de fundo (imagens em Web Mercator) e rasters só aparecem em Web Mercator, como no mapa principal. */
+  var RES0=156543.03392804097,GRS80="+ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
+  var PROJ_LISTA=[
+    {k:"3857",g:"Padrão",nome:"Web Mercator",curto:"Web Mercator",cod:"EPSG:3857",nota:"O mesmo dos mapas da internet. Mantém os ângulos, mas aumenta as áreas longe do equador."},
+    {k:"4674",g:"Padrão",nome:"SIRGAS 2000 geográfica (graus)",curto:"Geográfica",cod:"EPSG:4674",geo:true,def:"+proj=longlat "+GRS80,nota:"Longitude e latitude direto nos eixos: as feições ficam achatadas ou esticadas."},
+    {k:"eqearth",g:"Mundo",nome:"Equal Earth (recomendada pela ONU)",curto:"Equal Earth",cod:"EPSG:8857",def:"+proj=eqearth +lon_0=0 +ellps=WGS84 +units=m +no_defs",nota:"Área igual: a que a Assembleia Geral da ONU recomendou em set/2026 para mapas-múndi. Para um estado ou cidade, a UTM mede melhor."},
+    {k:"eqearthbr",g:"Mundo",nome:"Equal Earth centrada no Brasil",curto:"Equal Earth BR",cod:"meridiano central 54°W",def:"+proj=eqearth +lon_0=-54 +ellps=WGS84 +units=m +no_defs",nota:"A mesma Equal Earth, com o meridiano central no Brasil: menos distorção de forma por aqui."}
+  ];
+  (function(){
+    for(var z=18;z<=25;z++)PROJ_LISTA.push({k:"utm"+z+"s",g:"UTM SIRGAS 2000 — hemisfério Sul",nome:"UTM zona "+z+"S",curto:"UTM "+z+"S",cod:"EPSG:"+(31978+z-18),zona:z,sul:true,def:"+proj=utm +zone="+z+" +south "+GRS80,nota:"Mantém os ângulos e quase não distorce distâncias na zona (6° de largura): a melhor para mapas locais."});
+    for(var n=18;n<=22;n++)PROJ_LISTA.push({k:"utm"+n+"n",g:"UTM SIRGAS 2000 — hemisfério Norte",nome:"UTM zona "+n+"N",curto:"UTM "+n+"N",cod:"EPSG:"+(31972+n-18),zona:n,sul:false,def:"+proj=utm +zone="+n+" "+GRS80,nota:"Mantém os ângulos e quase não distorce distâncias na zona (6° de largura)."});
+    PROJ_LISTA.push({k:"5880",g:"Brasil inteiro",nome:"Policônica do Brasil",curto:"Policônica BR",cod:"EPSG:5880",def:"+proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 "+GRS80,nota:"Oficial para o país todo: equilibra as distorções de forma e de área."});
+    PROJ_LISTA.push({k:"aea",g:"Brasil inteiro",nome:"Albers de área igual (Brasil)",curto:"Albers BR",cod:"IBGE",def:"+proj=aea +lat_0=-12 +lon_0=-54 +lat_1=-2 +lat_2=-22 +x_0=0 +y_0=0 "+GRS80,nota:"Preserva as áreas: boa para comparar tamanhos no país todo."});
+  })();
+  var layoutProj="3857";
+  function projDe(k){for(var i=0;i<PROJ_LISTA.length;i++)if(PROJ_LISTA[i].k===k)return PROJ_LISTA[i];return null}
+  function projPronta(p){return p.k==="3857"||!!(window.proj4&&window.L&&L.Proj&&L.Proj.CRS)}
+  function projCM(p){if(p.zona)return p.zona*6-183;var m=/\+lon_0=(-?[\d.]+)/.exec(p.def||"");return m?+m[1]:0}  // meridiano central
+  function projLim(p){return p.zona?80:180}  // até onde (em longitude, a partir do meridiano central) a projeção é desenhada; a UTM só presta perto da sua zona
+  // O inverso do proj4 devolve NaN/Infinity (ou lixo) fora do desenho da projeção, e isso derruba o Leaflet (getBounds etc.).
+  // Aqui, fora do desenho, volta o ponto válido mais próximo, na direção do centro da projeção.
+  function inversoSeguro(crs,p){
+    var pr=crs.projection,pj=pr._proj,cm=projCM(p),c0=pj.forward([cm,0]),tol=p.geo?1e-5:10;
+    function valido(x,y){
+      var r;try{r=pj.inverse([x,y])}catch(e){return null}
+      if(!r||!isFinite(r[0])||!isFinite(r[1])||Math.abs(r[1])>90.0001)return null;
+      var f;try{f=pj.forward(r)}catch(e){return null}
+      if(!f||!isFinite(f[0])||!isFinite(f[1])||Math.abs(f[0]-x)>tol||Math.abs(f[1]-y)>tol)return null; // ida e volta tem que fechar
+      return r;
+    }
+    pr.unproject=function(pt){
+      var r=valido(pt.x,pt.y);
+      if(!r){
+        var lo=0,hi=1,best=null;
+        for(var i=0;i<32;i++){var m=(lo+hi)/2,q=valido(c0[0]+(pt.x-c0[0])*m,c0[1]+(pt.y-c0[1])*m);if(q){lo=m;best=q}else hi=m}
+        r=best||[cm,0];
+      }
+      return new L.LatLng(r[1],r[0]);
+    };
+  }
+  function crsDe(p,centro){
+    if(p.k==="3857")return L.CRS.EPSG3857;
+    var xy=proj4(p.def).forward([centro.lng,centro.lat]),res=[],r0=p.geo?RES0/111319.49079327357:RES0,passo=p.geo?1:1000; // geográfica: resolução em graus por pixel
+    for(var i=0;i<=26;i++)res.push(r0/Math.pow(2,i));
+    var crs=new L.Proj.CRS("gisjr-"+p.k,p.def,{resolutions:res,origin:[Math.round(xy[0]/passo)*passo,Math.round(xy[1]/passo)*passo]}); // origem perto da vista: números pequenos
+    crs.scale=function(z){return Math.pow(2,z)/r0};          // zoom fracionário em escala geométrica, igual ao Web Mercator
+    crs.zoom=function(sc){return Math.log(sc*r0)/Math.LN2};
+    crs.distance=function(a,b){return L.CRS.Earth.distance(a,b)}; // distâncias em metros sobre o globo (barra de escala, ferramentas do Leaflet)
+    inversoSeguro(crs,p);
+    return crs;
+  }
+
+  /* ---------- Recorte para desenhar (só na tela; os dados da camada não mudam) ----------
+     Numa projeção com meridiano central diferente de 0° (Albers/Policônica do Brasil, UTM, Equal Earth centrada...), as feições que cruzam o
+     "lado de trás" do mapa (antimeridiano da projeção) ligariam um lado ao outro com uma faixa. Aqui elas são cortadas nesse meridiano e a parte
+     de fora volta pelo outro lado. Na UTM também se tira o que está além de 80° do meridiano central, onde a projeção deixa de fazer sentido. */
+  function recorteAtual(){
+    var p=projDe(layoutProj);
+    if(!p||!p.def||p.geo||!window.turf)return null;
+    var cm=projCM(p),lim=projLim(p);
+    return(cm!==0||lim<180)?{cm:cm,lim:lim}:null;
+  }
+  function recLon(l,cm){return((l-cm+540)%360+360)%360-180+cm} // para dentro de [cm-180, cm+180)
+  function recDentro(c,rc){return rc.lim>=180||Math.abs(recLon(c[0],rc.cm)-rc.cm)<=rc.lim}
+  function recDesembrulha(coords,rc,ancora){ // longitudes contínuas (sem saltos de 360°), a partir de uma âncora dentro da janela
+    var out=[],prev=null;
+    coords.forEach(function(c,i){
+      var l=c[0];
+      if(i===0)l=ancora!==undefined?ancora:recLon(l,rc.cm);
+      else{var d=l-coords[i-1][0];if(d>180)d-=360;else if(d<-180)d+=360;l=prev+d}
+      out.push([l,c[1]]);prev=l;
+    });
+    return out;
+  }
+  function recJanelas(rc){var w=[];for(var k=-1;k<=1;k++){if(rc.lim<180&&k!==0)continue;w.push({k:k,bb:[rc.cm-rc.lim+360*k,-90,rc.cm+rc.lim+360*k,90]})}return w}
+  function recTraz(coords,k){return k===0?coords:coords.map(function(c){return[c[0]-360*k,c[1]]})}
+  function recLinhas(linhas,rc){
+    var mudou=false,partes=[];
+    linhas.forEach(function(ln){
+      var u=recDesembrulha(ln,rc),minL=1/0,maxL=-1/0,igual=true;
+      u.forEach(function(c,i){if(c[0]<minL)minL=c[0];if(c[0]>maxL)maxL=c[0];if(c[0]!==ln[i][0])igual=false});
+      if(igual&&minL>=rc.cm-rc.lim&&maxL<=rc.cm+rc.lim){partes.push(ln);return}
+      mudou=true;
+      recJanelas(rc).forEach(function(w){
+        var g=turf.bboxClip({type:"LineString",coordinates:u},w.bb).geometry;
+        var ls=g.type==="LineString"?[g.coordinates]:g.coordinates;
+        ls.forEach(function(l2){if(l2.length>=2)partes.push(recTraz(l2,w.k))});
+      });
+    });
+    return mudou?partes:null;
+  }
+  function recPoligonos(polis,rc){
+    var mudou=false,partes=[];
+    polis.forEach(function(rings){
+      var ext=rings[0],u0=recDesembrulha(ext,rc),n=Math.round((u0[u0.length-1][0]-u0[0][0])/360),polar=false,lats=0;
+      ext.forEach(function(c){lats+=c[1]});
+      if(n!==0){ // dá a volta no polo (ex.: Antártida): fecha a feição pelo polo
+        var pol=lats<0?-90:90,a=u0[0],z=u0[u0.length-1];
+        u0=u0.slice(0,u0.length-1);u0.push([z[0],z[1]],[z[0],pol],[a[0],pol]);u0.push([a[0],a[1]]);polar=true;
+      }
+      var minL=1/0,maxL=-1/0,igual=!polar;
+      u0.forEach(function(c,i){if(c[0]<minL)minL=c[0];if(c[0]>maxL)maxL=c[0];if(igual&&(i>=ext.length||c[0]!==ext[i][0]))igual=false});
+      if(igual&&minL>=rc.cm-rc.lim&&maxL<=rc.cm+rc.lim){partes.push(rings);return}
+      mudou=true;
+      var us=[u0];
+      for(var h=1;h<rings.length;h++){var hr=rings[h],a0=recLon(hr[0][0],rc.cm);us.push(recDesembrulha(hr,rc,a0+360*Math.round((u0[0][0]-a0)/360)))}
+      recJanelas(rc).forEach(function(w){
+        var g=turf.bboxClip({type:"Polygon",coordinates:us},w.bb).geometry;
+        var ps=g.type==="Polygon"?[g.coordinates]:g.coordinates;
+        ps.forEach(function(pc){if(pc.length&&pc[0].length>=4)partes.push(pc.map(function(r){return recTraz(r,w.k)}))});
+      });
+    });
+    return mudou?partes:null;
+  }
+  function recortaGeom(g,rc){ // devolve a mesma geometria se nada precisa mudar; senão uma nova (ou null se nada sobra na tela)
+    if(!g)return g;
+    var r;
+    switch(g.type){
+      case "Point":return recDentro(g.coordinates,rc)?g:null;
+      case "MultiPoint":var pts=g.coordinates.filter(function(c){return recDentro(c,rc)});return pts.length===g.coordinates.length?g:(pts.length?{type:"MultiPoint",coordinates:pts}:null);
+      case "LineString":r=recLinhas([g.coordinates],rc);if(!r)return g;return r.length?(r.length===1?{type:"LineString",coordinates:r[0]}:{type:"MultiLineString",coordinates:r}):null;
+      case "MultiLineString":r=recLinhas(g.coordinates,rc);if(!r)return g;return r.length?{type:"MultiLineString",coordinates:r}:null;
+      case "Polygon":r=recPoligonos([g.coordinates],rc);if(!r)return g;return r.length?(r.length===1?{type:"Polygon",coordinates:r[0]}:{type:"MultiPolygon",coordinates:r}):null;
+      case "MultiPolygon":r=recPoligonos(g.coordinates,rc);if(!r)return g;return r.length?{type:"MultiPolygon",coordinates:r}:null;
+      case "GeometryCollection":var gs=g.geometries.map(function(x){return recortaGeom(x,rc)}),mu=gs.some(function(x,i){return x!==g.geometries[i]});return mu?{type:"GeometryCollection",geometries:gs.filter(Boolean)}:g;
+    }
+    return g;
+  }
+// Feições recortadas só para desenhar (meridiano central ≠ 0° etc.); os dados da camada não mudam.
+function geoParaTela(gj){
+  var rc=recorteAtual();
+  if(!rc||!gj||!gj.features)return gj;
+  return{type:"FeatureCollection",features:gj.features.map(function(f){
+    var g=recortaGeom(f.geometry,rc);
+    if(g===f.geometry)return f;
+    return{type:"Feature",properties:f.properties,geometry:g};
+  })};
+}
+// Texto para o campo "Projeção" dos modelos (ex.: "UTM 24S (EPSG:31984)").
+function nomeProjLayout(){
+  var p=projDe(layoutProj)||projDe("3857");
+  return p.curto+(/^EPSG:/.test(p.cod||"")?" ("+p.cod+")":"");
+}
+// CRS inicial de um item de mapa novo (null = Web Mercator padrão do Leaflet).
+function crsInicialItem(it){
+  var p=projDe(layoutProj);
+  if(!p||p.k==="3857"||!projPronta(p))return null;
+  try{var c=it.center||[-9.7,-36.0];return crsDe(p,L.latLng(c[0],c[1]))}catch(e){console.error("Projeção:",e);return null}
+}
+// Troca o CRS de um item de mapa já criado, mantendo centro e zoom; as camadas são refeitas em seguida (applySnapshotToMapItem).
+function trocaCrsItem(it,p){
+  var m=it.leaflet;if(!m||!p)return;
+  var c=m.getCenter(),z=m.getZoom();
+  if(it._layerGroups){
+    it._layerGroups.forEach(function(lyr,id){try{removerRotulosDaCamada(it,id,lyr)}catch(e){}try{m.removeLayer(lyr)}catch(e){}});
+    it._layerGroups.clear();
+  }
+  if(it._fundoLeaf){try{m.removeLayer(it._fundoLeaf)}catch(e){}it._fundoLeaf=null}
+  if(it._fundoCred){it._fundoCred.remove();it._fundoCred=null}
+  it._fundoChave=undefined;
+  m.options.crs=(p.k==="3857")?L.CRS.EPSG3857:crsDe(p,c);
+  m.options.maxZoom=(p.k==="3857")?undefined:24;
+  m.setView(c,z,{animate:false,reset:true});
+}
+
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -1374,7 +1544,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
     let f;
     if (item.lockLayers) { if (item._fundoTrav === undefined && hasReceivedSnapshot) item._fundoTrav = mapProjectState.fundo || null; f = item._fundoTrav === undefined ? (mapProjectState.fundo || null) : item._fundoTrav; }
     else { item._fundoTrav = undefined; f = mapProjectState.fundo || null; }
-    const d = (f && f.visible !== false && f.d && f.d.u) ? f.d : null;
+    const d = (f && f.visible !== false && f.d && f.d.u && layoutProj === '3857') ? f.d : null;
     const chave = d ? f.k : null;
     if (item._fundoChave === chave) return;
     if (item._fundoLeaf) { try { map.removeLayer(item._fundoLeaf); } catch (e) {} item._fundoLeaf = null; }
@@ -1438,7 +1608,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       let leafletLayer = item._layerGroups.get(layer.id);
       if (layer.isBasemap) {
         // Camadas base (tiles OSM etc.) — recriamos como tile layer simples se visível.
-        if (!layer.visible) {
+        if (!layer.visible || layoutProj !== '3857') {
           if (leafletLayer) { map.removeLayer(leafletLayer); item._layerGroups.delete(layer.id); }
           return;
         }
@@ -1465,6 +1635,10 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
 
       // ---- Camada raster (item 10): reconstrói o GeoTIFF a partir do base64 ----
       if (layer.isRaster) {
+        if (layoutProj !== '3857') { // raster só aparece em Web Mercator (o arquivo continua no projeto)
+          if (leafletLayer) { try { map.removeLayer(leafletLayer); } catch (e) {} item._layerGroups.delete(layer.id); }
+          return;
+        }
         if (typeof GeoRasterLayer === 'undefined') return; // lib ainda não carregou
         if (leafletLayer && leafletLayer._qwSourceBase64 === layer.originalFileBase64 && leafletLayer._qwSymbologyJson === JSON.stringify(layer.symbology)) {
           // Já está desenhado com os mesmos dados/simbologia — nada a fazer.
@@ -1475,7 +1649,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
         item._rasterLoading.add(layer.id);
         getOrParseGeoraster(layer).then(georaster => {
           item._rasterLoading.delete(layer.id);
-          if (!georaster) return;
+          if (!georaster || layoutProj !== '3857') return;
           // O snapshot pode ter mudado enquanto o parse rodava (assíncrono) — se a
           // camada não existir mais ou tiver ficado invisível, descarta o resultado.
           const stillWanted = item.lockLayers ? layer : mapProjectState.layers.find(l => l.id === layer.id);
@@ -1531,7 +1705,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
       if (!leafletLayer) {
         // smoothFactor:0 desliga a simplificação (Douglas-Peucker) que o Leaflet faz nas
         // linhas e polígonos conforme o zoom diminui: o layout mostra e exporta a geometria completa.
-        leafletLayer = L.geoJSON(layer.geojson, {
+        leafletLayer = L.geoJSON(geoParaTela(layer.geojson), {
           pane: paneName,
           smoothFactor: 0,
           style: (f) => Object.assign({}, styleFn(f), { smoothFactor: 0 }),
@@ -1542,7 +1716,7 @@ var b64Raster = {}; // layerId -> base64 do raster já recebido (o mapa só reen
         // Atualiza estilo e geometria in-place em vez de recriar (mais leve
         // e evita "piscar" o item de mapa a cada snapshot).
         leafletLayer.clearLayers();
-        leafletLayer.addData(layer.geojson);
+        leafletLayer.addData(geoParaTela(layer.geojson));
         leafletLayer.setStyle((f) => Object.assign({}, styleFn(f), { smoothFactor: 0 })); // função por feição (Categorizado/Graduado)
         leafletLayer.options.smoothFactor = 0;
       }
@@ -2133,6 +2307,12 @@ function recebeu(s){
   snap.camadas.forEach(function(c){if(!c.isRaster)return;if(c.originalFileBase64)b64Raster[c.id]=c.originalFileBase64;else if(b64Raster[c.id])c.originalFileBase64=b64Raster[c.id]});
   mapProjectState={projectCrs:"EPSG:4326",selectedLayerId:snap.ativaId,layers:snap.camadas,fundo:snap.fundo||null,viewZ:(snap.view&&isFinite(snap.view.z))?snap.view.z:null};
   hasReceivedSnapshot=true;
+  var pkNovo=(snap.proj&&projDe(snap.proj))?snap.proj:"3857";
+  if(pkNovo!=="3857"&&!projPronta(projDe(pkNovo))){aviso("A biblioteca de projeções não carregou: o layout fica em Web Mercator.",5000);pkNovo="3857"}
+  if(pkNovo!==layoutProj){ // o mapa principal mudou de projeção: todos os mapas do layout acompanham
+    layoutProj=pkNovo;
+    itens.forEach(function(it){if(it.t==="mapa"&&it.leaflet)trocaCrsItem(it,projDe(layoutProj))});
+  }
   itens.forEach(function(it){
     if(it.t!=="mapa"||!it.leaflet)return;
     applySnapshotToMapItem(it);
@@ -2759,12 +2939,13 @@ function criarMapa(it){
   var c=it._el.querySelector(".cont");
   var mapDiv=document.createElement("div");mapDiv.className="map-leaflet-div";c.appendChild(mapDiv);
   if(!it.center)it._needsAutoFit=true;
-  var map=L.map(mapDiv,{
+  var crsIni=crsInicialItem(it);
+  var map=L.map(mapDiv,Object.assign(crsIni?{crs:crsIni,maxZoom:24}:{},{
     attributionControl:false,zoomControl:false,
     center:it.center||[-9.7,-36.0],zoom:it.zoom||3,
     zoomSnap:0,zoomDelta:0.25, // zoom fracionário livre: a escala digitada (1:N) bate exatamente
     dragging:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false
-  });
+  }));
   it._m=map;zoomFinoRoda(it,c);
   var gl=document.createElement("div");gl.className="map-grids-layer";mapDiv.appendChild(gl);
   Object.defineProperty(it,"leaflet",{value:map,writable:true,configurable:true,enumerable:false}); // fora do que é salvo
@@ -3958,7 +4139,7 @@ function mapaProps(e){
       ${gdSection('Grade')}
       ${gdSelect('gd-type', 'Tipo de grade', GRID_TYPE_OPTS, g.gridType)}
       ${gdField('SRC da grade', `<select id="gd-crs">
-        <option value="" ${!g.crs ? 'selected' : ''}>Igual ao mapa</option>
+        <option value="" ${!g.crs ? 'selected' : ''}>Igual ao mapa (${escapeHtml(nomeProjLayout())})</option>
         <option value="4326" ${g.crs === '4326' ? 'selected' : ''}>EPSG:4326 - WGS 84</option>
         <option value="3857" ${g.crs === '3857' ? 'selected' : ''}>EPSG:3857 - Web Mercator</option>
         <optgroup label="UTM (WGS 84) — Norte">${utmOptionsHtml('n', g.crs)}</optgroup>
@@ -4168,7 +4349,10 @@ function mapaProps(e){
   // Retorna null para "usar SRC do item de mapa" (comportamento antigo,
   // sem reprojeção) ou quando o código não é reconhecido.
   function resolveGridProjDef(crsCode) {
-    if (!crsCode) return null;
+    if (!crsCode) { // "Igual ao mapa": em mapa projetado (UTM, Albers...) a grade usa a própria projeção do mapa
+      const pm = projDe(layoutProj);
+      return (pm && pm.def && !pm.geo && pm.k !== '3857') ? pm.def : null;
+    }
     if (PROJ_DEFS[crsCode]) return PROJ_DEFS[crsCode];
     const m = /^utm([ns])(\d{1,2})$/.exec(crsCode);
     if (m) return utmProjString(Number(m[2]), m[1] === 's');
@@ -5555,7 +5739,7 @@ function mdPeca(p){
   else if(p.k==="l")mdCria("legenda",x,y,w,h);
   else if(p.k==="e")mdCria("escala",x,y,w,h,Object.assign({segmentsRight:1,segmentWidthAdjust:{min:15,max:36}},fu||{})); // barra compacta (largura em mm de papel): cabe na caixa do modelo
   else if(p.k==="n")mdCria("norte",x,y,w,h,fu);
-  else if(p.k==="t")mdTexto(x,y,w,h,p.txt,p);
+  else if(p.k==="t")mdTexto(x,y,w,h,p.txt==="SIRGAS 2000"?nomeProjLayout():p.txt,p);
   else if(p.k==="b")mdCria("forma",x,y,w,h,{forma:"ret",preenche:!!(p.fill&&!p.nf),preencheCor:p.fill||"#ffffff",contornoCor:p.stroke||MD_BORDA,contornoEsp:0.3});
   else if(p.k==="h")mdCria("forma",x,y,w,h,{forma:"ret",preenche:false,contornoCor:"#d85a30",contornoEsp:0.8});
   else if(p.k==="ph")mdTexto(x,y,w,h,p.ico?p.lb+"\n(use uma imagem)":p.lb,{tam:p.ico?16:18,bx:1,bg:"#f5f7f6"});
