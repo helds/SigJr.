@@ -11,6 +11,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/proj4@2.22.0/dist/proj4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/georaster@1.6.0/dist/georaster.browser.bundle.min.js"></script>
@@ -158,6 +160,25 @@ body.arrastando-corpo,body.arrastando-corpo *{cursor:grabbing!important;user-sel
 #res-regua.show{display:block}
 #tab-attr{position:absolute;left:0;right:0;bottom:0;height:42%;z-index:1200;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;background:var(--card);border-top:2px solid var(--linha);box-shadow:0 -4px 14px rgba(0,0,0,.18);text-align:left}
 #tab-attr[hidden]{display:none}
+/* projeção do mapa: botão no canto do mapa, coordenadas do cursor e lista de projeções */
+#proj-chip{position:absolute;top:10px;left:10px;z-index:900;display:flex;align-items:center;gap:8px;max-width:calc(100% - 20px);flex-wrap:wrap}
+#proj-btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px;font:inherit;font-size:14px;color:var(--tinta);background:var(--bg-campo);border:2px solid var(--linha);border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:pointer}
+#proj-btn:hover,#proj-btn[aria-expanded="true"]{border-color:var(--agua)}
+#proj-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#proj-btn .cr{border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--tinta-2)}
+/* coordenadas do cursor: canto inferior direito do mapa (sobem junto quando a tabela de atributos abre: --tab-h) */
+#proj-xy{position:absolute;right:10px;bottom:calc(10px + var(--tab-h,0px));z-index:900;pointer-events:none;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--tinta);background:var(--bg-campo);border:2px solid var(--linha);border-radius:8px;padding:5px 8px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+#proj-xy:empty{display:none}
+#proj-pop{position:absolute;top:52px;left:10px;z-index:1000;width:min(380px,calc(100% - 20px));max-height:min(72%,480px);overflow:auto;background:var(--card);color:var(--tinta);border:2px solid var(--linha);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.3);padding:6px;text-align:left}
+#proj-pop[hidden]{display:none}
+#proj-pop .pp-aviso{font-size:13px;color:var(--tinta-2);padding:6px 8px 8px;border-bottom:1px solid var(--linha);margin:0 0 4px}
+#proj-pop h3{font-size:12px;color:var(--tinta-2);margin:10px 8px 2px;font-weight:700}
+#proj-pop button.op{display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;padding:7px 8px;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;font-size:14px;cursor:pointer}
+#proj-pop button.op:hover,#proj-pop button.op:focus-visible{background:var(--agua-claro);outline:none}
+#proj-pop button.op[aria-selected="true"]{background:var(--agua-claro);font-weight:700}
+#proj-pop .ck{flex:none;width:16px;color:var(--agua)}
+#proj-pop .tx{flex:1;min-width:0}
+#proj-pop .cd{display:block;font-size:12px;font-weight:400;color:var(--tinta-2)}
 /* redimensionar: barra no topo (arraste), botões retrair/expandir e ampliar; altura lembrada entre as sessões */
 #tab-grip{flex:none;position:relative;height:14px;cursor:ns-resize;touch-action:none;background:var(--bg-suave);border-bottom:1px solid var(--linha);outline:none}
 #tab-grip::before{content:"";position:absolute;left:0;right:0;top:-8px;height:10px} /* área de toque maior, acima da barra */
@@ -1660,6 +1681,10 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
 <style id="img-fill-css">
 /* ---- Preenchimento com imagem: bloco do painel e editor de posição ---- */
 .lp-oculto{display:none!important}
+.lp-oculto-g{display:none!important}
+.cam .sw.sw-ponto{border-radius:50%}
+.cam .sw.sw-linha{width:22px;border:0;border-radius:0;background:none!important;display:inline-flex;align-items:center;justify-content:center}
+.cam .sw.sw-linha svg{display:block;width:22px;height:14px;overflow:visible}
 #lp-img[hidden],#lp-img [hidden],#ie[hidden]{display:none!important}
 #lp-img{margin:0 0 12px;padding:12px;border:2px solid var(--linha);border-radius:10px;background:var(--papel)}
 .lp-sub-t{font-weight:700;color:var(--agua);margin:0 0 10px}
@@ -1719,6 +1744,7 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
   <symbol id="i-tabela" viewBox="0 0 24 24"><path d="M3 5h18v14H3zM3 10h18M3 15h18M9 5v14"/></symbol>
   <symbol id="i-desselec" viewBox="0 0 24 24"><path d="M5 3l12 6-5 2-2 5zM15 16l6 6M21 16l-6 6"/></symbol>
   <symbol id="i-calc" viewBox="0 0 24 24"><path d="M5 3h14v18H5zM8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></symbol>
+  <symbol id="i-globo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></symbol>
   <symbol id="i-camada" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5"/></symbol>
   <symbol id="i-olho" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
   <symbol id="i-olho-off" viewBox="0 0 24 24"><path d="M2 9.5c3.2 3.6 6.2 5.5 10 5.5s6.8-1.9 10-5.5M5 13.8L3 17M9.5 15.8l-1 3.4M14.5 15.8l1 3.4M19 13.8l2 3.2"/></symbol>
@@ -1794,6 +1820,7 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
       <button class="b" id="b-regua" disabled title="Medir distância"><svg><use href="#i-regua"/></svg>Régua</button>
       <button class="b" id="b-tabela" title="Tabela de atributos da camada ativa"><svg><use href="#i-tabela"/></svg>Tabela de atributos</button>
       <button class="b" id="b-calc" title="Calculadora de campo: cria ou atualiza um campo com uma expressão"><svg><use href="#i-calc"/></svg>Calcular</button>
+      <button class="b" id="b-proj" aria-pressed="false" title="Projeções: mostrar ou esconder as opções de projeção do mapa"><svg><use href="#i-globo"/></svg>Projeções</button>
     </div>
     <div class="grupo">
       <button class="b" id="b-id" aria-pressed="false" title="Identificar feição: clique numa feição do mapa para ver os atributos (clique de novo para sair)"><svg><use href="#i-info"/></svg>Identificar feição</button>
@@ -1818,6 +1845,11 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
       <div id="map"></div>
       <p class="vazio" id="vazio-mapa">O mapa está vazio. Adicione uma camada para começar.</p>
       <div id="res-regua" role="status"></div>
+      <div id="proj-chip" hidden>
+        <button type="button" id="proj-btn" aria-haspopup="listbox" aria-expanded="false" title="Projeção do mapa"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg><span id="proj-nome">Web Mercator</span><span class="cr" aria-hidden="true"></span></button>
+      </div>
+      <span id="proj-xy" aria-hidden="true"></span>
+      <div id="proj-pop" role="listbox" aria-label="Projeção do mapa" hidden></div>
       <div id="tab-attr" hidden>
         <div id="tab-grip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Redimensionar a tabela" title="Arraste para mudar a altura (duplo clique: retrair/expandir)"></div>
         <div id="tab-cab">
@@ -1859,8 +1891,9 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
           <select id="lp-tipo"><option value="none">Sem símbolos</option><option value="single" selected>Símbolo simples</option><option value="categorized">Categorizado</option><option value="graduated">Graduado</option></select></div>
         <div class="lp-prev" aria-hidden="true"><span id="lp-prev"></span></div>
         <div id="lp-simples">
-          <div class="lp-linha"><label for="lp-cor">Cor de preenchimento</label><input type="color" id="lp-cor"></div>
-          <div class="lp-linha"><label id="lp-fill-l">Estilo do preenchimento</label><div class="sym-style-dropdown" id="lp-fill-dd" role="button" tabindex="0" aria-haspopup="listbox" aria-labelledby="lp-fill-l"><span class="sym-style-preview" id="lp-fill-pv"></span><span class="sym-style-dropdown-label" id="lp-fill-lb"></span><span class="sym-style-dropdown-arrow">▾</span></div></div>
+          <div class="lp-linha" id="lp-r-cor"><label for="lp-cor">Cor de preenchimento</label><input type="color" id="lp-cor"></div>
+          <div class="lp-linha" id="lp-r-diam"><label for="lp-diam">Diâmetro do ponto (mm)</label><input type="number" id="lp-diam" min="0.2" max="50" step="0.1"></div>
+          <div class="lp-linha" id="lp-r-fill"><label id="lp-fill-l">Estilo do preenchimento</label><div class="sym-style-dropdown" id="lp-fill-dd" role="button" tabindex="0" aria-haspopup="listbox" aria-labelledby="lp-fill-l"><span class="sym-style-preview" id="lp-fill-pv"></span><span class="sym-style-dropdown-label" id="lp-fill-lb"></span><span class="sym-style-dropdown-arrow">▾</span></div></div>
           <div id="lp-img" hidden>
           <div class="lp-sub-t">Preenchimento com imagem</div>
           <p class="lp-nota" id="lp-img-nota" hidden>Esta camada não tem polígonos. A imagem só preenche polígonos; linhas e pontos continuam com a cor lisa.</p>
@@ -1885,7 +1918,7 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
           <div class="lp-linha"><label for="lp-img-blend">Mesclagem</label><select id="lp-img-blend"></select></div>
           <p class="lp-nota" style="margin:0">A mesclagem mistura a camada com o que está por baixo dela no mapa. O contorno usa as opções logo abaixo.</p>
         </div>
-          <div class="lp-linha"><label for="lp-opac">Opacidade</label><input type="range" id="lp-opac" min="0" max="100" step="1"><output id="lp-opac-v" for="lp-opac"></output></div>
+          <div class="lp-linha" id="lp-r-opac"><label for="lp-opac">Opacidade</label><input type="range" id="lp-opac" min="0" max="100" step="1"><output id="lp-opac-v" for="lp-opac"></output></div>
           <div class="lp-linha"><label for="lp-corc">Cor do contorno</label><input type="color" id="lp-corc"></div>
           <div class="lp-linha"><label for="lp-esp">Espessura do contorno (mm)</label><input type="number" id="lp-esp" min="0" max="20" step="0.05"></div>
           <div class="lp-linha"><label id="lp-stroke-l">Estilo do traço</label><div class="sym-style-dropdown" id="lp-stroke-dd" role="button" tabindex="0" aria-haspopup="listbox" aria-labelledby="lp-stroke-l"><span class="sym-style-line-preview" id="lp-stroke-pv"></span><span class="sym-style-dropdown-label" id="lp-stroke-lb"></span><span class="sym-style-dropdown-arrow">▾</span></div></div>
@@ -1911,10 +1944,11 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
           <div id="vg-classes"><p class="lp-nota" id="vg-vazio">Escolha um campo e clique em Classificar.</p><table class="lp-tb"><tbody id="vg-linhas"></tbody></table></div>
         </div>
         <div id="lp-base" hidden>
-          <div class="lp-linha"><label for="lp-bcorc">Cor do contorno</label><input type="color" id="lp-bcorc"></div>
+          <div class="lp-linha" id="lp-r-bcorc"><label for="lp-bcorc">Cor do contorno</label><input type="color" id="lp-bcorc"></div>
           <div class="lp-linha"><label for="lp-besp">Espessura do contorno (mm)</label><input type="number" id="lp-besp" min="0" max="20" step="0.05"></div>
-          <div class="lp-linha"><label for="lp-bopac">Opacidade</label><input type="range" id="lp-bopac" min="0" max="100" step="1"><output id="lp-bopac-v" for="lp-bopac"></output></div>
-          <div class="lp-linha"><label id="lp-b-fill-l">Estilo do preenchimento</label><div class="sym-style-dropdown" id="lp-b-fill-dd" role="button" tabindex="0" aria-haspopup="listbox" aria-labelledby="lp-b-fill-l"><span class="sym-style-preview" id="lp-b-fill-pv"></span><span class="sym-style-dropdown-label" id="lp-b-fill-lb"></span><span class="sym-style-dropdown-arrow">▾</span></div></div>
+          <div class="lp-linha" id="lp-r-bdiam"><label for="lp-bdiam">Diâmetro do ponto (mm)</label><input type="number" id="lp-bdiam" min="0.2" max="50" step="0.1"></div>
+          <div class="lp-linha" id="lp-r-bopac"><label for="lp-bopac">Opacidade</label><input type="range" id="lp-bopac" min="0" max="100" step="1"><output id="lp-bopac-v" for="lp-bopac"></output></div>
+          <div class="lp-linha" id="lp-r-bfill"><label id="lp-b-fill-l">Estilo do preenchimento</label><div class="sym-style-dropdown" id="lp-b-fill-dd" role="button" tabindex="0" aria-haspopup="listbox" aria-labelledby="lp-b-fill-l"><span class="sym-style-preview" id="lp-b-fill-pv"></span><span class="sym-style-dropdown-label" id="lp-b-fill-lb"></span><span class="sym-style-dropdown-arrow">▾</span></div></div>
           <div class="lp-linha"><label id="lp-b-stroke-l">Estilo do traço</label><div class="sym-style-dropdown" id="lp-b-stroke-dd" role="button" tabindex="0" aria-haspopup="listbox" aria-labelledby="lp-b-stroke-l"><span class="sym-style-line-preview" id="lp-b-stroke-pv"></span><span class="sym-style-dropdown-label" id="lp-b-stroke-lb"></span><span class="sym-style-dropdown-arrow">▾</span></div></div>
           <div class="lp-linha"><label id="lp-b-join-l">Estilo da união</label><div class="sym-style-dropdown" id="lp-b-join-dd" role="button" tabindex="0" aria-haspopup="listbox" aria-labelledby="lp-b-join-l"><span class="sym-style-dropdown-label" id="lp-b-join-lb"></span><span class="sym-style-dropdown-arrow">▾</span></div></div>
         </div>
@@ -2390,10 +2424,238 @@ function excluirMapa(id){
   var CORES=["#e6194b","#3cb44b","#4363d8","#f58231","#911eb4","#42d4f4","#f032e6","#bfef45","#469990","#9a6324"];
   var VISTA_INICIAL={c:[-9.7,-36.0],z:7};
 
+  /* ---------- Projeção do mapa ----------
+     O mapa passa a ser desenhado na projeção escolhida (o Leaflet recalcula a geometria no CRS novo): forma, ângulos e áreas
+     das feições mudam de verdade. As resoluções seguem a escala de zoom do Web Mercator (zoom 0 = 156543 m/px), então os números de zoom continuam valendo.
+     Mapas de fundo (imagens em Web Mercator) e rasters só aparecem em Web Mercator. */
+  var RES0=156543.03392804097,GRS80="+ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
+  var PROJ_LISTA=[
+    {k:"3857",g:"Padrão",nome:"Web Mercator",curto:"Web Mercator",cod:"EPSG:3857",nota:"O mesmo dos mapas da internet. Mantém os ângulos, mas aumenta as áreas longe do equador."},
+    {k:"4674",g:"Padrão",nome:"SIRGAS 2000 geográfica (graus)",curto:"Geográfica",cod:"EPSG:4674",geo:true,def:"+proj=longlat "+GRS80,nota:"Longitude e latitude direto nos eixos: as feições ficam achatadas ou esticadas."},
+    {k:"eqearth",g:"Mundo",nome:"Equal Earth (recomendada pela ONU)",curto:"Equal Earth",cod:"EPSG:8857",def:"+proj=eqearth +lon_0=0 +ellps=WGS84 +units=m +no_defs",nota:"Área igual: a que a Assembleia Geral da ONU recomendou em set/2026 para mapas-múndi. Para um estado ou cidade, a UTM mede melhor."},
+    {k:"eqearthbr",g:"Mundo",nome:"Equal Earth centrada no Brasil",curto:"Equal Earth BR",cod:"meridiano central 54°W",def:"+proj=eqearth +lon_0=-54 +ellps=WGS84 +units=m +no_defs",nota:"A mesma Equal Earth, com o meridiano central no Brasil: menos distorção de forma por aqui."}
+  ];
+  (function(){
+    for(var z=18;z<=25;z++)PROJ_LISTA.push({k:"utm"+z+"s",g:"UTM SIRGAS 2000 — hemisfério Sul",nome:"UTM zona "+z+"S",curto:"UTM "+z+"S",cod:"EPSG:"+(31978+z-18),zona:z,sul:true,def:"+proj=utm +zone="+z+" +south "+GRS80,nota:"Mantém os ângulos e quase não distorce distâncias na zona (6° de largura): a melhor para mapas locais."});
+    for(var n=18;n<=22;n++)PROJ_LISTA.push({k:"utm"+n+"n",g:"UTM SIRGAS 2000 — hemisfério Norte",nome:"UTM zona "+n+"N",curto:"UTM "+n+"N",cod:"EPSG:"+(31972+n-18),zona:n,sul:false,def:"+proj=utm +zone="+n+" "+GRS80,nota:"Mantém os ângulos e quase não distorce distâncias na zona (6° de largura)."});
+    PROJ_LISTA.push({k:"5880",g:"Brasil inteiro",nome:"Policônica do Brasil",curto:"Policônica BR",cod:"EPSG:5880",def:"+proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 "+GRS80,nota:"Oficial para o país todo: equilibra as distorções de forma e de área."});
+    PROJ_LISTA.push({k:"aea",g:"Brasil inteiro",nome:"Albers de área igual (Brasil)",curto:"Albers BR",cod:"IBGE",def:"+proj=aea +lat_0=-12 +lon_0=-54 +lat_1=-2 +lat_2=-22 +x_0=0 +y_0=0 "+GRS80,nota:"Preserva as áreas: boa para comparar tamanhos no país todo."});
+  })();
+  var projAtual="3857";
+  function projDe(k){for(var i=0;i<PROJ_LISTA.length;i++)if(PROJ_LISTA[i].k===k)return PROJ_LISTA[i];return null}
+  function projPronta(p){return p.k==="3857"||!!(window.proj4&&window.L&&L.Proj&&L.Proj.CRS)}
+  function projCM(p){if(p.zona)return p.zona*6-183;var m=/\+lon_0=(-?[\d.]+)/.exec(p.def||"");return m?+m[1]:0}  // meridiano central
+  function projLim(p){return p.zona?80:180}  // até onde (em longitude, a partir do meridiano central) a projeção é desenhada; a UTM só presta perto da sua zona
+  // O inverso do proj4 devolve NaN/Infinity (ou lixo) fora do desenho da projeção, e isso derruba o Leaflet (getBounds etc.).
+  // Aqui, fora do desenho, volta o ponto válido mais próximo, na direção do centro da projeção.
+  function inversoSeguro(crs,p){
+    var pr=crs.projection,pj=pr._proj,cm=projCM(p),c0=pj.forward([cm,0]),tol=p.geo?1e-5:10;
+    function valido(x,y){
+      var r;try{r=pj.inverse([x,y])}catch(e){return null}
+      if(!r||!isFinite(r[0])||!isFinite(r[1])||Math.abs(r[1])>90.0001)return null;
+      var f;try{f=pj.forward(r)}catch(e){return null}
+      if(!f||!isFinite(f[0])||!isFinite(f[1])||Math.abs(f[0]-x)>tol||Math.abs(f[1]-y)>tol)return null; // ida e volta tem que fechar
+      return r;
+    }
+    pr.unproject=function(pt){
+      var r=valido(pt.x,pt.y);
+      if(!r){
+        var lo=0,hi=1,best=null;
+        for(var i=0;i<32;i++){var m=(lo+hi)/2,q=valido(c0[0]+(pt.x-c0[0])*m,c0[1]+(pt.y-c0[1])*m);if(q){lo=m;best=q}else hi=m}
+        r=best||[cm,0];
+      }
+      return new L.LatLng(r[1],r[0]);
+    };
+  }
+  function crsDe(p,centro){
+    if(p.k==="3857")return L.CRS.EPSG3857;
+    var xy=proj4(p.def).forward([centro.lng,centro.lat]),res=[],r0=p.geo?RES0/111319.49079327357:RES0,passo=p.geo?1:1000; // geográfica: resolução em graus por pixel
+    for(var i=0;i<=26;i++)res.push(r0/Math.pow(2,i));
+    var crs=new L.Proj.CRS("gisjr-"+p.k,p.def,{resolutions:res,origin:[Math.round(xy[0]/passo)*passo,Math.round(xy[1]/passo)*passo]}); // origem perto da vista: números pequenos
+    crs.scale=function(z){return Math.pow(2,z)/r0};          // zoom fracionário em escala geométrica, igual ao Web Mercator
+    crs.zoom=function(sc){return Math.log(sc*r0)/Math.LN2};
+    crs.distance=function(a,b){return L.CRS.Earth.distance(a,b)}; // distâncias em metros sobre o globo (barra de escala, ferramentas do Leaflet)
+    inversoSeguro(crs,p);
+    return crs;
+  }
+
+  /* ---------- Recorte para desenhar (só na tela; os dados da camada não mudam) ----------
+     Numa projeção com meridiano central diferente de 0° (Albers/Policônica do Brasil, UTM, Equal Earth centrada...), as feições que cruzam o
+     "lado de trás" do mapa (antimeridiano da projeção) ligariam um lado ao outro com uma faixa. Aqui elas são cortadas nesse meridiano e a parte
+     de fora volta pelo outro lado. Na UTM também se tira o que está além de 80° do meridiano central, onde a projeção deixa de fazer sentido. */
+  function recorteAtual(){
+    var p=projDe(projAtual);
+    if(!p||!p.def||p.geo||!window.turf)return null;
+    var cm=projCM(p),lim=projLim(p);
+    return(cm!==0||lim<180)?{cm:cm,lim:lim}:null;
+  }
+  function recLon(l,cm){return((l-cm+540)%360+360)%360-180+cm} // para dentro de [cm-180, cm+180)
+  function recDentro(c,rc){return rc.lim>=180||Math.abs(recLon(c[0],rc.cm)-rc.cm)<=rc.lim}
+  function recDesembrulha(coords,rc,ancora){ // longitudes contínuas (sem saltos de 360°), a partir de uma âncora dentro da janela
+    var out=[],prev=null;
+    coords.forEach(function(c,i){
+      var l=c[0];
+      if(i===0)l=ancora!==undefined?ancora:recLon(l,rc.cm);
+      else{var d=l-coords[i-1][0];if(d>180)d-=360;else if(d<-180)d+=360;l=prev+d}
+      out.push([l,c[1]]);prev=l;
+    });
+    return out;
+  }
+  function recJanelas(rc){var w=[];for(var k=-1;k<=1;k++){if(rc.lim<180&&k!==0)continue;w.push({k:k,bb:[rc.cm-rc.lim+360*k,-90,rc.cm+rc.lim+360*k,90]})}return w}
+  function recTraz(coords,k){return k===0?coords:coords.map(function(c){return[c[0]-360*k,c[1]]})}
+  function recLinhas(linhas,rc){
+    var mudou=false,partes=[];
+    linhas.forEach(function(ln){
+      var u=recDesembrulha(ln,rc),minL=1/0,maxL=-1/0,igual=true;
+      u.forEach(function(c,i){if(c[0]<minL)minL=c[0];if(c[0]>maxL)maxL=c[0];if(c[0]!==ln[i][0])igual=false});
+      if(igual&&minL>=rc.cm-rc.lim&&maxL<=rc.cm+rc.lim){partes.push(ln);return}
+      mudou=true;
+      recJanelas(rc).forEach(function(w){
+        var g=turf.bboxClip({type:"LineString",coordinates:u},w.bb).geometry;
+        var ls=g.type==="LineString"?[g.coordinates]:g.coordinates;
+        ls.forEach(function(l2){if(l2.length>=2)partes.push(recTraz(l2,w.k))});
+      });
+    });
+    return mudou?partes:null;
+  }
+  function recPoligonos(polis,rc){
+    var mudou=false,partes=[];
+    polis.forEach(function(rings){
+      var ext=rings[0],u0=recDesembrulha(ext,rc),n=Math.round((u0[u0.length-1][0]-u0[0][0])/360),polar=false,lats=0;
+      ext.forEach(function(c){lats+=c[1]});
+      if(n!==0){ // dá a volta no polo (ex.: Antártida): fecha a feição pelo polo
+        var pol=lats<0?-90:90,a=u0[0],z=u0[u0.length-1];
+        u0=u0.slice(0,u0.length-1);u0.push([z[0],z[1]],[z[0],pol],[a[0],pol]);u0.push([a[0],a[1]]);polar=true;
+      }
+      var minL=1/0,maxL=-1/0,igual=!polar;
+      u0.forEach(function(c,i){if(c[0]<minL)minL=c[0];if(c[0]>maxL)maxL=c[0];if(igual&&(i>=ext.length||c[0]!==ext[i][0]))igual=false});
+      if(igual&&minL>=rc.cm-rc.lim&&maxL<=rc.cm+rc.lim){partes.push(rings);return}
+      mudou=true;
+      var us=[u0];
+      for(var h=1;h<rings.length;h++){var hr=rings[h],a0=recLon(hr[0][0],rc.cm);us.push(recDesembrulha(hr,rc,a0+360*Math.round((u0[0][0]-a0)/360)))}
+      recJanelas(rc).forEach(function(w){
+        var g=turf.bboxClip({type:"Polygon",coordinates:us},w.bb).geometry;
+        var ps=g.type==="Polygon"?[g.coordinates]:g.coordinates;
+        ps.forEach(function(pc){if(pc.length&&pc[0].length>=4)partes.push(pc.map(function(r){return recTraz(r,w.k)}))});
+      });
+    });
+    return mudou?partes:null;
+  }
+  function recortaGeom(g,rc){ // devolve a mesma geometria se nada precisa mudar; senão uma nova (ou null se nada sobra na tela)
+    if(!g)return g;
+    var r;
+    switch(g.type){
+      case "Point":return recDentro(g.coordinates,rc)?g:null;
+      case "MultiPoint":var pts=g.coordinates.filter(function(c){return recDentro(c,rc)});return pts.length===g.coordinates.length?g:(pts.length?{type:"MultiPoint",coordinates:pts}:null);
+      case "LineString":r=recLinhas([g.coordinates],rc);if(!r)return g;return r.length?(r.length===1?{type:"LineString",coordinates:r[0]}:{type:"MultiLineString",coordinates:r}):null;
+      case "MultiLineString":r=recLinhas(g.coordinates,rc);if(!r)return g;return r.length?{type:"MultiLineString",coordinates:r}:null;
+      case "Polygon":r=recPoligonos([g.coordinates],rc);if(!r)return g;return r.length?(r.length===1?{type:"Polygon",coordinates:r[0]}:{type:"MultiPolygon",coordinates:r}):null;
+      case "MultiPolygon":r=recPoligonos(g.coordinates,rc);if(!r)return g;return r.length?{type:"MultiPolygon",coordinates:r}:null;
+      case "GeometryCollection":var gs=g.geometries.map(function(x){return recortaGeom(x,rc)}),mu=gs.some(function(x,i){return x!==g.geometries[i]});return mu?{type:"GeometryCollection",geometries:gs.filter(Boolean)}:g;
+    }
+    return g;
+  }
+  function atualizaChipProj(){var p=projDe(projAtual)||projDe("3857"),e=byId("proj-nome");if(e)e.textContent=p.curto;var b=byId("proj-btn");if(b)b.title="Projeção do mapa: "+p.nome+" ("+p.cod+")"}
+  // Troca o CRS do mapa já criado, mantendo centro e zoom. Quem chama refaz as camadas depois (reconstruir).
+  function trocaCrs(p){
+    var c=map.getCenter(),z=map.getZoom();
+    if(fundoLeaf&&map.hasLayer(fundoLeaf))map.removeLayer(fundoLeaf);
+    camadas.forEach(function(x){if(x.isRaster&&x.leaf&&map.hasLayer(x.leaf))map.removeLayer(x.leaf)});
+    map.options.crs=crsDe(p,c);
+    map.options.maxZoom=(p.k==="3857")?undefined:24;
+    projAtual=p.k;
+    map.setView(c,z,{animate:false,reset:true});
+    atualizaChipProj();
+  }
+  function aplicarProjecao(k){
+    var p=projDe(k);if(!p)return false;
+    if(!projPronta(p)){aviso("A biblioteca de projeções não carregou — verifique sua conexão.");return false}
+    if(!map){projAtual=p.k;atualizaChipProj();return true}
+    if(p.k===projAtual)return true;
+    trocaCrs(p);
+    reconstruir(foto());reatribuirGv(); // refaz todas as camadas no CRS novo
+    var msg="Projeção: "+p.nome+".",nr=camadas.filter(function(c){return c.isRaster&&c.visible}).length,fv=!!(fundo&&fundo.visible);
+    if(p.k!=="3857"&&(nr||fv))msg+=(nr?" "+nr+(nr>1?" rasters não aparecem":" raster não aparece"):"")+(fv?(nr?" e o":" O")+" mapa de fundo "+(nr?"também ":"também ")+"não aparece":"")+" nesta projeção; volte ao Web Mercator para vê-lo"+((nr+(fv?1:0))>1?"s":"")+".";
+    aviso(msg,(nr||fv)&&p.k!=="3857"?8000:4500);
+    naoExportado=true;marcarBadge();agendarAutosave();agendarSyncLayout();
+    return true;
+  }
+  // Rasters só existem em Web Mercator: em outra projeção ficam fora do mapa (o arquivo continua no projeto).
+  function adicionaNoMapa(c){
+    if(c.isRaster&&projAtual!=="3857"){if(!restaurando)aviso("Este raster só aparece em Web Mercator. Troque a projeção para vê-lo.",5000);return false}
+    c.leaf.addTo(map);return true;
+  }
+  // Coordenadas do cursor na projeção ativa: graus nas geográficas, metros (E/N) nas projetadas.
+  // Ligadas pelo menu Visualizar > Coordenadas e pelo botão Projeções da barra; a escolha fica lembrada neste navegador.
+  function lerUi(k){try{return localStorage.getItem(k)==="1"}catch(x){return false}}
+  function gravaUi(k,v){try{localStorage.setItem(k,v?"1":"0")}catch(x){}}
+  var xyRaf=0,xyPos=null,coordsOn=lerUi("gisjr:coords"),projOn=lerUi("gisjr:proj");
+  function fmtXY(v){return v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})} // 2 casas depois da vírgula
+  function mostraXY(){
+    xyRaf=0;var el=byId("proj-xy");if(!el)return;
+    if(!coordsOn||!xyPos){el.textContent="";return}
+    var p=projDe(projAtual)||projDe("3857");
+    if(p.def&&!p.geo&&window.proj4){var q=proj4(p.def).forward([xyPos.lng,xyPos.lat]);el.textContent="E "+fmtXY(q[0])+"  N "+fmtXY(q[1])+" m"}
+    else el.textContent="Lat "+fmtXY(xyPos.lat)+"°  Lon "+fmtXY(xyPos.lng)+"°";
+  }
+  function moveuXY(e){xyPos=e&&e.latlng||null;if(coordsOn&&!xyRaf)xyRaf=requestAnimationFrame(mostraXY)}
+  function alternaCoords(){
+    coordsOn=!coordsOn;gravaUi("gisjr:coords",coordsOn);mostraXY();
+    aviso(coordsOn?"Coordenadas ativadas: aparecem no canto inferior direito quando o cursor está sobre o mapa.":"Coordenadas desativadas.");
+  }
+  // A tabela de atributos abre por cima do rodapé do mapa: as coordenadas sobem para ficar logo acima dela.
+  (function(){
+    var t=document.querySelector(".tela"),ta=byId("tab-attr");if(!t||!ta||!window.ResizeObserver)return;
+    function s(){t.style.setProperty("--tab-h",(ta.hidden?0:ta.offsetHeight)+"px")}
+    new ResizeObserver(s).observe(ta);s();
+  })();
+  // Lista de projeções (abre sob o botão do canto do mapa)
+  function fechaPopProj(volta){var pp=byId("proj-pop"),b=byId("proj-btn");if(pp.hidden)return;pp.hidden=true;b.setAttribute("aria-expanded","false");if(volta)b.focus()}
+  function abrePopProj(){
+    var pp=byId("proj-pop"),b=byId("proj-btn");
+    var c=map?map.getCenter():L.latLng(VISTA_INICIAL.c[0],VISTA_INICIAL.c[1]);
+    var zona=Math.floor((c.lng+180)/6)+1,sug=PROJ_LISTA.filter(function(p){return p.zona===zona&&p.sul===(c.lat<0)})[0];
+    pp.innerHTML="";
+    pp.appendChild(h("p","pp-aviso","A projeção muda o desenho das feições (forma e área). Mapas de fundo e rasters só aparecem em Web Mercator."));
+    function linha(p){
+      var o=h("button","op");o.type="button";o.dataset.k=p.k;o.setAttribute("role","option");o.setAttribute("aria-selected",p.k===projAtual?"true":"false");
+      o.appendChild(h("span","ck",p.k===projAtual?"✓":""));
+      var t=h("span","tx");t.appendChild(document.createTextNode(p.nome+" "));t.appendChild(h("span","cd",p.cod+" · "+p.nota));o.appendChild(t);
+      return o;
+    }
+    if(sug){pp.appendChild(h("h3",null,"Sugerida para onde o mapa está"));pp.appendChild(linha(sug))}
+    var g=null;PROJ_LISTA.forEach(function(p){if(p.g!==g){g=p.g;pp.appendChild(h("h3",null,g))}pp.appendChild(linha(p))});
+    pp.hidden=false;b.setAttribute("aria-expanded","true");
+    var on=pp.querySelector('[aria-selected="true"]')||pp.querySelector("button.op");if(on){on.focus();on.scrollIntoView({block:"nearest"})}
+  }
+  function aplicaProjUi(abrir){
+    var chip=byId("proj-chip"),bt=byId("b-proj");
+    chip.hidden=!projOn;
+    if(bt){bt.classList.toggle("active",projOn);bt.setAttribute("aria-pressed",projOn?"true":"false")}
+    if(!projOn)fechaPopProj(false);else if(abrir)abrePopProj();
+  }
+  (function(){
+    var b=byId("proj-btn"),pp=byId("proj-pop");
+    byId("b-proj").addEventListener("click",function(){projOn=!projOn;gravaUi("gisjr:proj",projOn);aplicaProjUi(true)});
+    aplicaProjUi(false);
+    b.addEventListener("click",function(){if(pp.hidden)abrePopProj();else fechaPopProj(true)});
+    pp.addEventListener("click",function(e){var o=e.target.closest("button.op");if(!o)return;fechaPopProj(true);aplicarProjecao(o.dataset.k)});
+    pp.addEventListener("keydown",function(e){
+      var os=[].slice.call(pp.querySelectorAll("button.op")),i=os.indexOf(document.activeElement);
+      if(e.key==="ArrowDown"&&i>=0){e.preventDefault();os[Math.min(i+1,os.length-1)].focus()}
+      else if(e.key==="ArrowUp"&&i>=0){e.preventDefault();os[Math.max(i-1,0)].focus()}
+      else if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fechaPopProj(true)}
+    });
+    document.addEventListener("pointerdown",function(e){if(pp.hidden)return;if(pp.contains(e.target)||b.contains(e.target))return;fechaPopProj(false)},true);
+  })();
+
   function garantirMapa(){
     if(!window.L){aviso("O mapa não carregou — verifique sua conexão com a internet.");return}
     if(!map){
-      map=L.map("map",{zoomControl:false,attributionControl:false,zoomSnap:0,zoomDelta:0.25}).setView(VISTA_INICIAL.c,VISTA_INICIAL.z);
+      var pAt=projDe(projAtual)||projDe("3857"),op0={zoomControl:false,attributionControl:false,zoomSnap:0,zoomDelta:0.25};
+      if(pAt.k!=="3857"&&projPronta(pAt)){op0.crs=crsDe(pAt,L.latLng(VISTA_INICIAL.c[0],VISTA_INICIAL.c[1]));op0.maxZoom=24}else projAtual="3857";
+      map=L.map("map",op0).setView(VISTA_INICIAL.c,VISTA_INICIAL.z);
+      atualizaChipProj();map.on("mousemove",moveuXY);map.on("mouseout",function(){moveuXY(null)});
       map.on("zoomend",function(){camadas.forEach(function(c){if(c.labeling&&c.labeling.enabled)rotular(c)});agendarSyncLayout()}); // visibilidade por escala; o layout precisa do zoom atual para manter a posição dos rótulos
       map.on("click",identificarClique);map.on("click",selecionarNoClique);map.on("moveend zoomend",pushViewHistorySoon);
       // Aproximar/Afastar: com o modo ativo, um clique no mapa dá zoom centrado no ponto clicado.
@@ -2420,7 +2682,23 @@ function excluirMapa(id){
   /* ---------- Camadas e feições ---------- */
   var grupos=[],proxGrupo=1,selIds=new Set(),ancora=null,renomeando=null;
   // Símbolo padrão de uma camada vetorial (mesmos campos do original: defaultVectorSymbolShape).
-  function formaPadrao(){return{fillStyle:"solid",strokeColor:"#232323",strokeStyle:"solid",strokeWidth:0.26,unit:"Milímetros",joinStyle:"bevel",capStyle:"flat",offset:0,opacity:100}}
+  function formaPadrao(){return{pointSize:2.6,fillStyle:"solid",strokeColor:"#232323",strokeStyle:"solid",strokeWidth:0.26,unit:"Milímetros",joinStyle:"bevel",capStyle:"flat",offset:0,opacity:100}}
+  /* Diâmetro do ponto em mm (mesma convenção da espessura: 0,26 mm = 1 px). Padrão 2,6 mm = 10 px = raio 5, como era antes. */
+  function raioDoPonto(f){var d=f&&f.pointSize!=null&&isFinite(+f.pointSize)&&+f.pointSize>0?+f.pointSize:2.6;return Math.max(0.5,d/0.26/2)}
+  function raioDaCamada(c){var s=c.symbology,f=!s?null:(s.renderer==="categorized"||s.renderer==="graduated")?(s[s.renderer]&&s[s.renderer].symbol):s.single;return raioDoPonto(f)}
+  // "ponto" | "linha" | "poligono" | "misto" | "" (camada vazia). Guardado na camada e refeito quando muda o nº de feições.
+  function tipoGeomCamada(c){
+    var fs=c&&c.geojson&&c.geojson.features;if(!fs)return"";
+    if(c._gtK&&c._gtN===fs.length)return c._gtK;
+    var p=0,l=0,g=0;
+    function ve(geo){if(!geo)return;var t=geo.type;
+      if(t==="Point"||t==="MultiPoint")p=1;else if(t==="LineString"||t==="MultiLineString")l=1;else if(t==="Polygon"||t==="MultiPolygon")g=1;
+      else if(t==="GeometryCollection"&&geo.geometries)geo.geometries.forEach(ve)}
+    for(var i=0;i<fs.length&&p+l+g<2;i++)ve(fs[i]&&fs[i].geometry);
+    var k=(p+l+g>1)?"misto":p?"ponto":l?"linha":g?"poligono":"";
+    c._gtK=k;c._gtN=fs.length;return k;
+  }
+  function ehLinhaFeicao(f){var t=f&&f.geometry&&f.geometry.type;return t==="LineString"||t==="MultiLineString"}
   var VSYM_DASH_ARRAY_MAP={solid:null,dash:"6,4",dot:"1,3",dashdot:"6,3,1,3",dashdotdot:"6,3,1,3,1,3",none:null};
   var VSYM_LINE_CAP_MAP={square:"square",flat:"butt",round:"round"};
   var VSYM_LINE_JOIN_MAP={bevel:"bevel",miter:"miter",round:"round"};
@@ -2638,7 +2916,7 @@ function excluirMapa(id){
     el.style.background="repeating-linear-gradient(90deg,"+st.join(",")+")";
   }
   // Prévia da janela: um retângulo em SVG, que mostra de verdade preenchimento, traço e união.
-  function svgPrevia(hex,opac,corc,esp,fs,ss,js,fi){
+  function svgPrevia(hex,opac,corc,esp,fs,ss,js,fi,tipo,diam){
     var px=Math.min(6,Math.max(1,Math.round(esp/0.26))),fill,defs="";
     if(fs==="none")fill="none";
     else if(fs==="image"&&fi&&fi.src){
@@ -2648,6 +2926,14 @@ function excluirMapa(id){
     else fill=hex;
     var da=VSYM_DASH_ARRAY_MAP[ss];
     var stroke=(ss==="none"||esp<=0)?' stroke="none"':' stroke="'+corc+'" stroke-width="'+px+'"'+(da?' stroke-dasharray="'+da+'"':'')+' stroke-linejoin="'+(VSYM_LINE_JOIN_MAP[js]||"bevel")+'"';
+    if(tipo==="linha"){
+      var lw=Math.min(8,Math.max(1,esp/0.26)),ld=da&&ss!=="none"?' stroke-dasharray="'+da+'"':'';
+      return '<svg viewBox="0 0 72 34" aria-hidden="true"><line x1="5" y1="17" x2="67" y2="17" stroke="'+corc+'" stroke-width="'+lw+'"'+ld+' stroke-linecap="'+(ss==="none"?"butt":"butt")+'"'+(ss==="none"||esp<=0?' stroke-opacity=".25"':'')+'/></svg>';
+    }
+    if(tipo==="ponto"){
+      var r=Math.min(15,Math.max(1.5,raioDoPonto({pointSize:diam})));
+      return '<svg viewBox="0 0 72 34" aria-hidden="true">'+defs+'<circle cx="36" cy="17" r="'+r+'" fill="'+fill+'" fill-opacity="'+(opac/100)+'"'+stroke+'/></svg>';
+    }
     return '<svg viewBox="0 0 72 34" aria-hidden="true">'+defs+'<polygon points="5,4 67,4 67,30 5,30" fill="'+fill+'" fill-opacity="'+(opac/100)+'"'+stroke+'/></svg>';
   }
 
@@ -2691,6 +2977,7 @@ function excluirMapa(id){
   function estiloDoSimbolo(forma,cor){
     var f=forma||formaPadrao();
     return{
+      radius:raioDoPonto(f),
       fillColor:cor||"#808080",
       fillOpacity:f.fillStyle==="none"?0:((f.opacity==null?100:f.opacity)/100),
       color:f.strokeColor||"#232323",
@@ -2707,14 +2994,16 @@ function excluirMapa(id){
   // Seleção, "sem símbolos" etc. nunca usam hachura: garante que o padrão anterior não "gruda" no setStyle do Leaflet.
   function estilo(c,sel,f){var s=estilo0(c,sel,f);if(s.fillPattern===undefined)s.fillPattern=null;if(s.fillImage===undefined)s.fillImage=null;return s}
   function estilo0(c,sel,f){
-    if(sel)return{color:"#000000",weight:1,fillOpacity:1,fillColor:"#ffff00",opacity:1,dashArray:null};
+    if(sel)return{color:"#000000",weight:1,fillOpacity:1,fillColor:"#ffff00",opacity:1,dashArray:null,radius:raioDaCamada(c)};
     var sym=c.symbology;
     if(!sym)return{color:"#232323",weight:1,fillOpacity:1,fillColor:c.color,opacity:1,dashArray:null};
     if(sym.renderer==="none")return{color:"#232323",weight:0,fillOpacity:0,opacity:0,fillColor:c.color};
     if(f&&(sym.renderer==="categorized"||sym.renderer==="graduated")){
       var fc=resolveFeatureFillColor(c,f);
       if(fc===null)return{fillOpacity:0,opacity:0,color:c.color,weight:0};
-      return estiloDoSimbolo(sym[sym.renderer].symbol,fc);
+      var sc=estiloDoSimbolo(sym[sym.renderer].symbol,fc);
+      if(ehLinhaFeicao(f))sc.color=fc;
+      return sc;
     }
     return estiloDoSimbolo(sym.single,c.color); // 'single' (e, por enquanto, categorizado/graduado desenham como simples)
   }
@@ -2750,7 +3039,7 @@ function excluirMapa(id){
     try{map.removeLayer(c.leaf)}catch(e){}
     clearLabelAnchors(c.id);soltaRenderer(c);
     c.leaf=criarLeaflet(c);
-    if(vis){c.leaf.addTo(map);rotular(c)}
+    if(vis){adicionaNoMapa(c);rotular(c)}
     ordenarPaineis();marcarTabela(c);
   }
   function criarLeaflet(c){
@@ -2761,14 +3050,28 @@ function excluirMapa(id){
     soltaRenderer(c);
     c._canvas=usaCanvas(c);
     var rend=c._canvas?(c._rend=L.canvas({pane:pn})):null;
+    // Em projeção com meridiano central ≠ 0° as feições que cruzam o "fundo" do mapa são cortadas só para desenhar (ver recortaGeom);
+    // as feições recortadas são cópias, e "orig" leva cada cópia de volta à feição verdadeira (seleção, tabela e identificar usam a original).
+    var rc=recorteAtual(),orig=null,fonte=c.geojson;
+    if(rc){
+      orig=new Map();
+      fonte={type:"FeatureCollection",features:c.geojson.features.map(function(f){
+        var g=recortaGeom(f.geometry,rc);
+        if(g===f.geometry)return f;
+        var d={type:"Feature",properties:f.properties,geometry:g};orig.set(d,f);return d;
+      })};
+    }
+    function de(f){return(orig&&orig.get(f))||f}
     var opcoes={
       pane:pn,
-      style:function(f){return estilo(c,c.sel.has(pos(f)),f)},
+      style:function(f){f=de(f);return estilo(c,c.sel.has(pos(f)),f)},
       pointToLayer:function(f,ll){
+        f=de(f);
         var st=estilo(c,c.sel.has(pos(f)),f);
         return L.circleMarker(ll,Object.assign({pane:pn,radius:5},st,rend?{renderer:rend}:null));
       },
       onEachFeature:function(f,lyr){
+        f=de(f);lyr.feature=f;
         lyr.on("click",function(e){
           if(!modoSel)return; // fora do modo de seleção, clicar na feição não faz nada
           var oe=e.originalEvent;
@@ -2779,7 +3082,7 @@ function excluirMapa(id){
     };
     if(rend)opcoes.renderer=rend;
     aplicarMesclagem(c);
-    return L.geoJSON(c.geojson,opcoes);
+    return L.geoJSON(fonte,opcoes);
   }
   function restilizar(c){if(c.isRaster)return;
     if(c.leaf&&typeof c._canvas==="boolean"&&usaCanvas(c)!==c._canvas){trocarRenderizador(c);return}
@@ -3651,7 +3954,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
   function applyRasterSymbology(c){
     if(!c||!c.isRaster)return;
     var vis=map.hasLayer(c.leaf);try{map.removeLayer(c.leaf)}catch(e){}
-    criarRaster(c);if(vis)c.leaf.addTo(map);ordenarPaineis();
+    criarRaster(c);if(vis)adicionaNoMapa(c);ordenarPaineis();
   }
   function addRaster(nome,gr,op){
     op=op||{};
@@ -3659,7 +3962,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
       symbology:op.symbology?JSON.parse(JSON.stringify(op.symbology)):detectInitialRasterSymbology(gr),labeling:null,isRaster:true,georaster:gr,opacity:op.opacity==null?1:op.opacity,originalFileName:op.fileName||(nome+".tif")};
     rasterCache.set(c.id,{georaster:gr,b64:op.b64||null});
     criarRaster(c);camadas.push(c);ordenarPaineis();
-    if(c.visible)c.leaf.addTo(map);
+    if(c.visible)adicionaNoMapa(c);
     selIds=new Set([c.id]);ativaId=c.id;ancora=c.id;
     if(!op.semAjuste)ajustar([c]);
     aposMudar(op.semHist,true);
@@ -4723,7 +5026,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
   /* ---------- Tutorial guiado do mapa (balões + tela escurecida) ---------- */
   var PASSOS_TUTORIAL_MAPA=[
     {t:"Bem-vindo ao GisJr!",x:"Este tutorial rápido mostra como montar um mapa: de <b>adicionar camadas</b> até o que <b>cada ferramenta</b> faz. Use <b>Próximo</b> (ou a seta → do teclado). Para sair, clique em <b>Pular tutorial</b> ou aperte Esc."},
-    {sel:"#menubar",t:"Barra de menus",pos:"baixo",x:"<b>Visualizar</b>: mover o mapa, ver tudo e voltar ou avançar entre vistas. <b>Desenhar feições</b>: ponto, linha, polígono, círculo, retângulo e elipse. <b>Vetor</b>: geoprocessamento (buffer, recortar, dissolver, união, interseção…). <b>Tema</b>: muda as cores do site. Em <b>Ajuda</b> você abre este tutorial de novo."},
+    {sel:"#menubar",t:"Barra de menus",pos:"baixo",x:"<b>Visualizar</b>: mover o mapa, ver tudo, voltar ou avançar entre vistas e ligar as <b>coordenadas</b> do cursor (canto inferior direito do mapa). <b>Desenhar feições</b>: ponto, linha, polígono, círculo, retângulo e elipse. <b>Vetor</b>: geoprocessamento (buffer, recortar, dissolver, união, interseção…). <b>Tema</b>: muda as cores do site. Em <b>Ajuda</b> você abre este tutorial de novo."},
     {sel:"#add-cam",t:"1. Adicionar uma camada",pos:"dir",x:"Tudo começa aqui. Clique em <b>Adicionar</b> e escolha entre as <b>malhas do IBGE</b> (Brasil, regiões ou estados), os <b>países do mundo</b>, os <b>mapas virtuais de fundo</b> (OpenStreetMap, Esri, EOX) ou um <b>arquivo do seu computador</b> (.zip de shapefile, .gpkg ou .tif). Também dá para arrastar o arquivo e soltar na tela."},
     {sel:"aside.camadas",t:"2. A lista de camadas",pos:"dir",x:"Cada camada adicionada aparece aqui, com um controle para <b>mostrar ou ocultar</b>. A alça de pontinhos permite <b>arrastar para mudar a ordem</b>: a camada de cima fica por cima no mapa. Clique com o <b>botão direito</b> (ou toque longo no celular) para abrir o menu da camada: <b>Propriedades</b> (cores, simbologia categorizada ou graduada e rótulos), tabela de atributos, aproximar, renomear, duplicar, copiar e colar estilo, agrupar, exportar e remover."},
     {sel:"#rem-cam",t:"Remover camadas",pos:"dir",x:"Escolha uma ou mais camadas na lista (segure Ctrl ou Shift para escolher várias) e clique em <b>Remover</b> para tirá-las do mapa."},
@@ -4738,6 +5041,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     {sel:"#b-regua",t:"Régua",x:"Mede distâncias: clique nos pontos do mapa e o resultado aparece na tela. Fica ativa quando há camadas."},
     {sel:"#b-tabela",t:"Tabela de atributos",x:"Abre a tabela da <b>camada ativa</b>. Nela você seleciona linhas, inverte a seleção, dá zoom na seleção, adiciona e exclui colunas e exclui feições."},
     {sel:"#b-calc",t:"Calcular",x:"<b>Calculadora de campo</b>: cria ou atualiza um campo da tabela a partir de uma expressão, como na calculadora de campo do QGIS."},
+    {sel:"#b-proj",t:"Projeções",x:"Mostra ou esconde as <b>opções de projeção</b> do mapa. Ao ligar, aparece no canto superior esquerdo do mapa o botão com o nome da projeção e a lista se abre: escolha, por exemplo, Web Mercator, SIRGAS 2000 ou UTM. A projeção muda o desenho das feições."},
     {sel:"#b-id",t:"Identificar feição",x:"Clique numa feição do mapa para ver todos os atributos dela. Clique de novo no botão para sair desse modo."},
     {sel:"#b-selec",t:"Selecionar feição",x:"Clique nas feições do mapa para selecioná-las (elas ficam amarelas). Segure Shift ou Ctrl para escolher várias. Clique de novo no botão para sair."},
     {sel:"#b-desselec",t:"Desselecionar",x:"Limpa a seleção de todas as feições, de todas as camadas."},
@@ -4801,7 +5105,8 @@ const POINT_ANCHOR_TO_DIRECTION = {
     {n:"Visualizar",it:[
       {r:"Pan",f:fazerPan},{r:"Ver tudo",f:verTudo},
       {r:"Vista anterior",f:function(){irVista(-1)},off:function(){return viewHistory.index<=0}},
-      {r:"Próxima vista",f:function(){irVista(1)},off:function(){return viewHistory.index>=viewHistory.stack.length-1}}]},
+      {r:"Próxima vista",f:function(){irVista(1)},off:function(){return viewHistory.index>=viewHistory.stack.length-1}},
+      "-",{r:function(){return (coordsOn?"\u2713 ":"\u2003 ")+"Coordenadas"},f:alternaCoords}]},
     {n:"Desenhar feições",it:[
       {r:"Ponto",f:function(){iniciarDesenho("ponto")}},{r:"Linha",f:function(){iniciarDesenho("linha")}},{r:"Polígono",f:function(){iniciarDesenho("poligono")}},
       "-",{r:"Círculo",f:function(){iniciarDesenho("circulo")}},{r:"Retângulo",f:function(){iniciarDesenho("retangulo")}},{r:"Elipse",f:function(){iniciarDesenho("elipse")}}]},
@@ -4924,7 +5229,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     var c={id:proxId++,name:nomeUnico(nome),color:op.color||CORES[(proxId-2)%CORES.length],visible:op.visible!==false,geojson:normalizar(gj),sel:new Set(),leaf:null,groupId:null,symbology:op.symbology?JSON.parse(JSON.stringify(op.symbology)):null,labeling:op.labeling?JSON.parse(JSON.stringify(op.labeling)):null};
     c.leaf=criarLeaflet(c);
     camadas.push(c);ordenarPaineis();
-    if(c.visible)c.leaf.addTo(map);
+    if(c.visible)adicionaNoMapa(c);
     rotular(c);
     selIds=new Set([c.id]);ativaId=c.id;ancora=c.id;
     if(!op.semAjuste)ajustar([c]);
@@ -4934,7 +5239,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
   function defVis(c,v){
     if(c.visible===v)return false;
     c.visible=v;
-    if(v){c.leaf.addTo(map);rotular(c)}else{map.removeLayer(c.leaf);clearLabelAnchors(c.id)}
+    if(v){adicionaNoMapa(c);rotular(c)}else{map.removeLayer(c.leaf);clearLabelAnchors(c.id)}
     return true;
   }
   function alternarVis(c){defVis(c,!c.visible);renderCamadas();empilhar(false,true)}
@@ -5022,6 +5327,22 @@ const POINT_ANCHOR_TO_DIRECTION = {
     el.addEventListener("click",function(e){if(el.dataset.lp){delete el.dataset.lp;e.stopImmediatePropagation();e.preventDefault()}},true);
   }
   var ultimoCliqueCam={id:null,t:0};
+  // Amostra de cor da lista: círculo (ponto), traço com a cor/espessura do contorno (linha) ou quadrado (polígono).
+  function swatchCamada(c){
+    var sem=!!(c.symbology&&c.symbology.renderer==="none"),t=tipoGeomCamada(c);
+    var sw=h("span","sw"+(sem?" sem":"")+(t==="ponto"?" sw-ponto":t==="linha"?" sw-linha":""));
+    if(t==="linha"){
+      var f=formaBase(c),NS="http://www.w3.org/2000/svg",sv=document.createElementNS(NS,"svg"),ln=document.createElementNS(NS,"line");
+      sv.setAttribute("viewBox","0 0 22 14");sv.setAttribute("aria-hidden","true");
+      ln.setAttribute("x1","0");ln.setAttribute("y1","7");ln.setAttribute("x2","22");ln.setAttribute("y2","7");
+      ln.setAttribute("stroke",sem?"currentColor":(f.strokeColor||"#232323"));
+      ln.setAttribute("stroke-width",String(Math.min(6,Math.max(1,(f.strokeWidth==null?0.26:f.strokeWidth)/0.26))));
+      var da=sem?"3,2":VSYM_DASH_ARRAY_MAP[f.strokeStyle];if(da)ln.setAttribute("stroke-dasharray",da);
+      if(f.strokeStyle==="none"&&!sem)ln.setAttribute("stroke-opacity",".3");
+      sv.appendChild(ln);sw.appendChild(sv);
+    }else sw.style.background=c.color;
+    return sw;
+  }
   function linhaCamada(c){
     var d=h("div","cam"+(c.visible?"":" off")+(selIds.has(c.id)?" sel":"")+(c.id===ativaId?" ativa":"")+(c.groupId!=null?" em-grupo":""));
     d.dataset.cid=c.id;d.tabIndex=0;d.setAttribute("role","option");d.setAttribute("aria-selected",selIds.has(c.id)?"true":"false");
@@ -5030,7 +5351,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     gr.addEventListener("click",function(e){e.stopPropagation()});
     var o=h("button","ol");o.setAttribute("aria-label",(c.visible?"Ocultar":"Mostrar")+" camada "+c.name);o.appendChild(ico(c.visible?"i-olho":"i-olho-off"));o.title=c.visible?"Ocultar camada":"Mostrar camada";
     o.addEventListener("click",function(e){e.stopPropagation();alternarVis(c)});
-    var sw=h("span","sw"+(c.symbology&&c.symbology.renderer==="none"?" sem":""));sw.style.background=c.color;
+    var sw=swatchCamada(c);
     var n;
     if(renomeando&&renomeando.t==="c"&&renomeando.id===c.id)n=campoNome(c.name,function(v){renomearCamada(c,v)});
     else{n=h("span","nome",c.name);n.title=c.name+" — duplo clique: propriedades"}
@@ -5169,7 +5490,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     var cp={id:proxId++,name:nomeUnico(c.name+" (cópia)"),color:c.color,visible:c.visible,geojson:JSON.parse(JSON.stringify(c.geojson)),sel:new Set(),leaf:null,groupId:c.groupId,symbology:c.symbology?JSON.parse(JSON.stringify(c.symbology)):null,labeling:c.labeling?JSON.parse(JSON.stringify(c.labeling)):null};
     cp.leaf=criarLeaflet(cp);
     camadas.splice(camadas.indexOf(c)+1,0,cp);ordenarPaineis();
-    if(cp.visible)cp.leaf.addTo(map);
+    if(cp.visible)adicionaNoMapa(cp);
     selIds=new Set([cp.id]);ativaId=cp.id;ancora=cp.id;
     aposMudar(false,true);aviso("Camada duplicada como \""+cp.name+"\".");
   }
@@ -5672,16 +5993,16 @@ const POINT_ANCHOR_TO_DIRECTION = {
       if(d.s)op.subdomains=d.s;
       var base=L.tileLayer(d.u,Object.assign({attribution:d.a},op));
       fundoLeaf=d.o?L.layerGroup([base,L.tileLayer(d.o,op)]):base;
-      if(fundo.visible)fundoLeaf.addTo(map);
+      if(fundo.visible&&projAtual==="3857")fundoLeaf.addTo(map);
     }
     var row=byId("fundo-row");row.hidden=!fundo;
-    if(fundo){byId("fundo-nome").textContent="Fundo: "+FUNDOS[fundo.k].nome;byId("fundo-vis").textContent=fundo.visible?"Ocultar":"Mostrar"}
+    if(fundo){byId("fundo-nome").textContent="Fundo: "+FUNDOS[fundo.k].nome+(projAtual==="3857"?"":" (não aparece nesta projeção)");byId("fundo-vis").textContent=fundo.visible?"Ocultar":"Mostrar"}
     atualizarBotoes();
   }
   function definirFundo(k){
     if(!window.L){aviso("As bibliotecas do mapa não carregaram — verifique sua conexão.");return}
     garantirMapa();aplicarFundo({k:k,visible:true});empilhar(false,true);
-    aviso("Mapa de fundo: "+FUNDOS[k].nome+".");
+    aviso("Mapa de fundo: "+FUNDOS[k].nome+"."+(projAtual==="3857"?"":" Ele só aparece em Web Mercator: troque a projeção para vê-lo."),projAtual==="3857"?undefined:6000);
   }
   byId("fundo-vis").addEventListener("click",function(){if(fundo){aplicarFundo({k:fundo.k,visible:!fundo.visible});empilhar(false,true)}});
   byId("fundo-x").addEventListener("click",function(){aplicarFundo(null);empilhar(false,true);aviso("Mapa de fundo removido.")});
@@ -5756,6 +6077,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     var s=foto();
     s.camadas.forEach(function(x){if(x.isRaster){var rc=rasterCache.get(x.id);if(rc)x.originalFileBase64=rc.b64}});
     if(map){var c=map.getCenter();s.view={c:[c.lat,c.lng],z:map.getZoom()}}
+    s.proj=projAtual;
     if(s.fundo&&FUNDOS[s.fundo.k])s.fundo.d=FUNDOS[s.fundo.k]; // o Layout lê a descrição pronta (URL, crédito, zoom)
     return s;
   }
@@ -5872,7 +6194,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     grupos=(s.grupos||[]).map(function(g){if(rec[g.id]!==undefined)g.recolhido=rec[g.id];return g});
     proxGrupo=s.proxGrupo||1;ativaId=s.ativaId==null?null:s.ativaId;proxId=s.proxId;aplicarFundo(s.fundo||null);
     ordenarPaineis();
-    camadas.forEach(function(c){if(c.visible)c.leaf.addTo(map)});
+    camadas.forEach(function(c){if(c.visible)adicionaNoMapa(c)});
     camadas.forEach(function(c){rotular(c)});
     selIds=new Set(Array.from(selIds).filter(function(id){return camadaPorId(id)}));
     if(!camadaPorId(ativaId))ativaId=null;
@@ -5917,6 +6239,8 @@ const POINT_ANCHOR_TO_DIRECTION = {
     grupos=[];proxGrupo=1;selIds=new Set();ancora=null;renomeando=null;
     restaurando=false;
     hist={pilha:[],i:-1,max:5,E:null};
+    var pk=snap&&snap.proj&&projDe(snap.proj)&&projPronta(projDe(snap.proj))?snap.proj:"3857";
+    if(pk!==projAtual)trocaCrs(projDe(pk)); // a projeção é guardada junto com o mapa
     if(snap){
       reconstruir(snap);
       var v=snap.view||VISTA_INICIAL;map.setView(v.c,v.z,{animate:false});
@@ -6727,6 +7051,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     }
     if(pj.project&&pj.project.basemap&&!fundo)aplicarFundo(pj.project.basemap);
     if(novas.length){ajustar(novas);aposMudar(false,true)}
+    if(pj.project&&pj.project.mapProj&&pj.project.mapProj!==projAtual)aplicarProjecao(pj.project.mapProj); // projeção escolhida no projeto exportado
     var nLay=0,laysPj=Array.isArray(pj.layouts)?pj.layouts.filter(function(x){return x&&x.dados&&Array.isArray(x.dados.itens)&&x.dados.itens.length}):[];
     if(laysPj.length)nLay=await importarLayouts(laysPj,zip,idmap,pj.projectName);
     var faltouLay=laysPj.length-nLay;
@@ -7072,7 +7397,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     try{
       var m=mapas.filter(function(x){return x.id===atual})[0],nome=m?m.t:"Projeto sem título";
       var ser={
-        version:1,savedAt:new Date().toISOString(),projectCrs:"EPSG:4326",basemap:fundo?{k:fundo.k,visible:fundo.visible}:null,
+        version:1,savedAt:new Date().toISOString(),projectCrs:"EPSG:4326",mapProj:projAtual,basemap:fundo?{k:fundo.k,visible:fundo.visible}:null,
         layers:camadas.map(function(c){return{id:c.id,name:c.name,color:c.color,visible:c.visible,geojson:c.geojson,isBasemap:false,basemapKind:null,crs:"EPSG:4326",labeling:c.labeling||null,isRaster:false,symbology:c.symbology||null,groupId:c.groupId==null?null:c.groupId}}),
         groups:grupos.map(function(g){return{id:g.id,name:g.nome,collapsed:!!g.recolhido}}),nextGroupId:proxGrupo,nextId:proxId
       };
@@ -7202,13 +7527,14 @@ const POINT_ANCHOR_TO_DIRECTION = {
     var p=byId("lp-prev"),d=propDraft;
     if(d.renderer==="none"){p.innerHTML="";p.style.background="transparent";p.style.border="2px dashed #5d665f";p.style.opacity="1";return}
     p.style.background="transparent";p.style.border="0";
-    p.innerHTML=svgPrevia(d.cor,d.opac,d.corc,d.esp,d.fillStyle,d.strokeStyle,d.joinStyle,d.fillImage);
+    var tg=tipoGeomCamada(camadaPorId(propId));
+    p.innerHTML=svgPrevia(d.cor,d.opac,d.corc,d.esp,d.fillStyle,d.strokeStyle,d.joinStyle,d.fillImage,tg==="ponto"||tg==="linha"?tg:"",d.diam);
   }
   // Mostra no mapa, sem gravar na camada, o que está na janela (símbolo simples). Só vale de verdade ao Aplicar/OK.
   function previaMapaProp(){
     var c=camadaPorId(propId),d=propDraft;
     if(!c||c.isRaster||!c.leaf||d.renderer!=="single")return;
-    var forma=Object.assign({},formaBase(c),{opacity:d.opac,strokeColor:d.corc,strokeWidth:d.esp,fillStyle:d.fillStyle,strokeStyle:d.strokeStyle,joinStyle:d.joinStyle,fillImage:d.fillImage});
+    var forma=Object.assign({},formaBase(c),{opacity:d.opac,strokeColor:d.corc,strokeWidth:d.esp,pointSize:d.diam,fillStyle:d.fillStyle,strokeStyle:d.strokeStyle,joinStyle:d.joinStyle,fillImage:d.fillImage});
     var ix=new Map();c.geojson.features.forEach(function(f,i){ix.set(f,i)});
     c.leaf.eachLayer(function(l){
       if(!l.setStyle)return;
@@ -7220,11 +7546,19 @@ const POINT_ANCHOR_TO_DIRECTION = {
     aplicarMesclagem(c,mesclaDe(forma));
     propPrevia=true;
   }
+  // Linha não tem preenchimento (só cor e espessura do traço); diâmetro só aparece quando há pontos.
+  function ajustarPorGeom(c){
+    var t=tipoGeomCamada(c),lin=t==="linha",semPt=lin||t==="poligono";
+    function T(id,on){var e=byId(id);if(e)e.classList.toggle("lp-oculto-g",on)}
+    T("lp-r-cor",lin);T("lp-r-fill",lin);T("lp-r-opac",lin);T("lp-img",lin);
+    T("lp-r-bcorc",lin);T("lp-r-bopac",lin);T("lp-r-bfill",lin);
+    T("lp-r-diam",semPt);T("lp-r-bdiam",semPt);
+  }
   function mostrarCamposProp(){
     var nenhum=propDraft.renderer==="none";
     var r=propDraft.renderer,cg=r==="categorized"||r==="graduated";
     byId("lp-simples").hidden=r!=="single";byId("lp-nota-nenhum").hidden=!nenhum;
-    byId("lp-cat").hidden=r!=="categorized";byId("lp-grad").hidden=r!=="graduated";byId("lp-base").hidden=!cg;document.querySelector(".lp-prev").hidden=cg;syncImg();
+    byId("lp-cat").hidden=r!=="categorized";byId("lp-grad").hidden=r!=="graduated";byId("lp-base").hidden=!cg;document.querySelector(".lp-prev").hidden=cg;syncImg();ajustarPorGeom(camadaPorId(propId));
   }
   function abrirPropriedades(c,aba,manter){
     if(!map||!c)return;
@@ -7234,7 +7568,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     if(c.isRaster){rBk=JSON.stringify({s:c.symbology,o:c.opacity});byId("aba-rot").hidden=true;preencherInfo(c);openRasterSymbologyPane(c)}
     else{byId("aba-rot").hidden=false;
     f=formaBase(c);sym=c.symbology;
-    propDraft={renderer:(sym&&{none:1,categorized:1,graduated:1}[sym.renderer])?sym.renderer:"single",cor:hex6(c.color),opac:f.opacity==null?100:f.opacity,corc:hex6(f.strokeColor),esp:f.strokeWidth==null?0.26:f.strokeWidth,fillStyle:f.fillStyle||"solid",strokeStyle:f.strokeStyle||"solid",joinStyle:f.joinStyle||"bevel"};
+    propDraft={renderer:(sym&&{none:1,categorized:1,graduated:1}[sym.renderer])?sym.renderer:"single",cor:hex6(c.color),opac:f.opacity==null?100:f.opacity,corc:hex6(f.strokeColor),esp:f.strokeWidth==null?0.26:f.strokeWidth,diam:f.pointSize==null?2.6:f.pointSize,fillStyle:f.fillStyle||"solid",strokeStyle:f.strokeStyle||"solid",joinStyle:f.joinStyle||"bevel"};
     propDraft.fillImage=f.fillImage?Object.assign({},f.fillImage):null;
     byId("lp-tipo").value=propDraft.renderer;
     fecharDDs();pintarTodosDD("lp-",propDraft);
@@ -7242,6 +7576,7 @@ const POINT_ANCHOR_TO_DIRECTION = {
     byId("lp-opac").value=propDraft.opac;byId("lp-opac-v").textContent=Math.round(propDraft.opac)+" %";
     byId("lp-corc").value=propDraft.corc;
     byId("lp-esp").value=String(propDraft.esp);
+    byId("lp-diam").value=String(propDraft.diam);
     initCG(c);initRot(c);mostrarCamposProp();previaProp();preencherInfo(c);}
     byId("lp-titulo").textContent="Propriedades da camada — "+c.name;
     if(!manter){var j=byId("lp-janela");j.style.left="50%";j.style.top="";j.style.transform="translateX(-50%)"} // volta à posição inicial
@@ -7299,12 +7634,18 @@ const POINT_ANCHOR_TO_DIRECTION = {
       if(!isFinite(v)||v<0){aviso("Digite uma espessura de contorno válida (0 ou mais).");byId("lp-esp").focus();return false}
       propDraft.esp=Math.min(v,20);
     }
+    if(propTocado.diam){
+      var vd=parseFloat(String(byId("lp-diam").value).replace(",","."));
+      if(!isFinite(vd)||vd<=0){aviso("Digite um diâmetro de ponto válido (maior que 0).");byId("lp-diam").focus();return false}
+      propDraft.diam=Math.min(vd,50);
+    }
     // Só grava o que a pessoa mexeu: assim, mudanças feitas por fora (ex.: cor pelo menu) não são desfeitas sem querer.
     var forma=formaBase(c);
     if(propTocado.cor)forma.color=propDraft.cor;
     if(propTocado.opac)forma.opacity=propDraft.opac;
     if(propTocado.corc)forma.strokeColor=propDraft.corc;
     if(propTocado.esp)forma.strokeWidth=propDraft.esp;
+    if(propTocado.diam)forma.pointSize=propDraft.diam;
     if(propTocado.fillStyle)forma.fillStyle=propDraft.fillStyle;
     if(propTocado.fillImage)forma.fillImage=propDraft.fillImage?Object.assign({},propDraft.fillImage):null;
     if(propTocado.strokeStyle)forma.strokeStyle=propDraft.strokeStyle;
@@ -7349,8 +7690,13 @@ const POINT_ANCHOR_TO_DIRECTION = {
     byId("lp-opac").addEventListener("input",function(){propDraft.opac=+this.value;propTocado.opac=difGravado("opac",this.value);byId("lp-opac-v").textContent=Math.round(propDraft.opac)+" %";previaProp();previaMapaProp()});
     byId("lp-esp").addEventListener("input",function(){
       var v=parseFloat(String(this.value).replace(",","."));
-      propTocado.esp=true;if(isFinite(v)&&v>=0){propDraft.esp=Math.min(v,20);previaProp()}
+      propTocado.esp=true;if(isFinite(v)&&v>=0){propDraft.esp=Math.min(v,20);previaProp();previaMapaProp()}
     });
+    byId("lp-diam").addEventListener("input",function(){
+      var v=parseFloat(String(this.value).replace(",","."));
+      propTocado.diam=true;if(isFinite(v)&&v>0){propDraft.diam=Math.min(v,50);previaProp();previaMapaProp()}
+    });
+    byId("lp-diam").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();byId("lp-ok").click()}});
     ["fill","stroke","join"].forEach(function(k){
       var dd=byId("lp-"+k+"-dd");
       var abre=function(e){e.stopPropagation();abrirDD("lp-",k,function(){return propDraft},function(key){propTocado[key]=true;sincEspessura("lp-",propDraft);previaProp();if(key==="fillStyle")aoTrocarPreench()})};
@@ -8495,7 +8841,7 @@ function live(){
   }else c.symbology=propBk?JSON.parse(propBk):null;
   restilizar(c);
 }
-function refreshBase(){var y=ativo().symbol;pintarTodosDD("lp-b-",y);byId("lp-bcorc").value=hex6(y.strokeColor);byId("lp-besp").value=y.strokeWidth;byId("lp-bopac").value=y.opacity;byId("lp-bopac-v").textContent=Math.round(y.opacity)+" %"}
+function refreshBase(){var y=ativo().symbol;pintarTodosDD("lp-b-",y);byId("lp-bcorc").value=hex6(y.strokeColor);byId("lp-besp").value=y.strokeWidth;byId("lp-bdiam").value=y.pointSize==null?2.6:y.pointSize;byId("lp-bopac").value=y.opacity;byId("lp-bopac-v").textContent=Math.round(y.opacity)+" %"}
 function modoVis(){var f=vg.classifyMode==="fixedInterval";byId("vg-n-w").hidden=f;byId("vg-int-w").hidden=!f}
 function linhaCG(tr,st,v,leg){
   return '<td><input type="checkbox" class="r-on" aria-label="Mostrar"'+(st.enabled===false?"":" checked")+'></td><td><input type="color" class="r-cor" aria-label="Cor" value="'+hex6(st.color)+'"></td><td>'+v+'</td><td><input type="text" class="r-rot" aria-label="Legenda" value="'+esc(leg)+'"></td><td><button type="button" class="r-del" aria-label="Excluir">✕</button></td>';
@@ -8559,6 +8905,7 @@ function initCG(c){
   document.addEventListener("click",function(e){if(!e.target.closest("#style-list-popover,#line-style-list-popover"))fecharDDs()});
   byId("lp-bcorc").oninput=function(){ativo().symbol.strokeColor=this.value;live()};
   byId("lp-besp").oninput=function(){var v=parseFloat(String(this.value).replace(",","."));if(isFinite(v)&&v>=0){ativo().symbol.strokeWidth=Math.min(v,20);live()}};
+  byId("lp-bdiam").oninput=function(){var v=parseFloat(String(this.value).replace(",","."));if(isFinite(v)&&v>0){ativo().symbol.pointSize=Math.min(v,50);live()}};
   byId("lp-bopac").oninput=function(){ativo().symbol.opacity=+this.value;byId("lp-bopac-v").textContent=Math.round(+this.value)+" %";live()};
   byId("vc-campo").onchange=function(){vc.field=this.value};
   byId("vc-outros").onchange=function(){vc.addOthers=this.checked};
