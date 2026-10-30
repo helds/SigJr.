@@ -1591,6 +1591,24 @@ html[data-tema="escuro"]{--mb-bg:#1e2423;--mb-borda:#38413c;--mb-hover:#343d39;-
 #mb-drop button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--tinta);padding:9px 12px;font:inherit;font-size:14px;border-radius:4px;cursor:pointer}
 #mb-drop button:hover:not(:disabled){background:var(--mb-drop-hover)}#mb-drop button:disabled{color:var(--mb-off);cursor:default}
 #mb-drop .mb-sep{height:1px;background:var(--mb-sep);margin:4px 0}#mb-drop .mb-sec{padding:6px 12px 2px;font-size:12px;color:var(--tinta-2)}
+/* Janelinha de exemplo ao passar o mouse nos itens do menu Vetor */
+#mb-tip{position:fixed;z-index:3600;width:290px;max-width:92vw;box-sizing:border-box;padding:10px 12px 12px;background:var(--mb-drop);color:var(--tinta);border:1px solid var(--mb-drop-borda);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none}
+#mb-tip[hidden]{display:none}
+#mb-tip b{display:block;font-size:14px;margin:0 0 6px}
+#mb-tip svg{display:block;width:100%;height:auto;margin:0 0 8px;border-radius:6px;background:color-mix(in srgb,var(--tinta) 5%,transparent)}
+#mb-tip p{margin:0;font-size:13px;line-height:1.35;color:var(--tinta-2)}
+#mb-tip .ex-a{fill:var(--agua);fill-opacity:.35;stroke:var(--agua);stroke-width:2;stroke-linejoin:round}
+#mb-tip .ex-b{fill:var(--sol);fill-opacity:.35;stroke:var(--sol);stroke-width:2;stroke-linejoin:round}
+#mb-tip .ex-ra{fill:var(--agua);stroke:var(--agua);stroke-width:2;stroke-linejoin:round}
+#mb-tip .ex-rb{fill:var(--sol);stroke:var(--sol);stroke-width:2;stroke-linejoin:round}
+#mb-tip .ex-ol{fill:none;stroke-width:1.5;stroke-dasharray:4 3}
+#mb-tip .ex-ola{stroke:var(--agua)}#mb-tip .ex-olb{stroke:var(--sol)}
+#mb-tip .ex-bgc{fill:var(--mb-drop);stroke:none}
+#mb-tip .ex-ln{fill:none;stroke:var(--agua);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+#mb-tip .ex-halo{fill:none;stroke:var(--sol);stroke-opacity:.45;stroke-width:30;stroke-linecap:round;stroke-linejoin:round}
+#mb-tip .ex-pt{fill:var(--agua)}
+#mb-tip .ex-seta{fill:none;stroke:var(--tinta-2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#mb-tip .ex-tx{fill:var(--tinta-2);font-size:10px;font-family:inherit;text-anchor:middle}
 #lp{--panel-border:#d8d5ca;--text-dim:#5d665f}
 #lp-rsimb{padding:0}
 
@@ -5166,6 +5184,48 @@ const POINT_ANCHOR_TO_DIRECTION = {
     box.scrollTop=0;
   }
   // Barra de menu: lista de grupos; novos menus entram só acrescentando itens aqui.
+  // Exemplos desenhados (antes → depois) mostrados ao passar o mouse nos itens do menu Vetor.
+  // Cada painel tem 130×100; "Antes" fica em x=0 e "Depois" em x=160 (ver exemploSvg).
+  var EXEMPLOS=(function(){
+    var A='14,22 76,18 80,78 18,82',B='52,36 112,32 116,88 56,92';
+    function par(antes,depois,defs){
+      return '<svg viewBox="0 0 290 124" role="img" aria-hidden="true">'+(defs?'<defs>'+defs+'</defs>':'')+
+        '<text class="ex-tx" x="65" y="11">Antes</text><text class="ex-tx" x="225" y="11">Depois</text>'+
+        '<g transform="translate(0,18)">'+antes+'</g>'+
+        '<path class="ex-seta" d="M136 68h18M148 62l6 6-6 6"/>'+
+        '<g transform="translate(160,18)">'+depois+'</g></svg>';
+    }
+    var clipB='<clipPath id="ex-cb"><polygon points="'+B+'"/></clipPath>';
+    // máscaras: recortam preenchimento e borda juntos (tudo branco fica; o preto some)
+    var maskD='<mask id="ex-md" maskUnits="userSpaceOnUse" x="0" y="0" width="130" height="100"><rect width="130" height="100" fill="#fff"/><polygon points="'+B+'" fill="#000"/></mask>';
+    var maskS=clipB+'<mask id="ex-ms" maskUnits="userSpaceOnUse" x="0" y="0" width="130" height="100"><rect width="130" height="100" fill="#fff"/><g clip-path="url(#ex-cb)"><polygon points="'+A+'" fill="#000"/></g></mask>';
+    var AB='<polygon class="ex-a" points="'+A+'"/><polygon class="ex-b" points="'+B+'"/><text class="ex-tx" x="27" y="40">A</text><text class="ex-tx" x="104" y="84">B</text>';
+    var linha='<polyline class="ex-ln" points="18,74 45,38 80,62 112,28"/>';
+    var E={};
+    E.buffer={t:'Buffer',d:'Cria uma faixa ao redor das feições, na distância (em metros) que você informar. Aqui, a linha ganhou uma área de influência.',
+      svg:par(linha,'<polyline class="ex-halo" points="18,74 45,38 80,62 112,28"/>'+linha)};
+    E.recortar={t:'Recortar',d:'Mantém só a parte da camada que cai dentro da máscara (contorno tracejado). O que fica fora some.',
+      svg:par('<polygon class="ex-a" points="8,20 122,14 124,86 10,90"/><rect class="ex-ol ex-olb" x="34" y="30" width="62" height="42"/>',
+        '<rect class="ex-ra" x="34" y="30" width="62" height="42" fill-opacity=".75"/><rect class="ex-ol ex-olb" x="34" y="30" width="62" height="42"/>')};
+    E.convexo={t:'Fecho convexo',d:'Traça o menor polígono convexo que envolve todas as feições, como um elástico esticado em volta dos pontos.',
+      svg:par('<g class="ex-pt"><circle cx="20" cy="70" r="4"/><circle cx="35" cy="30" r="4"/><circle cx="60" cy="50" r="4"/><circle cx="85" cy="20" r="4"/><circle cx="105" cy="60" r="4"/><circle cx="75" cy="85" r="4"/><circle cx="50" cy="68" r="4"/></g>',
+        '<polygon class="ex-b" points="20,70 35,30 85,20 105,60 75,85"/><g class="ex-pt"><circle cx="20" cy="70" r="4"/><circle cx="35" cy="30" r="4"/><circle cx="60" cy="50" r="4"/><circle cx="85" cy="20" r="4"/><circle cx="105" cy="60" r="4"/><circle cx="75" cy="85" r="4"/><circle cx="50" cy="68" r="4"/></g>')};
+    E.diferenca={t:'Diferença',d:'Camada A menos a camada B: sobra só o que está em A e não se sobrepõe a B.',
+      svg:par(AB,'<polygon class="ex-ra" points="'+A+'" fill-opacity=".75" mask="url(#ex-md)"/><polygon class="ex-ol ex-olb" points="'+B+'"/>',maskD)};
+    E.dissolver={t:'Dissolver',d:'Funde várias feições em uma só e apaga as divisas internas. Com um campo escolhido, funde só as que têm o mesmo valor.',
+      svg:par('<rect class="ex-a" x="14" y="20" width="50" height="30"/><rect class="ex-a" x="64" y="20" width="50" height="30"/><rect class="ex-a" x="14" y="50" width="50" height="30"/><rect class="ex-a" x="64" y="50" width="50" height="30"/>',
+        '<rect class="ex-ra" x="14" y="20" width="100" height="60" fill-opacity=".75"/>')};
+    E.intersecao={t:'Interseção',d:'Guarda apenas a área onde as camadas A e B se sobrepõem. O resto de cada camada é descartado.',
+      svg:par(AB,'<g clip-path="url(#ex-cb)"><polygon class="ex-ra" points="'+A+'" fill-opacity=".8"/></g>',clipB)};
+    E.simetrica={t:'Diferença simétrica',d:'Guarda tudo o que está em A ou em B, menos a área em comum. É o contrário da interseção.',
+      svg:par(AB,'<g opacity=".8" mask="url(#ex-ms)"><polygon class="ex-ra" points="'+A+'"/><polygon class="ex-rb" points="'+B+'"/></g>',maskS)};
+    E.uniao={t:'União',d:'Junta as camadas A e B em uma só, somando as áreas e unindo as feições que se tocam.',
+      svg:par(AB,'<g opacity=".8"><polygon class="ex-ra" points="'+A+'"/><polygon class="ex-ra" points="'+B+'"/></g>')};
+    E.eliminar={t:'Eliminar polígonos selecionados',d:'O polígono selecionado (em destaque) é fundido ao vizinho com quem divide a maior fronteira. Aqui, ele se junta ao de cima.',
+      svg:par('<rect class="ex-a" x="12" y="18" width="60" height="64"/><rect class="ex-a" x="72" y="18" width="46" height="30"/><rect class="ex-b" x="72" y="48" width="46" height="34"/>',
+        '<rect class="ex-a" x="12" y="18" width="60" height="64"/><rect class="ex-ra" x="72" y="18" width="46" height="64" fill-opacity=".75"/>')};
+    return E;
+  })();
   var MENUS=[
     {n:"Visualizar",it:[
       {r:"Pan",f:fazerPan},{r:"Ver tudo",f:verTudo},
@@ -5177,9 +5237,9 @@ const POINT_ANCHOR_TO_DIRECTION = {
       "-",{r:"Círculo",f:function(){iniciarDesenho("circulo")}},{r:"Retângulo",f:function(){iniciarDesenho("retangulo")}},{r:"Elipse",f:function(){iniciarDesenho("elipse")}}]},
     {n:"Vetor",it:[
       {sec:"Geoprocessamento"},
-      {r:"Buffer…",f:runBuffer},{r:"Recortar…",f:runClip},{r:"Fecho convexo…",f:runConvexHull},{r:"Diferença…",f:runDifference},
-      {r:"Dissolver…",f:runDissolve},{r:"Interseção…",f:runIntersect},{r:"Diferença simétrica…",f:runSymmetricalDifference},{r:"União…",f:runUnion},
-      "-",{r:"Eliminar polígonos selecionados…",f:runEliminateSelected}]},
+      {r:"Buffer…",f:runBuffer,ex:"buffer"},{r:"Recortar…",f:runClip,ex:"recortar"},{r:"Fecho convexo…",f:runConvexHull,ex:"convexo"},{r:"Diferença…",f:runDifference,ex:"diferenca"},
+      {r:"Dissolver…",f:runDissolve,ex:"dissolver"},{r:"Interseção…",f:runIntersect,ex:"intersecao"},{r:"Diferença simétrica…",f:runSymmetricalDifference,ex:"simetrica"},{r:"União…",f:runUnion,ex:"uniao"},
+      "-",{r:"Eliminar polígonos selecionados…",f:runEliminateSelected,ex:"eliminar"}]},
     {n:"Tema",it:(window.gisTema?window.gisTema.lista:["claro"]).map(function(k){
       return {r:function(){return (window.gisTema&&window.gisTema.get()===k?"\u2713 ":"\u2003 ")+window.gisTema.nome(k)},f:function(){window.gisTema.set(k)}};
     })},
@@ -5188,7 +5248,25 @@ const POINT_ANCHOR_TO_DIRECTION = {
   (function(){
     var bar=byId("menubar"),drop=h("div");drop.id="mb-drop";drop.hidden=true;document.body.appendChild(drop);
     var aberto=null;
-    function fechar(){drop.hidden=true;if(aberto){aberto.setAttribute("aria-expanded","false");aberto=null}}
+    // Janelinha de exemplo: aparece ao lado do item sob o mouse (ou com o foco do teclado)
+    var tip=h("div");tip.id="mb-tip";tip.setAttribute("role","tooltip");tip.hidden=true;document.body.appendChild(tip);
+    var tipBtn=null;
+    function esconderTip(){tip.hidden=true;if(tipBtn){tipBtn.removeAttribute("aria-describedby");tipBtn=null}}
+    function mostrarTip(btn,ex){
+      var e=EXEMPLOS[ex];if(!e)return;
+      tip.innerHTML="<b></b>"+e.svg+"<p></p>";
+      tip.firstChild.textContent=e.t;tip.lastChild.textContent=e.d;
+      if(tipBtn&&tipBtn!==btn)tipBtn.removeAttribute("aria-describedby");
+      tipBtn=btn;btn.setAttribute("aria-describedby","mb-tip");
+      tip.hidden=false;
+      var d=drop.getBoundingClientRect(),r=btn.getBoundingClientRect(),w=tip.offsetWidth,hh=tip.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;
+      var left=d.right+6,top;                              // por padrão, à direita do menu, alinhada ao item
+      if(left+w<=vw-4)top=Math.max(4,Math.min(r.top,vh-hh-4));
+      else if(d.left-w-6>=4){left=d.left-w-6;top=Math.max(4,Math.min(r.top,vh-hh-4))}   // sem espaço: vai para a esquerda
+      else{left=Math.max(4,Math.min(d.left,vw-w-4));top=d.bottom+6;if(top+hh>vh-4)top=Math.max(4,d.top-hh-6)}  // tela estreita: embaixo (ou em cima) do menu
+      tip.style.left=left+"px";tip.style.top=top+"px";
+    }
+    function fechar(){esconderTip();drop.hidden=true;if(aberto){aberto.setAttribute("aria-expanded","false");aberto=null}}
     MENUS.forEach(function(m){
       var b=h("button",null,m.n);b.type="button";b.setAttribute("aria-haspopup","true");b.setAttribute("aria-expanded","false");
       b.addEventListener("click",function(e){
@@ -5199,7 +5277,14 @@ const POINT_ANCHOR_TO_DIRECTION = {
           if(it==="-"){drop.appendChild(h("div","mb-sep"));return}
           if(it.sec){drop.appendChild(h("div","mb-sec",it.sec));return}
           var x=h("button",null,typeof it.r==="function"?it.r():it.r);x.type="button";x.disabled=!!(it.off&&it.off());
-          x.addEventListener("click",function(){fechar();it.f()});drop.appendChild(x);
+          x.addEventListener("click",function(){fechar();it.f()});
+          if(it.ex){
+            x.addEventListener("mouseenter",function(){mostrarTip(x,it.ex)});
+            x.addEventListener("mouseleave",esconderTip);
+            x.addEventListener("focus",function(){mostrarTip(x,it.ex)});
+            x.addEventListener("blur",esconderTip);
+          }
+          drop.appendChild(x);
         });
         var r=b.getBoundingClientRect();drop.hidden=false;
         drop.style.top=(r.bottom+2)+"px";drop.style.left=Math.max(4,Math.min(r.left,window.innerWidth-drop.offsetWidth-4))+"px";
