@@ -1853,9 +1853,9 @@ html[data-tema] .lp-kv-table td{border-bottom:1px solid var(--borda)}
       <button class="b" id="b-proj" aria-pressed="false" title="Projeções: mostrar ou esconder as opções de projeção do mapa"><svg><use href="#i-globo"/></svg>Projeções</button>
     </div>
     <div class="grupo">
-      <button class="b" id="b-id" aria-pressed="false" title="Identificar feição: clique numa feição do mapa para ver os atributos (clique de novo para sair)"><svg><use href="#i-info"/></svg>Identificar feição</button>
       <button class="b" id="b-selec" aria-pressed="false" title="Selecionar feição: clique numa feição do mapa (clique de novo para sair)"><svg><use href="#i-selec"/></svg>Selecionar feição</button>
       <button class="b" id="b-desselec" title="Desselecionar todas as feições"><svg><use href="#i-desselec"/></svg>Desselecionar</button>
+      <button class="b" id="b-id" aria-pressed="false" title="Identificar feição: clique numa feição do mapa para ver os atributos (clique de novo para sair)"><svg><use href="#i-info"/></svg>Identificar feição</button>
       <button class="b" id="b-exp-sel" title="Exportar as feições selecionadas (de todas as camadas) como shapefile .zip"><svg><use href="#i-zip"/></svg>Exportar seleção</button>
       <button class="b" id="b-remover" title="Remover as feições selecionadas"><svg><use href="#i-x"/></svg>Remover feição</button>
     </div>
@@ -5125,9 +5125,9 @@ const POINT_ANCHOR_TO_DIRECTION = {
     {sel:"#b-tabela",t:"Tabela de atributos",x:"Abre a tabela da <b>camada ativa</b>. Nela você seleciona linhas, inverte a seleção, dá zoom na seleção, adiciona e exclui colunas e exclui feições."},
     {sel:"#b-calc",t:"Calcular",x:"<b>Calculadora de campo</b>: cria ou atualiza um campo da tabela a partir de uma expressão, como na calculadora de campo do QGIS."},
     {sel:"#b-proj",t:"Projeções",x:"Mostra ou esconde as <b>opções de projeção</b> do mapa. Ao ligar, aparece no canto superior esquerdo do mapa o botão com o nome da projeção e a lista se abre: escolha, por exemplo, Web Mercator, SIRGAS 2000 ou UTM. A projeção muda o desenho das feições."},
-    {sel:"#b-id",t:"Identificar feição",x:"Clique numa feição do mapa para ver todos os atributos dela. Clique de novo no botão para sair desse modo."},
     {sel:"#b-selec",t:"Selecionar feição",x:"Clique nas feições do mapa para selecioná-las (elas ficam amarelas). Segure Shift ou Ctrl para escolher várias. Clique de novo no botão para sair."},
     {sel:"#b-desselec",t:"Desselecionar",x:"Limpa a seleção de todas as feições, de todas as camadas."},
+    {sel:"#b-id",t:"Identificar feição",x:"Clique numa feição do mapa para ver todos os atributos dela. Clique de novo no botão para sair desse modo."},
     {sel:"#b-exp-sel",t:"Exportar seleção",x:"Exporta só as feições selecionadas (de todas as camadas) como shapefile em <b>.zip</b>."},
     {sel:"#b-remover",t:"Remover feição",x:"Apaga do mapa as feições selecionadas. Selecione antes só o que deseja remover; se errar, use <b>Desfazer</b>."},
     {t:"Pronto!",x:"O caminho é este: <b>1)</b> adicione camadas, <b>2)</b> ajuste cores e rótulos em Propriedades, <b>3)</b> explore e edite com as ferramentas, <b>4)</b> salve, <b>5)</b> monte o <b>Layout</b> para imprimir. Para rever este tutorial, abra o menu <b>Ajuda</b>."}
